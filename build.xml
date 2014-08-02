@@ -38,27 +38,24 @@
 	  <arg value="git://develop.git.wordpress.org/" />
 	  <arg value="${basedir}/wordpress-develop" />
   </exec>
-  <exec executable="cd">
-	  <arg value="${basedir}/wordpress-develop" />
-  </exec>
   <exec executable="cp">
-	  <arg value="wp-tests-config-sample.php" />
-	  <arg value="wp-tests-config.php" />
+	  <arg value="${basedir}/wordpress-develop/wp-tests-config-sample.php" />
+	  <arg value="${basedir}/wordpress-develop/wp-tests-config.php" />
   </exec>
   <exec executable="sed">
 	  <arg value="-i" />
 	  <arg value='"s/youremptytestdbnamehere/wordpress_test/"' />
-	  <arg value="wp-tests-config.php" />
+	  <arg value="${basedir}/wordpress-develop/wp-tests-config.php" />
   </exec>
   <exec executable="sed">
 	  <arg value="-i" />
 	  <arg value='"s/yourusernamehere/root/"' />
-	  <arg value="wp-tests-config.php" />
+	  <arg value="${basedir}/wordpress-develop/wp-tests-config.php" />
   </exec>
   <exec executable="sed">
 	  <arg value="-i" />
 	  <arg value='"s/yourpasswordhere//"' />
-	  <arg value="wp-tests-config.php" />
+	  <arg value="${basedir}/wordpress-develop/wp-tests-config.php" />
   </exec>
   <exec executable="mysql">
 	  <arg value="-e" />

@@ -49,17 +49,17 @@
   </exec>
   <exec executable="sed">
 	  <arg value="-i" />
-	  <arg value='"s/yourusernamehere/root/"' />
+	  <arg value='s/yourusernamehere/root/' />
 	  <arg value="${basedir}/wordpress-develop/wp-tests-config.php" />
   </exec>
   <exec executable="sed">
 	  <arg value="-i" />
-	  <arg value='"s/yourpasswordhere//"' />
+	  <arg value='s/yourpasswordhere//' />
 	  <arg value="${basedir}/wordpress-develop/wp-tests-config.php" />
   </exec>
   <exec executable="mysql">
 	  <arg value="-e" />
-	  <arg value='"CREATE DATABASE wordpress_test;"' />
+	  <arg value='CREATE DATABASE wordpress_test;' />
 	  <arg value="-uroot" />
   </exec>
   <exec executable="cp">

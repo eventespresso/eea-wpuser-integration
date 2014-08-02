@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class xmlns="http://xml.phpdox.net/src#" full="Money" namespace="" name="Money" abstract="false" final="false" start="3" end="23">
+  <file path="src" file="Money.php" realpath="/home/sidney/Development/NetbeansProjects/EE4-test-site-1/wp-content/plugins/EE4-members/src/Money.php" size="306" time="2014-08-02T02:49:59-04:00" unixtime="1406962199" sha1="2542a02b141cde3bbf71b8bf9c6a332073cd7379"/>
+  <member name="amount" type="{unknown}" visibility="private" line="5"/>
+  <constructor name="__construct" start="7" end="10" abstract="false" final="false" static="false" visibility="public">
+    <parameter name="amount" byreference="false" type="{unknown}"/>
+  </constructor>
+  <method name="getAmount" start="12" end="15" abstract="false" final="false" static="false" visibility="public"/>
+  <method name="negate" start="17" end="20" abstract="false" final="false" static="false" visibility="public"/>
+</class>

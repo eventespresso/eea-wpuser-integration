@@ -44,7 +44,7 @@
   </exec>
   <exec executable="sed">
 	  <arg value="-i" />
-	  <arg value='"s/youremptytestdbnamehere/wordpress_test/"' />
+	  <arg value='s/youremptytestdbnamehere/wordpress_test/' />
 	  <arg value="${basedir}/wordpress-develop/wp-tests-config.php" />
   </exec>
   <exec executable="sed">
@@ -63,10 +63,12 @@
 	  <arg value="-uroot" />
   </exec>
   <exec executable="cp">
+	  <arg value="-r" />
 	  <arg value="${basedir}/src" />
 	  <arg value="${basedir}/wordpress-develop/src/wp-content/plugins" />
   </exec>
   <exec executable="cp">
+	  <arg value="-r" />
 	  <arg value="${basedir}/tests" />
 	  <arg value="${basedir}/wordpress-develop/src/wp-content/plugins" />
   </exec>

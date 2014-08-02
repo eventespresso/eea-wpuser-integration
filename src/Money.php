@@ -11,7 +11,7 @@ class Money
     public function getAmount()
     {
         return $this->amount;
-    }
+    } 
 
     public function negate()
     {

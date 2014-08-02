@@ -1,8 +1,19 @@
 <?php
+class MoneyTest extends PHPUnit_Framework_TestCase
+{
+    // ...
 
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+    public function testCanBeNegated()
+    {
+        // Arrange
+        $a = new Money(1);
 
+        // Act
+        $b = $a->negate();
+
+        // Assert
+        $this->assertEquals(-1, $b->getAmount());
+    }
+
+    // ...
+}

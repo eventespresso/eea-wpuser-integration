@@ -122,7 +122,6 @@
   <exec executable="phpunit" failonerror="true">
     <arg value="--configuration" />
     <arg value="${basedir}/build/phpunit.xml" />
-    <arg value="${basedir}/tests" />
   </exec>
  </target>
 </project>

@@ -1,5 +1,5 @@
 <phpdox xmlns="http://phpdox.net/config">
- <project name="EE-WPUsers" source="src" workdir="build/phpdox">
+ <project name="EE-WPUsers" source="." workdir="build/phpdox">
   <collector publiconly="false">
    <include mask="*.php" />
   </collector>

@@ -14,7 +14,7 @@ class EE_WPUsers extends EE_Addon {
 			array(
 				'version' 					=> EE_WPUSERS_VERSION,
 				'min_core_version' => '4.3.0',
-				'main_file_path' 				=> EE_WPUSERS_PLUGIN_DIR,
+				'main_file_path' 				=> EE_WPUSERS_PLUGIN_FILE,
 				
 				// if plugin update engine is being used for auto-updates. not needed if PUE is not being used.
 				'pue_options'			=> array(

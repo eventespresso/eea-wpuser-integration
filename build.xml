@@ -166,10 +166,10 @@
 	</target>
 
 	<target name="phpunit" description="Run unit tests with PHPUnit">
-		<exec executable="phpunit" failonerror="true">
-			<arg value="--configuration" />
-			<arg value="${basedir}/build/phpunit.xml" />
-			<arg value="${basedir}/wordpress-develop/src/wp-content/plugins/tests" />
+		<exec executable="phpunit" failonerror="true" dir="${basedir}/wordpress-develop/src/wp-content/plugins/ee4-wpusers/tests">
+		</exec>
+		<exec executable="${basedir}/build/copy_phpunit_logs.sh">
+			<arg value="${basedir}" />
 		</exec>
 	</target>
 </project>

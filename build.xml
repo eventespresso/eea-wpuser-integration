@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="EE4-members" default="build">
 	<target name="build"
-		 depends="clean,lint,phploc,pdepend,phpmd-ci,phpcs-ci,phpcpd,phpdox,prepare,phpunit"/>
+		 depends="prepare,lint,phploc,pdepend,phpmd-ci,phpcs-ci,phpcpd,phpdox,prepare-for-phpunit,phpunit"/>
 
 	<target name="build-parallel"
-		 depends="clean,lint,tools-parallel,prepare,phpunit"/>
+		 depends="prepare,lint,tools-parallel,prepare-for-phpunit,phpunit"/>
  
 	<target name="build-small"
-		depends="prepare,phpunit"/>
+		depends="prepare,prepare-for-phpunit,phpunit"/>
 
 	<target name="tools-parallel" description="Run tools in parallel">
 		<parallel threadCount="2">
@@ -35,12 +35,15 @@
 		</exec>
 	</target>
 
-	<target name="prepare" depends="clean" description="Prepare for build">
+	<target name="prepare" depends="clean" description="prepare for build">
 		<mkdir dir="${basedir}/build/api"/>
 		<mkdir dir="${basedir}/build/coverage"/>
 		<mkdir dir="${basedir}/build/logs"/>
 		<mkdir dir="${basedir}/build/pdepend"/>
 		<mkdir dir="${basedir}/build/phpdox"/>
+	</target>
+
+	<target name="prepare-for-phpunit" depends="clean" description="Prepare for phpunit">
 		<exec executable="git">
 			<arg value="clone" />
 			<arg value="/home/sidney/Development/wordpress-develop" />

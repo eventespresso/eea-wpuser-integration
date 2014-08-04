@@ -78,6 +78,10 @@
 			<arg value="/home/sidney/Development/event-espresso-core" />
 			<arg value="${basedir}/wordpress-develop/src/wp-content/plugins/event-espresso-core" />
 		</exec>
+		<exec executable="mkdir">
+			<arg value="-p" />
+			<arg value="${basedir}/wordpress-develop/src/wp-content/uploads/espresso/logs" />
+		</exec>
 	</target>
 
 	<target name="lint" description="Perform syntax check of sourcecode files">

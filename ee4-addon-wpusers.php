@@ -37,7 +37,9 @@ if (!defined('ABSPATH'))
  */
 define('EE_WPUSERS_VERSION', '1.0.0.dev.001');
 define('EE_WPUSERS_PLUGIN_FILE', __FILE__);
-define('EE_WPUSERS_PLUGIN_DIR', __DIR__);
+// defined when tests are run
+if (!defined('EE_WPUSERS_PLUGIN_DIR'))
+	define('EE_WPUSERS_PLUGIN_DIR', __DIR__);
 
 function load_ee_core_wpusers() {
 	if (class_exists('EE_Addon')) {

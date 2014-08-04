@@ -30,16 +30,9 @@ if (!defined('ABSPATH'))
  */
 
 /**
- * Event Espresso
- *
- * Event Registration and Management Plugin for WordPress
- *
- * @ package		Event Espresso
- * @ author			Event Espresso
- * @ copyright	(c) 2008-2014 Event Espresso  All Rights Reserved.
- * @ license		http://eventespresso.com/support/terms-conditions/   * see Plugin Licensing *
- * @ link			http://www.eventespresso.com
- * @ version	 	EE4
+ * EE WPUsers add-on for Event Espresso
+ * @since 		1.0.0
+ * @package 	EE WPUsers
  *
  */
 define('EE_WPUSERS_VERSION', '1.0.0.dev.001');
@@ -50,7 +43,7 @@ function load_ee_core_wpusers() {
 	if (class_exists('EE_Addon')) {
 		// new_addon version
 		require_once ( EE_WPUSERS_PLUGIN_DIR . '/src/EE_WPUsers.class.php' );
-		EE_Ticketing::register_addon();
+		EE_WPUsers::register_addon();
 	}
 }
 

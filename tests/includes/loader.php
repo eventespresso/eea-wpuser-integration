@@ -1,11 +1,11 @@
 <?php
 /**
- * Loader for EE Ticketing Unit Tests initializes plugin and gets thing off to a start.
+ * Loader for EE WPUsers Unit Tests initializes plugin and gets thing off to a start.
  *
  * @since 		1.0.0
- * @package 		EE Ticketing
- * @subpackage 	tests
+ * @package 	EE WPUsers
+ * @subpackage 	Tests
  */
 
-// Bootstrap EE Ticketing
-require EE_TICKETING_PLUGIN_DIR . 'ee-addon-wpusers.php';
+// Bootstrap EE WPUsers
+require EE_WPUSERS_PLUGIN_DIR . 'ee-addon-wpusers.php';

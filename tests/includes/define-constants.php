@@ -3,7 +3,7 @@
  * Define constants needed by test suite.
  *
  * @since 		1.0.0
- * @package 		EE WPUsers
+ * @package 	EE WPUsers
  * @subpackage 	Tests
  */
 

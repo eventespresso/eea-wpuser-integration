@@ -44,7 +44,7 @@ if (!defined('EE_WPUSERS_PLUGIN_DIR'))
 function load_ee_core_wpusers() {
 	if (class_exists('EE_Addon')) {
 		// new_addon version
-		require_once ( EE_WPUSERS_PLUGIN_DIR . '/src/EE_WPUsers.class.php' );
+		require_once ( EE_WPUSERS_PLUGIN_DIR . 'EE_WPUsers.class.php' );
 		EE_WPUsers::register_addon();
 	}
 }

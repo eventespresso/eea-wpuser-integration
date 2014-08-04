@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<source xmlns="http://xml.phpdox.net/src#">
-  <dir name="src">
-    <file name="Money.php" size="306" time="2014-08-02T02:49:59-04:00" unixtime="1406962199" sha1="2542a02b141cde3bbf71b8bf9c6a332073cd7379"/>
-    <file name="ee4_members.php" size="1746" time="2014-08-01T21:56:18-04:00" unixtime="1406944578" sha1="bf69ab230ee188834913586f666ed0b2f304d7d7"/>
-    <file name="autoload.php" size="476" time="2014-08-02T02:49:59-04:00" unixtime="1406962199" sha1="f8d76e41c10b8db70c17f747d918506969099ef3"/>
-  </dir>
-</source>

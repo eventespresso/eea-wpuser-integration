@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuites>
-  <testsuite name="tests" tests="1" assertions="1" failures="0" errors="0" time="0.004914">
-    <testsuite name="MoneyTest" file="/home/sidney/Development/NetbeansProjects/EE4-test-site-1/wp-content/plugins/EE4-members/tests/MoneyTest.php" tests="1" assertions="1" failures="0" errors="0" time="0.004914">
-      <testcase name="testCanBeNegated" class="MoneyTest" file="/home/sidney/Development/NetbeansProjects/EE4-test-site-1/wp-content/plugins/EE4-members/tests/MoneyTest.php" line="6" assertions="1" time="0.004914"/>
-    </testsuite>
-  </testsuite>
-</testsuites>

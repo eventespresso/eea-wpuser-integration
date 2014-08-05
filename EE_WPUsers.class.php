@@ -26,4 +26,8 @@ class EE_WPUsers extends EE_Addon {
 			)
 		);
 	}
+	
+	public static function filterAnswerForWPUser($value, $registration, $question_id) {
+		return $value;
+	}
 }

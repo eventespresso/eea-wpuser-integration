@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="EE4-members" default="build">
+<project name="EE4-members" default="build-small">
 	<target name="build"
 		 depends="prepare,lint,phploc,pdepend,phpmd-ci,phpcs-ci,phpcpd,phpdox,prepare-for-phpunit,phpunit"/>
 
@@ -7,7 +7,7 @@
 		 depends="prepare,lint,tools-parallel,prepare-for-phpunit,phpunit"/>
  
 	<target name="build-small"
-		depends="prepare,prepare-for-phpunit,phpunit"/>
+		depends="prepare-for-phpunit,phpunit"/>
 
 	<target name="tools-parallel" description="Run tools in parallel">
 		<parallel threadCount="2">

@@ -27,25 +27,27 @@ class EE_WPUsers extends EE_Addon {
 		);
 		
 		add_filter( 'FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value', array( 'EE_WPUsers', 'filterAnswerForWPUser' ), 10, 3 );
+		add_action( 'AHEE__EE_Single_Page_Checkout__process_attendee_information__end', array( 'EE_WPUsers', 'actionAddAttendeeAsWPUser' ), 10, 2 );
 		
 	}
 	
 	public static function filterAnswerForWPUser($value, $registration, $question_id) {
 		if ( empty($value) ) {
-			$user_query = new WP_User_Query( array( 'meta_key' => 'EE_Attendee_ID', 'meta_value' => $registration->attendee_ID() ) );
-			if ( count($user_query) == 1 ) {
+			$current_user = wp_get_current_user();
+			
+			if ( $current_user instanceof WP_User ) {
 				switch ($question_id) {
-					
+
 					case 1:
-						$value = $user_query[0]->get('first_name');
+						$value = $current_user->get('first_name');
 						break;
 					
 					case 2:
-						$value = $user_query[0]->get('last_name');
+						$value = $current_user->get('last_name');
 						break;
 					
 					case 3:
-						$value = $user_query[0]->get('user_email');
+						$value = $current_user->get('user_email');
 						break;
 					
 					default:
@@ -53,5 +55,20 @@ class EE_WPUsers extends EE_Addon {
 			}
 		}
 		return $value;
+	}
+	
+	public static function actionAddAttendeeAsWPUser ($ee_Single_Page_Checkout, $valid_data) {
+		foreach ($valid_data as $registrant) {
+			$attendee = EEM_Attendee::get_attendee(array('ATT_fname'=>$registrant['fname']));
+		}	
+		
+		ob_start();
+		var_dump($valid_data);
+		var_dump($attendee);
+		$temp=  ob_get_clean();
+		file_put_contents('/tmp/log.html',$temp, FILE_APPEND);
+		
+		
+
 	}
 }

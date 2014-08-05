@@ -13,6 +13,6 @@
  */
 class EE_WPUsersTest extends EE_UnitTestCase {
 	public function testFilterAnswerForWPUser() {
-		assertTrue('some answer' === EE_WPUsers::filterAnswerForWPUser( 'some answer', EE_Registration::new_instance(), 1) );
+		$this->assertTrue('some answer' === EE_WPUsers::filterAnswerForWPUser( 'some answer', EE_Registration::new_instance(), 1) );
 	}
 }

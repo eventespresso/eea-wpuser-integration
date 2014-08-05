@@ -58,7 +58,7 @@ class EE_WPUsers extends EE_Addon {
 	}
 	
 	public static function actionAddAttendeeAsWPUser ($ee_Single_Page_Checkout, $valid_data) {
-		foreach ($valid_data as $registrant) {
+		/*foreach ($valid_data as $registrant) {
 			$attendee = EEM_Attendee::get_attendee(array('ATT_fname'=>$registrant['fname']));
 		}	
 		
@@ -67,7 +67,7 @@ class EE_WPUsers extends EE_Addon {
 		var_dump($attendee);
 		$temp=  ob_get_clean();
 		file_put_contents('/tmp/log.html',$temp, FILE_APPEND);
-		
+		*/
 		
 
 	}

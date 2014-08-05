@@ -13,13 +13,6 @@
  */
 class EE_WPUsersTest extends EE_UnitTestCase {
 	public function testFilterAnswerForWPUser() {
-		$transaction = $this->new_typical_transaction();
-		
-		ob_start();
-		var_dump($transaction);
-		$temp=  ob_get_clean();
-		file_put_contents('/tmp/log.txt',$temp, FILE_APPEND);
-		
-		assert('some answer' === 'some answer' );
+		assert('some answer' === EE_WPUsers::filterAnswerForWPUser( 'some answer', EE_Registration::new_instance(), 1) );
 	}
 }

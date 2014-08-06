@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="EE4-members" default="build-small">
 	<target name="build"
-		 depends="prepare,lint,phploc,pdepend,phpmd-ci,phpcs-ci,phpcpd,phpdox,prepare-for-phpunit,phpunit"/>
+			depends="prepare,lint,phploc,pdepend,phpmd-ci,phpcs-ci,phpcpd,phpdox,prepare-for-phpunit,phpunit"/>
 
 	<target name="build-parallel"
-		 depends="prepare,lint,tools-parallel,prepare-for-phpunit,phpunit"/>
+			depends="prepare,lint,tools-parallel,prepare-for-phpunit,phpunit"/>
  
 	<target name="build-small"
-		depends="prepare-for-phpunit,phpunit"/>
+			depends="prepare-for-phpunit,phpunit"/>
 
 	<target name="tools-parallel" description="Run tools in parallel">
 		<parallel threadCount="2">
@@ -117,7 +117,7 @@
 	</target>
 
 	<target name="phpmd"
-		 description="Perform project mess detection using PHPMD and print human readable output. Intended for usage on the command line before committing.">
+			description="Perform project mess detection using PHPMD and print human readable output. Intended for usage on the command line before committing.">
 		<exec executable="phpmd">
 			<arg path="${basedir}" />
 			<arg value="text" />
@@ -136,7 +136,7 @@
 	</target>
 
 	<target name="phpcs"
-		 description="Find coding standard violations using PHP_CodeSniffer and print human readable output. Intended for usage on the command line before committing.">
+			description="Find coding standard violations using PHP_CodeSniffer and print human readable output. Intended for usage on the command line before committing.">
 		<exec executable="phpcs">
 			<arg value="--standard=${basedir}/build/phpcs.xml" />
 			<arg path="${basedir}" />

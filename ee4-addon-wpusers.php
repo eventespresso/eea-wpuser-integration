@@ -1,7 +1,7 @@
 <?php
 
-if (!defined('ABSPATH'))
-	exit('No direct script access allowed');
+if ( ! defined( 'ABSPATH' ) )
+	exit( 'No direct script access allowed' );
 /*
   Plugin Name: 	Event Espresso - WP Users (EE4+)
   Plugin URI: 	http://www.eventespresso.com
@@ -35,21 +35,28 @@ if (!defined('ABSPATH'))
  * @package 	EE WPUsers
  *
  */
-define('EE_WPUSERS_VERSION', '1.0.0.dev.001');
-define('EE_WPUSERS_PLUGIN_FILE', __FILE__);
+define( 'EE_WPUSERS_VERSION', '1.0.0.dev.001' );
+define( 'EE_WPUSERS_PLUGIN_FILE', __FILE__ );
 // defined when tests are run
-if (!defined('EE_WPUSERS_PLUGIN_DIR'))
-	define('EE_WPUSERS_PLUGIN_DIR', __DIR__ . '/');
+if ( ! defined( 'EE_WPUSERS_PLUGIN_DIR' ) )
+	define( 'EE_WPUSERS_PLUGIN_DIR', __DIR__ . '/' );
+
+
+
+
 
 function load_ee_core_wpusers() {
-	if (class_exists('EE_Addon')) {
+	if ( class_exists( 'EE_Addon' ) ) {
 		// new_addon version
 		require_once ( EE_WPUSERS_PLUGIN_DIR . 'EE_WPUsers.class.php' );
 		EE_WPUsers::register_addon();
 	}
+
 }
 
-add_action('AHEE__EE_System__load_espresso_addons', 'load_ee_core_wpusers');
+
+
+add_action( 'AHEE__EE_System__load_espresso_addons', 'load_ee_core_wpusers' );
 
 // End of file ee-addon-wpusers.php
 // Location: wp-content/plugins/ee4-wpusers/ee-addon-wpusers.php

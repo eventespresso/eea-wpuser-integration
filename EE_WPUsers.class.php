@@ -125,6 +125,7 @@ class EE_WPUsers extends EE_Addon {
 
 						// Email the user
 						wp_mail( $registrant[ 'email' ], 'Welcome to ' . EE_Config::instance()->get_config_option( 'name' ), 'Your Username: ' . apply_filters( 'FHEE__WPUsers_create_wp_username', $registrant[ 'email' ], $registrant ) . ' Your Password: ' . $password );
+						update_user_meta( $user_id, 'EE_Attendee_ID', $attendee->ID() );
 					} // end of filling in the details
 				} // end of wp-user creation
 			} else {  // SOL?

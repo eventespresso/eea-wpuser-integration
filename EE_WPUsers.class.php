@@ -3,6 +3,7 @@
 if ( ! defined( 'ABSPATH' ) )
 	exit( 'No direct script access allowed' );
 
+define( 'EE_WPUSERS_BASENAME', plugin_basename( EE_WPUSERS_PLUGIN_FILE ));
 
 /**
  * Class definition for the EE_WPUsers object
@@ -29,7 +30,7 @@ class EE_WPUsers extends EE_Addon {
 			// if plugin update engine is being used for auto-updates. not needed if PUE is not being used.
 			'pue_options' => array(
 				'pue_plugin_slug' => 'eea-wp-user-integration',
-				'plugin_basename' => EE_WPUSERS_PLUGIN_FILE,
+				'plugin_basename' => EE_WPUSERS_BASENAME,
 				'checkPeriod' => '24',
 				'use_wp_update' => FALSE
 			)

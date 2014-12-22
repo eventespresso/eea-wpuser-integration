@@ -28,7 +28,7 @@ class EE_WPUsers extends EE_Addon {
 			'main_file_path' => EE_WPUSERS_PLUGIN_FILE,
 			// if plugin update engine is being used for auto-updates. not needed if PUE is not being used.
 			'pue_options' => array(
-				'pue_plugin_slug' => 'ee-addon-wpusers',
+				'pue_plugin_slug' => 'eea-wp-user-integration',
 				'plugin_basename' => EE_WPUSERS_PLUGIN_FILE,
 				'checkPeriod' => '24',
 				'use_wp_update' => FALSE

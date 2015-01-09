@@ -1,9 +1,7 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) )
-	exit( 'No direct script access allowed' );
-
-define( 'EE_WPUSERS_BASENAME', plugin_basename( EE_WPUSERS_PLUGIN_FILE ));
+if (!defined('ABSPATH'))
+	exit('No direct script access allowed');
 
 /**
  * Class definition for the EE_WPUsers object
@@ -12,10 +10,6 @@ define( 'EE_WPUSERS_BASENAME', plugin_basename( EE_WPUSERS_PLUGIN_FILE ));
  * @package 	EE WPUsers
  */
 class EE_WPUsers extends EE_Addon {
-
-
-
-
 
 	/**
 	 * Set up
@@ -37,14 +31,10 @@ class EE_WPUsers extends EE_Addon {
 				)
 		);
 
-		add_filter( 'FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value', array( 'EE_WPUsers', 'filterAnswerForWPUser' ), 10, 3 );
-		add_action( 'AHEE__EE_Single_Page_Checkout__process_attendee_information__end', array( 'EE_WPUsers', 'actionAddAttendeeAsWPUser' ), 10, 2 );
-
+		add_filter('FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value', array('EE_WPUsers', 'filterAnswerForWPUser'), 10, 3);
+		add_action('AHEE__EE_Single_Page_Checkout__process_attendee_information__end', array('EE_WPUsers', 'actionAddAttendeeAsWPUser'), 10, 2);
+		add_action('AHEE__event_tickets_datetime_ticket_row_template_before_close', array('EE_WPUsers', 'insert_ticket_meta_interface'), 10, 1);
 	}
-
-
-
-
 
 	/**
 	 * Added to filter that processes the return to the registration form of whether and answer to the question exists for that 
@@ -53,23 +43,23 @@ class EE_WPUsers extends EE_Addon {
 	 * @param type $question_id
 	 * @return type
 	 */
-	public static function filterAnswerForWPUser( $value, $registration, $question_id ) {
-		if ( empty( $value ) ) {
+	public static function filterAnswerForWPUser($value, $registration, $question_id) {
+		if (empty($value)) {
 			$current_user = wp_get_current_user();
 
-			if ( $current_user instanceof WP_User ) {
-				switch ( $question_id ) {
+			if ($current_user instanceof WP_User) {
+				switch ($question_id) {
 
 					case 1:
-						$value = $current_user->get( 'first_name' );
+						$value = $current_user->get('first_name');
 						break;
 
 					case 2:
-						$value = $current_user->get( 'last_name' );
+						$value = $current_user->get('last_name');
 						break;
 
 					case 3:
-						$value = $current_user->get( 'user_email' );
+						$value = $current_user->get('user_email');
 						break;
 
 					default:
@@ -77,34 +67,30 @@ class EE_WPUsers extends EE_Addon {
 			}
 		}
 		return $value;
-
 	}
 
-
-
-
-
-	public static function actionAddAttendeeAsWPUser( $ee_Single_Page_Checkout, $valid_data ) {
-		foreach ( $valid_data as $registrant ) {
+	public static function actionAddAttendeeAsWPUser($ee_Single_Page_Checkout, $valid_data) {
+		foreach ($valid_data as $registrant) {
 			// Try to find a pre-existing attendee. If SPCO gave us access to the registration object, wouldn't have to do this step.
-			$attendee = EEM_Attendee::instance()->get_attendee( array(
-				'ATT_fname' => $registrant[ 'fname' ],
-				'ATT_lname' => $registrant[ 'lname' ],
-				'ATT_email' => $registrant[ 'email' ]
-			) );
+			$attendee = EEM_Attendee::instance()->get_attendee(array(
+				'ATT_fname' => $registrant['fname'],
+				'ATT_lname' => $registrant['lname'],
+				'ATT_email' => $registrant['email']
+			));
 
 
-			if ( $attendee instanceof EE_Attendee ) { // should always be a match, since SPCO just finished putting the attendee in the DB
+			if ($attendee instanceof EE_Attendee) { // should always be a match, since SPCO just finished putting the attendee in the DB
 				// Try to find an existing WP user matching the Attendee. Just match by email, since that should be unique in WP land.
-				$user = get_user_by( 'email', $registrant[ 'email' ] );
-				if ( $user != FALSE ) { // if there is a pre-existing attendee-wpuser connection, should always be 1-1, but update just to make sure and cause it's the same number of lines of code to test as to push the value onto a wp user that didn't have a attendee associated with it.
-					update_user_meta( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
+				$user = get_user_by('email', $registrant['email']);
+				if ($user != FALSE) {
+// if there is a pre-existing attendee-wpuser connection, should always be 1-1, but update just to make sure and cause it's the same number of lines of code to test as to push the value onto a wp user that didn't have a attendee associated with it.
+					update_user_meta($user->ID, 'EE_Attendee_ID', $attendee->ID());
 				} else { // no pre-existing wp-user, create one
 					// Generate the password and create the user
-					$password = wp_generate_password( 12, false );
-					$user_id = wp_create_user( apply_filters( 'FHEE__EE_WPUsers__actionAddAttendeeAsWPUser__username', $registrant[ 'email' ], $registrant ), $password, $registrant[ 'email' ] );
+					$password = wp_generate_password(12, false);
+					$user_id = wp_create_user(apply_filters('FHEE__EE_WPUsers__actionAddAttendeeAsWPUser__username', $registrant['email'], $registrant), $password, $registrant['email']);
 
-					if ( $user_id instanceof WP_Error ) {
+					if ($user_id instanceof WP_Error) {
 						// @todo something went boom! put in some error handling
 					} else { // user was added, fill in the details
 						// Set the users details
@@ -112,36 +98,42 @@ class EE_WPUsers extends EE_Addon {
 						wp_update_user(
 								array(
 									'ID' => $user_id,
-									'nickname' => $registrant[ 'fname' ] . ' ' . $registrant[ 'lname' ],
-									'display_name' => $registrant[ 'fname' ] . ' ' . $registrant[ 'lname' ],
-									'first_name' => $registrant[ 'fname' ],
-									'last_name' => $registrant[ 'lname' ],
-									'description' => __( 'Registered via event registration form.', 'event_espresso' ),
+									'nickname' => $registrant['fname'] . ' ' . $registrant['lname'],
+									'display_name' => $registrant['fname'] . ' ' . $registrant['lname'],
+									'first_name' => $registrant['fname'],
+									'last_name' => $registrant['lname'],
+									'description' => __('Registered via event registration form.', 'event_espresso'),
 								)
 						);
 
 						// Set the role
-						$user = new WP_User( $user_id );
-						$user->set_role( 'subscriber' );
+						$user = new WP_User($user_id);
+						$user->set_role('subscriber');
 
 						// Email the user
-						wp_mail( $registrant[ 'email' ], 'Welcome to ' . EE_Config::instance()->get_config_option( 'name' ), 'Your Username: ' . apply_filters( 'FHEE__WPUsers_create_wp_username', $registrant[ 'email' ], $registrant ) . ' Your Password: ' . $password );
-						update_user_meta( $user_id, 'EE_Attendee_ID', $attendee->ID() );
+						wp_mail($registrant['email'], 'Welcome to ' . EE_Config::instance()->get_config_option('name'), 'Your Username: ' . apply_filters('FHEE__WPUsers_create_wp_username', $registrant['email'], $registrant) . ' Your Password: ' . $password);
+						update_user_meta($user_id, 'EE_Attendee_ID', $attendee->ID());
 					} // end of filling in the details
 				} // end of wp-user creation
-			} else {  // SOL?
+			} else {
+				// SOL?
 			} // end of test to make sure is attendee
 		} // end of loop over attendees
-
 	}
 
-
-
-// end of function actionAddAttendeeAsWPUser
+	public static function insert_ticket_meta_interface($TKT_ID) {
+		$Ticket_model = EEM_Ticket::instance();
+		$ticket = $Ticket_model->get_one_by_ID($TKT_ID);
+		if ($ticket instanceof EE_Ticket) {
+			$template_args = array(
+				'TKT_WPU_meta' => $ticket->get_extra_meta('TKT_WPU_meta', TRUE),
+				'ticket_meta_help_link' => ''
+			);
+			$template = EE_WPUSERS_TEMPLATE_PATH . 'event_tickets_datetime_ticket_row_metadata.template.php';
+			EEH_Template::locate_template($template, $template_args, TRUE, FALSE);
+		}
+	}
 
 }
-
-
-
 
 // end of class EE_WPUsers

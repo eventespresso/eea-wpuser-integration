@@ -1,0 +1,18 @@
+{
+	"versionFile" : "eea-wpuser-integration.php",
+	"slug" : "eea-wpuser-integration",
+	"name" : "EE4 WPuser Integration",
+	"archiveBaseUrl" : "http://build.eventespresso.com/",
+	"archiveBasePath" : "~/www/build/",
+	"releaseFilesRemove" : [
+		"src/tests/**",
+		"src/info.json",
+		"src/circle.yml",
+		"src/readme.txt",
+		"src/build.xml",
+		"src/build/**"
+	],
+	"github" : false,
+	"awsbucket" : "",
+	"awsregion" : ""
+}

@@ -19,11 +19,11 @@ class EE_WPUsers extends EE_Addon {
 		EE_Register_Addon::register(
 				'EE_WPUsers', array(
 			'version' => EE_WPUSERS_VERSION,
-			'min_core_version' => '4.3.0',
+			'min_core_version' => '4.6.0.alpha.000',
 			'main_file_path' => EE_WPUSERS_PLUGIN_FILE,
 			// if plugin update engine is being used for auto-updates. not needed if PUE is not being used.
 			'pue_options' => array(
-				'pue_plugin_slug' => 'eea-wp-user-integration',
+				'pue_plugin_slug' => 'eea-wpuser-integration',
 				'plugin_basename' => EE_WPUSERS_BASENAME,
 				'checkPeriod' => '24',
 				'use_wp_update' => FALSE
@@ -37,7 +37,7 @@ class EE_WPUsers extends EE_Addon {
 	}
 
 	/**
-	 * Added to filter that processes the return to the registration form of whether and answer to the question exists for that 
+	 * Added to filter that processes the return to the registration form of whether and answer to the question exists for that
 	 * @param type $value
 	 * @param type $registration
 	 * @param type $question_id

@@ -19,12 +19,11 @@ class EE_WPUsers extends EE_Addon {
 		EE_Register_Addon::register(
 				'EE_WPUsers', array(
 			'version' => EE_WPUSERS_VERSION,
-			'min_core_version' => '4.6.0.alpha.000',
+			'min_core_version' => '4.6.0.alpha',
 			'main_file_path' => EE_WPUSERS_PLUGIN_FILE,
 			// if plugin update engine is being used for auto-updates. not needed if PUE is not being used.
 			'pue_options' => array(
 				'pue_plugin_slug' => 'eea-wpuser-integration',
-				'plugin_basename' => EE_WPUSERS_BASENAME,
 				'checkPeriod' => '24',
 				'use_wp_update' => FALSE
 			)

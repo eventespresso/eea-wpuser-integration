@@ -37,18 +37,12 @@ if ( ! defined( 'ABSPATH' ) )
  */
 define( 'EE_WPUSERS_VERSION', '1.0.0.rc.002' );
 define( 'EE_WPUSERS_PLUGIN_FILE', __FILE__ );
-// defined when tests are run
-if ( ! defined( 'EE_WPUSERS_PLUGIN_DIR' ) )
-	define( 'EE_WPUSERS_PLUGIN_DIR', __DIR__ . '/' );
-
-
-
 
 
 function load_ee_core_wpusers() {
 	if ( class_exists( 'EE_Addon' ) ) {
 		// new_addon version
-		require_once ( EE_WPUSERS_PLUGIN_DIR . 'EE_WPUsers.class.php' );
+		require_once ( plugin_dir_path( __FILE__ ) . 'EE_WPUsers.class.php' );
 		EE_WPUsers::register_addon();
 	}
 

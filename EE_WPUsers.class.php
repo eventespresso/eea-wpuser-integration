@@ -242,6 +242,7 @@ class EE_WPUsers extends EE_Addon {
 	 */
 	public static function process_wpuser_for_attendee( EE_SPCO_Reg_Step_Attendee_Information $spco, $valid_data) {
 		$user_created = FALSE;
+		$att_id = '';
 
 		//use spco to get registrations from the
 		$registrations = self::_get_registrations( $spco );
@@ -266,6 +267,12 @@ class EE_WPUsers extends EE_Addon {
 			} else {
 				//is there already a user for the given attendee?
 				$user = get_user_by( 'email', $attendee->email() );
+
+				//does this user have the same att_id as the given att?  If NOT, then we do NOT update because it's possible there was a family member or something sharing the same email address but is a different attendee record.
+				$att_id = $user instanceof WP_User ? get_user_meta( $user->ID, 'EE_Attendee_ID', TRUE ) : $att_id;
+				if ( ! empty( $att_id ) && $att_id != $attendee->ID() ) {
+					return;
+				}
 			}
 
 
@@ -302,7 +309,7 @@ class EE_WPUsers extends EE_Addon {
 			}
 
 			//failsafe just in case this is a logged in user not created by this system that has never had an attendee record attached.
-			$att_id = get_user_meta( $user->ID, 'EE_Attendee_ID', true );
+			$att_id = empty( $att_id ) ? get_user_meta( $user->ID, 'EE_Attendee_ID', true ) : $att_id;
 			if ( empty( $att_id ) ) {
 				update_user_meta( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
 			}

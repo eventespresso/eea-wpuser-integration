@@ -69,7 +69,17 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * All admin hooks (and ajax)
 	 */
 	public static function set_hooks_admin() {
-		//nothing yet! @todo
+
+		//hook into filters/actions done on ajax but ONLY EE_FRONT_AJAX requests
+		if (  EE_FRONT_AJAX ) {
+			add_filter( 'FHEE_EE_Single_Page_Checkout__save_registration_items__find_existing_attendee', array( 'EED_WP_Users_SPCO', 'maybe_sync_existing_attendee' ), 10, 3 );
+
+			add_filter( 'FHEE__EE_SPCO_Reg_Step_Attendee_Information___process_registrations__pre_registration_process', array( 'EED_WP_Users_SPCO', 'verify_user_access' ), 10, 6 );
+
+			add_action('AHEE__EE_Single_Page_Checkout__process_attendee_information__end', array('EED_WP_Users_SPCO', 'process_wpuser_for_attendee'), 10, 2);
+		}
+
+		add_action('AHEE__event_tickets_datetime_ticket_row_template_before_close', array('EED_WP_Users_SPCO', 'insert_ticket_meta_interface'), 10, 1);
 	}
 
 

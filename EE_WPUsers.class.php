@@ -317,7 +317,7 @@ class EE_WPUsers extends EE_Addon {
 			//no existing user? then we'll create the user from the date in the attendee form.
 			if ( ! $user instanceof WP_User ) {
 				$password = wp_generate_password( 12, false );
-				$user_id = wp_create_user( apply_filters( 'FHEE__EE_WPUsers__process_wpuser_for_attendee__username', $attendee->email(), $password, $attendee->email() ) );
+				$user_id = wp_create_user( apply_filters( 'FHEE__EE_WPUsers__process_wpuser_for_attendee__username', $attendee->email(), $password, $attendee->email() ), $password, $attendee->email() );
 				$user_created = TRUE;
 				if ( $user_id instanceof WP_Error ) {
 					return; //get out because something went wrong with creating the user.
@@ -336,13 +336,13 @@ class EE_WPUsers extends EE_Addon {
 					)
 				);
 
-			//set user role
-			//@todo let's make this an option set via the admin.
-			$user->set_role('subscriber');
 
 			//if user created then send notification and attach attendee to user
 			if ( $user_created ) {
 				do_action( 'AHEE__EE_WPUsers__process_wpuser_for_attendee__user_user_created', $user, $attendee, $registration );
+				//set user role
+				//@todo let's make this an option set via the admin.
+				$user->set_role('subscriber');
 				update_user_meta( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
 			}
 

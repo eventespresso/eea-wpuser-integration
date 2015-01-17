@@ -61,6 +61,8 @@ class EE_WPUsers extends EE_Addon {
 		add_filter('FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value', array('EE_WPUsers', 'filter_answer_for_wpuser'), 10, 3);
 		add_filter( 'FHEE_EE_Single_Page_Checkout__save_registration_items__find_existing_attendee', array( 'EE_WPUsers', 'maybe_sync_existing_attendee' ), 10, 3 );
 
+		add_filter( 'FHEE__EE_SPCO_Reg_Step_Attendee_Information___process_registrations__pre_registration_process', array( 'EE_WPUsers', 'verify_user_access' ), 10, 6 );
+
 		add_action('AHEE__EE_Single_Page_Checkout__process_attendee_information__end', array('EE_WPUsers', 'process_wpuser_for_attendee'), 10, 2);
 		add_action('AHEE__event_tickets_datetime_ticket_row_template_before_close', array('EE_WPUsers', 'insert_ticket_meta_interface'), 10, 1);
 	}
@@ -182,6 +184,94 @@ class EE_WPUsers extends EE_Addon {
 			}
 		}
 		return $value;
+	}
+
+
+
+
+
+	/**
+	 * callback for FHEE__EE_SPCO_Reg_Step_Attendee_Information___process_registrations__pre_registration_process.
+	 * In this callback we check if the submitted email address:
+	 * 	- matches the email address of a user in the system.
+	 * 	- If it does, then we have logic to determine whether we fail or pass the registration
+	 * 	depending on user privileges.
+	 *
+	 *
+	 * @param bool                                $stop_processing This is what the current process is set at. If
+	 *                                                             		  TRUE, then we should just return because
+	 *                                                             		  it means another plugin already failed the
+	 *                                                             		  processing.
+	 * @param EE_Registration                       $registration
+	 * @param EE_Registration[]                     $registrations
+	 * @param array                                	       $valid_data      incoming post data.
+	 * @param EE_SPCO_Reg_Step_Attendee_Information $spco
+	 *
+	 * @return bool                                false to NOT stop the process, TRUE to stop the process.
+	 */
+	public static function verify_user_access( $stop_processing, $att_nmbr, EE_Registration $registration, $registrations, $valid_data, EE_SPCO_Reg_Step_Attendee_Information $spco ) {
+		$field_input_error = '';
+		if ( $att_nmbr !== 0 || $stop_processing  ) {
+			//get out because we've already either verified things or another plugin is halting things.
+			return $stop_processing;
+		}
+
+		//we need to loop through each valid_data[$registration->reg_url_link()] set of data to see if there is a user existing for that email address.  If there is then halt the presses!
+		foreach ( $registrations as $registration ) {
+			//if not a valid $reg then we'll just ignore and let spco handle it
+			if ( ! $registration instanceof EE_Registration ) {
+				return $stop_processing;
+			}
+
+			$reg_url_link = $registration->reg_url_link();
+			if ( isset( $valid_data[$reg_url_link] ) ) {
+				foreach ( $valid_data[$reg_url_link]  as $form_section => $form_inputs ) {
+					if ( ! is_array( $form_inputs ) ) {
+						return $stop_processing;
+					}
+					foreach ( $form_inputs as $form_input => $input_value ) {
+						if ( $form_input == 'email' && ! empty( $input_value ) ) {
+							$user = get_user_by( 'email', $input_value );
+							if ( ! $user instanceof WP_User ) {
+								continue;
+							}
+
+							//we have a user for that email address.  If the person doing the transaction is logged in, let's verify that this email address matches theirs.
+							if ( is_user_logged_in() ) {
+								$current_user = get_userdata( get_current_user_id() );
+								if ( $current_user->user_email == $user->user_email ) {
+									continue;
+								} else {
+									EE_Error::add_error( __('You have entered an email address that matches an existing user account in our system.  You can only submit registrations for your own account or for a person that does not exist in the system.  Please use a different email address.', 'event_espresso' ), __FILE__, __FUNCTION__, __LINE__ );
+									$stop_processing = TRUE;
+									$field_input_error = 'ee_reg_qstn-' . $reg_url_link . '-email';
+								}
+							} else {
+								//user is NOT logged in, so let's prompt them to log in.
+								EE_Error::add_error( __('You have entered an email address that matches an existing user account in our system.  If this is your email address, please log in before continuing your registration. Otherwise, register with a different email address.', 'event_espresso' ), __FILE__, __FUNCTION__, __LINE__ );
+								$stop_processing = TRUE;
+								$field_input_error = 'ee_reg_qstn-' . $reg_url_link . '-email';
+							}
+						}
+					}
+
+					if ( $stop_processing ) {
+						$spco->checkout->json_response->set_return_data( array(
+							'wp_user_response' => array(
+								'require_login' => true,
+								'show_login_form' => true,
+								'validation_error' => array(
+									'field' => $field_input_error
+									)
+								)
+							));
+						return $stop_processing;
+					}
+				}
+			}
+
+		}
+		return $stop_processing;
 	}
 
 

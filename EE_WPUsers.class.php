@@ -59,7 +59,7 @@ class EE_WPUsers extends EE_Addon {
 		add_filter( 'FHEE__EEH_Form_Fields__generate_question_groups_html__after_question_group_questions', array( 'EE_WPUsers', 'primary_reg_sync_messages' ), 10, 4 );
 
 		add_filter('FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value', array('EE_WPUsers', 'filter_answer_for_wpuser'), 10, 3);
-		add_filter( 'FHEE_EE_Single_Page_Checkout__save_registration_items__find_existing_attendee', array( 'EE_WPUsers', 'maybe_sync_existing_attendee' ), 10, 2 );
+		add_filter( 'FHEE_EE_Single_Page_Checkout__save_registration_items__find_existing_attendee', array( 'EE_WPUsers', 'maybe_sync_existing_attendee' ), 10, 3 );
 
 		add_action('AHEE__EE_Single_Page_Checkout__process_attendee_information__end', array('EE_WPUsers', 'process_wpuser_for_attendee'), 10, 2);
 		add_action('AHEE__event_tickets_datetime_ticket_row_template_before_close', array('EE_WPUsers', 'insert_ticket_meta_interface'), 10, 1);
@@ -197,10 +197,12 @@ class EE_WPUsers extends EE_Addon {
 	 * @param mixed null|EE_Attendee          $existing_attendee Possibly an existing attendee
 	 *                                        					  already detected by SPCO
 	 * @param EE_Registration $registration
+	 * @param array $attendee_data array of core personal data used to verify if existing attendee
+	 *                             		      exists.
 	 *
 	 * @return EE_Attendee|null
 	 */
-	public static function maybe_sync_existing_attendee( $existing_attendee, EE_Registration $registration ) {
+	public static function maybe_sync_existing_attendee( $existing_attendee, EE_Registration $registration, $attendee_data ) {
 		if ( ! is_user_logged_in() || ( is_user_logged_in() && ! $registration->is_primary_registrant( ) ) ) {
 			return $existing_attendee;
 		}
@@ -213,7 +215,43 @@ class EE_WPUsers extends EE_Addon {
 
 		//existing attendee on user?
 		$att =  self::get_attendee_for_user( $user );
-		return $att instanceof EE_Attendee ? $att : $existing_attendee;
+
+		/**
+		 * if there already IS an existing attendee then that means the system found one matching
+		 * the first_name, last_name, and email address that is incoming.  If this attendee is NOT
+		 * what is attached to the user, then we'll change the firstname and lastname but not the
+		 * email address.  Otherwise we could end up with two wpusers in the system with the
+		 * same email address.
+		 */
+		if ( ! $att instanceof EE_Attendee ) {
+			return $existing_attendee;
+		}
+
+		if ( $existing_attendee instanceof EE_Attendee && $att->ID() != $existing_attendee->ID() ) {
+			//only change first and last name for att, we'll leave the email address alone regardless of what its at.
+			if ( ! empty( $attendee_data['ATT_fname'] ) ) {
+				$att->set_fname( $attendee_data['ATT_fname'] );
+			}
+
+			if ( ! empty( $attendee_data['ATT_lname'] ) ) {
+				$att->set_lname( $attendee_data['ATT_lname'] );
+			}
+		} else {
+			//change all
+			if ( ! empty( $attendee_data['ATT_fname'] ) ) {
+				$att->set_fname( $attendee_data['ATT_fname'] );
+			}
+
+			if ( ! empty( $attendee_data['ATT_lname'] ) ) {
+				$att->set_lname( $attendee_data['ATT_lname'] );
+			}
+
+			if ( ! empty( $attendee_data['ATT_email'] ) ) {
+				$att->set_email( $attendee_data['ATT_email'] );
+			}
+		}
+
+		return $att;
 	}
 
 

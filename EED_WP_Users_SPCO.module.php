@@ -258,7 +258,8 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * @return bool                                false to NOT stop the process, TRUE to stop the process.
 	 */
 	public static function verify_user_access( $stop_processing, $att_nmbr, EE_Registration $registration, $registrations, $valid_data, EE_SPCO_Reg_Step_Attendee_Information $spco ) {
-		$field_input_error = '';
+		$field_input_error = array();
+		$error_message = '';
 		if ( $att_nmbr !== 0 || $stop_processing  ) {
 			//get out because we've already either verified things or another plugin is halting things.
 			return $stop_processing;
@@ -275,7 +276,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 			if ( isset( $valid_data[$reg_url_link] ) ) {
 				foreach ( $valid_data[$reg_url_link]  as $form_section => $form_inputs ) {
 					if ( ! is_array( $form_inputs ) ) {
-						return $stop_processing;
+						continue;
 					}
 					foreach ( $form_inputs as $form_input => $input_value ) {
 						if ( $form_input == 'email' && ! empty( $input_value ) ) {
@@ -290,36 +291,38 @@ class EED_WP_Users_SPCO  extends EED_Module {
 								if ( $current_user->user_email == $user->user_email ) {
 									continue;
 								} else {
-									EE_Error::add_error( __('You have entered an email address that matches an existing user account in our system.  You can only submit registrations for your own account or for a person that does not exist in the system.  Please use a different email address.', 'event_espresso' ), __FILE__, __FUNCTION__, __LINE__ );
+									$error_message = __('You have entered an email address that matches an existing user account in our system.  You can only submit registrations for your own account or for a person that does not exist in the system.  Please use a different email address.', 'event_espresso' );
 									$stop_processing = TRUE;
-									$field_input_error = 'ee_reg_qstn-' . $reg_url_link . '-email';
+									$field_input_error[] = 'ee_reg_qstn-' . $reg_url_link . '-email';
 								}
 							} else {
 								//user is NOT logged in, so let's prompt them to log in.
-								EE_Error::add_error( __('You have entered an email address that matches an existing user account in our system.  If this is your email address, please log in before continuing your registration. Otherwise, register with a different email address.', 'event_espresso' ), __FILE__, __FUNCTION__, __LINE__ );
+								$error_message = __('You have entered an email address that matches an existing user account in our system.  If this is your email address, please log in before continuing your registration. Otherwise, register with a different email address.', 'event_espresso' );
 								$stop_processing = TRUE;
-								$field_input_error = 'ee_reg_qstn-' . $reg_url_link . '-email';
+								$field_input_error[] = 'ee_reg_qstn-' . $reg_url_link . '-email';
 							}
 						}
-					}
-
-					if ( $stop_processing ) {
-						$spco->checkout->json_response->set_return_data( array(
-							'wp_user_response' => array(
-								'require_login' => true,
-								'show_login_form' => false,
-								'show_errors_in_context' => true,
-								'validation_error' => array(
-									'field' => array( $field_input_error )
-									)
-								)
-							));
-						return $stop_processing;
 					}
 				}
 			}
 
 		}
+
+		if ( $stop_processing ) {
+			EE_Error::add_error( $error_message, __FILE__, __FUNCTION__, __LINE__ );
+			$spco->checkout->json_response->set_return_data( array(
+				'wp_user_response' => array(
+					'require_login' => true,
+					'show_login_form' => false,
+					'show_errors_in_context' => true,
+					'validation_error' => array(
+						'field' => $field_input_error
+						)
+					)
+				));
+			return $stop_processing;
+		}
+
 		return $stop_processing;
 	}
 

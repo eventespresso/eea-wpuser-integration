@@ -308,6 +308,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 							'wp_user_response' => array(
 								'require_login' => true,
 								'show_login_form' => false,
+								'show_errors_in_context' => true,
 								'validation_error' => array(
 									'field' => array( $field_input_error )
 									)

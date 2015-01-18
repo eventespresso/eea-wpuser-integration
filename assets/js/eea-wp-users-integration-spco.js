@@ -15,6 +15,7 @@ jQuery(document).ready( function($) {
 			responseData: {},
 			responseError: '',
 			responseSuccess: '',
+			showErrorsInContext: false,
 			dialog: {}
 		},
 
@@ -24,9 +25,12 @@ jQuery(document).ready( function($) {
 				this.params.responseData = response.return_data.wp_user_response;
 				this.params.responseError = typeof response.errors !== 'undefined' && response.errors ? response.errors : '';
 				this.params.responseSuccess = typeof response.success !== 'undefined' && response.success ? response.success : '';
+				this.params.showErrorsInContext = typeof this.params.responseData.show_errors_in_context !== 'undefined' ? this.params.responseData.show_errors_in_context : this.params.showErrorsInContext;
 				SPCO.override_messages = true;
 				this.highlightFields();
-				this.showDialog();
+				if ( ! this.params.showErrorsInContext ) {
+					this.showDialog();
+				}
 				return;
 			}
 			return;
@@ -36,6 +40,9 @@ jQuery(document).ready( function($) {
 			if ( typeof this.params.responseData.validation_error !== 'undefined' && typeof this.params.responseData.validation_error.field !== 'undefined' ) {
 				_.each( this.params.responseData.validation_error.field, function( val, ind, list ) {
 					$('#' + val).removeClass( 'ee-has-value' ).addClass( 'ee-needs-value' );
+					if ( WPUSPCO.params.showErrorsInContext ) {
+						WPUSPCO.showInContext( val );
+					}
 				});
 			}
 		},
@@ -67,6 +74,17 @@ jQuery(document).ready( function($) {
 			if ( SPCO.allow_enable_submit_buttons ) {
 				SPCO.enable_submit_buttons();
 			}
+		},
+
+
+		/**
+		 * This differs from showDialog in that it shows in context for the given element id string.
+		 */
+		showInContext : function( id ) {
+			SPCO.hide_notices();
+			SPCO.end_ajax();
+			msg = '<div class="highlight-bg important-notice">' + this.params.responseError + '</div>';
+			$('#' + id).after( msg );
 		},
 
 		doAjax : function() {

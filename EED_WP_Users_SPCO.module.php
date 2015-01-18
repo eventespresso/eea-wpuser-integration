@@ -60,7 +60,10 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		add_filter( 'FHEE__EE_SPCO_Reg_Step_Attendee_Information___process_registrations__pre_registration_process', array( 'EED_WP_Users_SPCO', 'verify_user_access' ), 10, 6 );
 
 		add_action('AHEE__EE_Single_Page_Checkout__process_attendee_information__end', array('EED_WP_Users_SPCO', 'process_wpuser_for_attendee'), 10, 2);
-		add_action('AHEE__event_tickets_datetime_ticket_row_template_before_close', array('EED_WP_Users_SPCO', 'insert_ticket_meta_interface'), 10, 1);
+
+
+		//hook into spco for styles and scripts.
+		add_action( 'AHEE__EED_Single_Page_Checkout__enqueue_styles_and_scripts__attendee_information', array( 'EED_WP_Users_SPCO', 'enqueue_scripts_styles' ) );
 	}
 
 
@@ -80,6 +83,23 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		}
 
 		add_action('AHEE__event_tickets_datetime_ticket_row_template_before_close', array('EED_WP_Users_SPCO', 'insert_ticket_meta_interface'), 10, 1);
+	}
+
+
+
+	/**
+	 * Callback for AHEE__EED_Single_Page_Checkout__enqueue_styles_and_scripts__attendee_information
+	 * used to register and enqueue scripts for wp user integration with spco.
+	 *
+	 *
+	 * @since 1.0.0
+	 * @param EED_Single_Page_Checkout $spco
+	 *
+	 * @return void
+	 */
+	public static function enqueue_scripts_styles( EED_Single_Page_Checkout $spco ) {
+		wp_register_script( 'eea-wp-users-integration-spco', EE_WPUSERS_URL . 'assets/js/eea-wp-users-integration-spco.js', array( 'single_page_checkout' ), EE_WPUSERS_VERSION, TRUE );
+		wp_enqueue_script( 'eea-wp-users-integration-spco' );
 	}
 
 
@@ -287,9 +307,9 @@ class EED_WP_Users_SPCO  extends EED_Module {
 						$spco->checkout->json_response->set_return_data( array(
 							'wp_user_response' => array(
 								'require_login' => true,
-								'show_login_form' => true,
+								'show_login_form' => false,
 								'validation_error' => array(
-									'field' => $field_input_error
+									'field' => array( $field_input_error )
 									)
 								)
 							));

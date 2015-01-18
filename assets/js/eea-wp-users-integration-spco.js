@@ -20,8 +20,11 @@ jQuery(document).ready( function($) {
 		},
 
 		processResponse : function( response ) {
+			//make sure we ALWAYS clear the WPUSPCO notices.
+			this.clearNotices();
+
 			//first determine if there are any wpuser errors that need handling.
-			if ( typeof response.return_data.wp_user_response !== 'undefined' ) {
+			if ( typeof response.return_data !== 'undefined' && typeof response.return_data.wp_user_response !== 'undefined' ) {
 				this.params.responseData = response.return_data.wp_user_response;
 				this.params.responseError = typeof response.errors !== 'undefined' && response.errors ? response.errors : '';
 				this.params.responseSuccess = typeof response.success !== 'undefined' && response.success ? response.success : '';
@@ -83,9 +86,18 @@ jQuery(document).ready( function($) {
 		showInContext : function( id ) {
 			SPCO.hide_notices();
 			SPCO.end_ajax();
-			msg = '<div class="highlight-bg important-notice">' + this.params.responseError + '</div>';
+			msg = '<div class="highlight-bg important-notice ee-inline-context-notice">' + this.params.responseError + '</div>';
 			$('#' + id).after( msg );
+			if ( SPCO.allow_enable_submit_buttons ) {
+				SPCO.enable_submit_buttons();
+			}
 		},
+
+
+		clearNotices : function() {
+			$('.ee-inline-context-notice').remove();
+		},
+
 
 		doAjax : function() {
 

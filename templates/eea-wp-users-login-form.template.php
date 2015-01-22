@@ -1,0 +1,23 @@
+<?php
+/**
+ * This is the template for EE WPUsers addon login form.
+ */
+?>
+<div id="ee-login-form-container" style="display:none">
+	<form name="ee_login_form" class="ee-login-form" action="" method="post">
+		<p>
+			<label for="log"><?php _e('Username') ?><br />
+			<input type="text" name="log"  class="user_login input" value="" size="20" /></label>
+		</p>
+		<p>
+			<label for="pwd"><?php _e('Password') ?><br />
+			<input type="password" name="pwd" class="user_pass input" value="" size="20" /></label>
+		</p>
+		<?php do_action( 'login_form' ); ?>
+		<p class="forgetmenot"><label for="rememberme"><input name="rememberme" type="checkbox" class="rememberme" value="forever" /> <?php esc_attr_e('Remember Me'); ?></label></p>
+		<p class="submit">
+			<input type="submit" name="wp-submit" class="button button-primary button-large wp-submit" value="<?php esc_attr_e('Log In'); ?>" />
+		</p>
+	</form>
+	<div class="login_error_notice"></div>
+</div>

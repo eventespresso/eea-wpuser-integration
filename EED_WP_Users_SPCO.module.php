@@ -22,6 +22,7 @@ if ( ! defined('EVENT_ESPRESSO_VERSION')) exit('No direct script access allowed'
 class EED_WP_Users_SPCO  extends EED_Module {
 
 
+
 	/**
 	 * All frontend hooks.
 	 */
@@ -82,6 +83,11 @@ class EED_WP_Users_SPCO  extends EED_Module {
 			add_action('AHEE__EE_Single_Page_Checkout__process_attendee_information__end', array('EED_WP_Users_SPCO', 'process_wpuser_for_attendee'), 10, 2);
 		}
 
+		//ajax calls
+		add_action( 'wp_ajax_ee_process_login_form', array( 'EED_WP_Users_SPCO', 'process_login_form' ), 10 );
+		add_action( 'wp_ajax_nopriv_ee_process_login_form', array( 'EED_WP_Users_SPCO', 'process_login_form' ), 10 );
+
+		//other admin side hooks
 		add_action('AHEE__event_tickets_datetime_ticket_row_template_before_close', array('EED_WP_Users_SPCO', 'insert_ticket_meta_interface'), 10, 1);
 	}
 
@@ -98,8 +104,14 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * @return void
 	 */
 	public static function enqueue_scripts_styles( EED_Single_Page_Checkout $spco ) {
-		wp_register_script( 'eea-wp-users-integration-spco', EE_WPUSERS_URL . 'assets/js/eea-wp-users-integration-spco.js', array( 'single_page_checkout' ), EE_WPUSERS_VERSION, TRUE );
+		wp_register_script('ee-dialog', EE_PLUGIN_DIR_URL .  'core/admin/assets/ee-dialog-helper.js', array('jquery', 'jquery-ui-draggable'), EVENT_ESPRESSO_VERSION, TRUE );
+		wp_register_script( 'eea-wp-users-integration-spco', EE_WPUSERS_URL . 'assets/js/eea-wp-users-integration-spco.js', array( 'single_page_checkout', 'ee-dialog' ), EE_WPUSERS_VERSION, TRUE );
 		wp_enqueue_script( 'eea-wp-users-integration-spco' );
+
+		//add hidden login form in footer if user is not logged in that will get called if user needs to log in.
+		if ( ! is_user_logged_in() ) {
+			add_action( 'wp_footer', array( 'EED_WP_Users_SPCO', 'login_form_skeleton' ), 100 );
+		}
 	}
 
 
@@ -124,8 +136,8 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * given in the reg form with their user profile.
 	 *
 	 * @param string                                $content        Any content already added here.
-	 * @param EE_Registration                       $registration
-	 * @param EE_Question_Group                     $question_group
+	 * @param EE_Registration               $registration
+	 * @param EE_Question_Group        $question_group
 	 * @param EE_SPCO_Reg_Step_Attendee_Information $spco
 	 *
 	 * @return string                                content to retun
@@ -291,13 +303,22 @@ class EED_WP_Users_SPCO  extends EED_Module {
 								if ( $current_user->user_email == $user->user_email ) {
 									continue;
 								} else {
-									$error_message = __('You have entered an email address that matches an existing user account in our system.  You can only submit registrations for your own account or for a person that does not exist in the system.  Please use a different email address.', 'event_espresso' );
+									$error_message = '<p>' . __('You have entered an email address that matches an existing user account in our system.  You can only submit registrations for your own account or for a person that does not exist in the system.  Please use a different email address.', 'event_espresso' ) . '</p>';
 									$stop_processing = TRUE;
 									$field_input_error[] = 'ee_reg_qstn-' . $reg_url_link . '-email';
 								}
 							} else {
 								//user is NOT logged in, so let's prompt them to log in.
-								$error_message = __('You have entered an email address that matches an existing user account in our system.  If this is your email address, please log in before continuing your registration. Otherwise, register with a different email address.', 'event_espresso' );
+								$error_message = '<p>' . __('You have entered an email address that matches an existing user account in our system.  If this is your email address, please log in before continuing your registration. Otherwise, register with a different email address.', 'event_espresso' ) .'</p>';
+
+								/**
+								 * @todo ideally the redirect url would come
+								 * back to the same page after login.  For
+								 * now we're just utilizing js/ajax for login
+								 * processing so users with js supported
+								 * browsers will just stay on the loaded page.
+								 */
+								$error_message .= '<a class="ee-roundish ee-orange ee-button float-right ee-wpuser-login-button" href="' . wp_login_url( $spco->checkout->redirect_url ) . '">' . __('Login', 'event_espresso') . '</a>';
 								$stop_processing = TRUE;
 								$field_input_error[] = 'ee_reg_qstn-' . $reg_url_link . '-email';
 							}
@@ -548,6 +569,124 @@ class EED_WP_Users_SPCO  extends EED_Module {
 			$attendee = $attendee instanceof EE_Attendee ? $attendee : null;
 		}
 		return $attendee;
+	}
+
+
+
+	/**
+	 * Callback for wp_footer.
+	 * This is only called when user is not logged in on SPCO page loads.  This simply prints the
+	 * skeleton of a login form for usage when user needs to login.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	public static function login_form_skeleton() {
+		//dialog container for dialog helper
+		$d_cont = '<div class="ee-admin-dialog-container auto-hide hidden">' . "\n";
+		$d_cont .= '<div class="ee-notices"></div>';
+		$d_cont .= '<div class="ee-admin-dialog-container-inner-content"></div>';
+		$d_cont .= '</div>';
+		echo $d_cont;
+
+		//overlay
+		$o_cont = '<div id="espresso-admin-page-overlay-dv" class=""></div>';
+		echo $o_cont;
+
+		EE_Registry::instance()->load_helper( 'Template' );
+		$template = EE_WPUSERS_TEMPLATE_PATH . 'eea-wp-users-login-form.template.php';
+		EEH_Template::display_template( $template, array() );
+	}
+
+
+
+
+	/**
+	 * Callback for the process_login_form ajax action that handles logging a person in if their
+	 * credentials match.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return json response.
+	 */
+	public static function process_login_form() {
+		$success = true;
+		$field_input = array();
+
+		//first verify we have the necessary data.
+		$user_login = EE_Registry::instance()->REQ->get( 'login_name' );
+		$user_pass = EE_Registry::instance()->REQ->get( 'login_pass' );
+		$rememberme = EE_Registry::instance()->REQ->get( 'rememberme' );
+
+
+		if ( empty( $user_login ) ) {
+			EE_Error::add_error( __('Missing a username.', 'even_espresso'), __FILE__, __FUNCTION__, __LINE__ );
+			$field_input[] = 'user_login';
+			$success = false;
+		}
+
+		if ( empty( $user_pass ) ) {
+			EE_Error::add_error( __('Missing a password.', 'even_espresso'), __FILE__, __FUNCTION__, __LINE__ );
+			$field_input[] = 'user_pass';
+			$success = false;
+		}
+
+		if ( ! $success ) {
+			$return_data = array(
+				'wp_user_response' => array(
+					'require_login' => true,
+					'show_login_form' => true,
+					'show_errors_in_context' => true,
+					'validation_error' => array(
+						'field' => $field_input
+						)
+				)
+			);
+			self::_return_json( $return_data );
+		}
+
+		//validate user creds and login if successful
+		$user = wp_signon( array(
+			'user_login' => $user_login,
+			'user_password' => $user_pass,
+			'remember' => $rememberme
+			));
+		if ( is_wp_error( $user ) ) {
+			EE_Error::add_error( __('Invalid username or incorrect password', 'event_espresso' ), __FILE__, __FUNCTION__, __LINE__ );
+			$return_data = array(
+				'wp_user_response' => array(
+					'require_login' => true,
+					'show_login_form' => true,
+					'show_errors_in_context' => true,
+					'validation_error' => array(
+						'field' => array( 'login_error_notice' )
+						)
+					)
+				);
+		} else {
+			EE_Error::add_success( sprintf( __( 'Logged in successfully as %s!', 'event_espresso' ), $user->display_name ) );
+			$return_data = array(
+				'wp_user_response' => array(
+					'require_login' => false,
+					'show_login_form' => false,
+					'show_errors_in_context' => false
+					)
+				);
+		}
+		self::_return_json( $return_data );
+	}
+
+
+
+
+
+
+	protected static function _return_json( $return_data = array() ) {
+		$json = new EE_SPCO_JSON_Response();
+		$json->set_return_data( $return_data );
+		echo $json;
+		exit();
 	}
 
 } //end EED_WP_Users_SPCO class

@@ -6,6 +6,7 @@ if (!defined('ABSPATH'))
 //define constants
 define( 'EE_WPUSERS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'EE_WPUSERS_URL', plugin_dir_url( __FILE__ ) );
+define( 'EE_WPUSERS_TEMPLATE_PATH', EE_WPUSERS_PATH . 'templates/' );
 
 /**
  * Class definition for the EE_WPUsers object

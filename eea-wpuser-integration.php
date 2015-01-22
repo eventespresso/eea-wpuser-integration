@@ -3,7 +3,7 @@
 if ( ! defined( 'ABSPATH' ) )
 	exit( 'No direct script access allowed' );
 /*
-  Plugin Name: 	Event Espresso - WP Users (EE4+)
+  Plugin Name: 	Event Espresso - WP Users (EE4.6+)
   Plugin URI: 	http://www.eventespresso.com
   Description: 	This adds the WP users integration.
   Version: 	1.0.0.rc.002

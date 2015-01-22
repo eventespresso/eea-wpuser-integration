@@ -47,6 +47,7 @@ jQuery(document).ready( function($) {
 
 				if ( this.params.responseSuccess !== '' ) {
 					SPCO.override_messages = false;
+					this.clearNotices();
 					SPCO.scroll_to_top_and_display_messages( '#spco-attendee_information-dv', response, true );
 					return;
 				}
@@ -86,6 +87,7 @@ jQuery(document).ready( function($) {
 		showLoginForm : function() {
 			this.params.loginForm = $('#ee-login-form-container').clone().html();
 			this.showDialog( this.params.loginForm, 'attention' );
+			position_dialog(4);
 			//add listener for login submit
 			dialogHelper.dialogContentContainer.on('submit', '.ee-login-form', function(e) {
 				e.preventDefault();
@@ -155,6 +157,7 @@ jQuery(document).ready( function($) {
 
 		clearNotices : function() {
 			$('.ee-inline-context-notice').remove();
+			$('input', SPCO.container).removeClass('ee-needs-value').addClass('ee-has-value');
 			//unbind any ajax success handlers that are set to prevent repeat fires.
 			$(document).unbind('ajaxSuccess');
 		},

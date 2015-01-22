@@ -106,7 +106,9 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	public static function enqueue_scripts_styles( EED_Single_Page_Checkout $spco ) {
 		wp_register_script('ee-dialog', EE_PLUGIN_DIR_URL .  'core/admin/assets/ee-dialog-helper.js', array('jquery', 'jquery-ui-draggable'), EVENT_ESPRESSO_VERSION, TRUE );
 		wp_register_script( 'eea-wp-users-integration-spco', EE_WPUSERS_URL . 'assets/js/eea-wp-users-integration-spco.js', array( 'single_page_checkout', 'ee-dialog' ), EE_WPUSERS_VERSION, TRUE );
+		wp_register_style( 'eea-wp-users-integration-spco-style', EE_WPUSERS_URL . 'assets/css/eea-wp-users-integration-spco.css', array(), EE_WPUSERS_VERSION );
 		wp_enqueue_script( 'eea-wp-users-integration-spco' );
+		wp_enqueue_style( 'eea-wp-users-integration-spco-style');
 
 		//add hidden login form in footer if user is not logged in that will get called if user needs to log in.
 		if ( ! is_user_logged_in() ) {
@@ -227,15 +229,15 @@ class EED_WP_Users_SPCO  extends EED_Module {
 			if ($current_user instanceof WP_User) {
 				switch ($question_id) {
 
-					case 1:
+					case EEM_Attendee::fname_question_id:
 						$value = $current_user->get('first_name');
 						break;
 
-					case 2:
+					case EEM_Attendee::lname_question_id:
 						$value = $current_user->get('last_name');
 						break;
 
-					case 3:
+					case EEM_Attendee::email_question_id:
 						$value = $current_user->get('user_email');
 						break;
 

@@ -240,7 +240,7 @@ class EED_WP_Users_Admin  extends EED_Module {
 		if ( $att instanceof EE_Attendee ) {
 			update_user_meta( $user->ID, 'EE_Attendee_ID', $existing_attendee->ID() );
 		} else {
-			$att = self::_create_attendee_and_attach_wp_user( $user );
+			$att = self::_create_attendee_and_attach_wpuser( $user );
 		}
 		return $att;
 	}

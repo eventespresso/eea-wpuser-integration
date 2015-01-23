@@ -29,12 +29,22 @@ class EED_WP_Users_Admin  extends EED_Module {
 
 		//hook into wp users
 		add_action( 'edit_user_profile', array( 'EED_WP_Users_Admin', 'add_link_to_ee_contact_details') );
+		add_action( 'show_user_profile', array( 'EED_WP_Users_Admin', 'add_link_to_ee_contact_details' ) );
 		add_action( 'profile_update', array( 'EED_WP_Users_Admin', 'sync_with_contact' ), 10, 2 );
 		add_action( 'user_register', array( 'EED_WP_Users_Admin', 'sync_with_contact') );
+
+		//hook into attendee saves
+		add_filter( 'FHEE__Registrations_Admin_Page__insert_update_cpt_item__attendee_update', array( 'EED_WP_Users_Admin', 'add_sync_with_wp_users_callback' ), 10 );
 	}
 	public static function enqueue_scripts_styles() {}
 	public function run( $WP ) {}
 
+
+
+	public static function add_sync_with_wp_users_callback( $callbacks ) {
+		$callbacks[] = array( 'EED_WP_Users_Admin', 'sync_with_wp_user' );
+		return $callbacks;
+	}
 
 
 
@@ -171,6 +181,43 @@ class EED_WP_Users_Admin  extends EED_Module {
 				$att->save();
 			}
 		}
+		return;
+	}
+
+
+
+
+
+
+	/**
+	 * Callback for FHEE__Registrations_Admin_Page__insert_update_cpt_item__attendee_update
+	 * filter.  Used to sync the saved Attendee data with any attached wp_user.
+	 * Note: currently this does NOT create a user.
+	 *
+	 * @param EE_Attendee $attendee
+	 * @param array      $request_data The request data from the save.
+	 *
+	 * @return void
+	 */
+	public static function sync_with_wp_user( EE_Attendee $attendee, $request_data ) {
+		//is there a user for this attendee ID?
+		$user_id = EE_WPUsers::get_attendee_user( $attendee->ID() );
+
+		if ( empty( $user_id ) ) {
+			return;
+		}
+
+		//made it here, so let's sync the main attendee details with the user account
+		//remove the existing action for updates so that we don't cause recursion.
+		remove_action( 'profile_update', array( 'EED_WP_Users_Admin', 'sync_with_contact' ) );
+		wp_update_user(
+			array(
+				'ID' => $user_id,
+				'first_name' => $attendee->fname(),
+				'last_name' => $attendee->lname(),
+				'user_email' => $attendee->email()
+				)
+			);
 		return;
 	}
 

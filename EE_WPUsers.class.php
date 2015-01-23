@@ -26,7 +26,10 @@ class EE_WPUsers extends EE_Addon {
 				'version' => EE_WPUSERS_VERSION,
 				'min_core_version' => '4.6.0.alpha',
 				'main_file_path' => EE_WPUSERS_PLUGIN_FILE,
-				'module_paths' => array( EE_WPUSERS_PATH . 'EED_WP_Users_SPCO.module.php' ),
+				'module_paths' => array(
+					EE_WPUSERS_PATH . 'EED_WP_Users_SPCO.module.php',
+					EE_WPUSERS_PATH . 'EED_WP_Users_Admin.module.php'
+				 ),
 				// if plugin update engine is being used for auto-updates. not needed if PUE is not being used.
 				'pue_options' => array(
 					'pue_plugin_slug' => 'eea-wpuser-integration',
@@ -35,6 +38,27 @@ class EE_WPUsers extends EE_Addon {
 				)
 			)
 		);
+	}
+
+
+	/**
+	 * other helper methods
+	 */
+
+
+	/**
+	 * Used to get a user id for a given EE_Attendee id.
+	 * If none found then null is returned.
+	 *
+	 * @param int     $att_id The attendee id to find a user match with.
+	 *
+	 * @return int|null     $user_id if found otherwise null.
+	 */
+	public static function get_attendee_user( $att_id ) {
+		global $wpdb;
+		$query = "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = 'EE_Attendee_ID' AND meta_value = '%d'";
+		$user_id = $wpdb->get_var( $wpdb->prepare( $query, (int) $att_id ) );
+		return $user_id ? (int) $user_id : NULL;
 	}
 
 }

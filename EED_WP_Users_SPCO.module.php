@@ -1,4 +1,5 @@
 <?php
+if ( ! defined('EVENT_ESPRESSO_VERSION')) exit('No direct script access allowed');
 /**
  * This file contains the module for the EE WP Users addon
  *
@@ -6,7 +7,6 @@
  * @package  EE WP Users
  * @subpackage modules
  */
-if ( ! defined('EVENT_ESPRESSO_VERSION')) exit('No direct script access allowed');
 /**
  *
  * EED_WP_Users_SPCO module.  Takes care of WP Users integration with SPCO.
@@ -482,6 +482,8 @@ class EED_WP_Users_SPCO  extends EED_Module {
 			//no existing user? then we'll create the user from the date in the attendee form.
 			if ( ! $user instanceof WP_User ) {
 				$password = wp_generate_password( 12, false );
+				//remove our action for creating contacts on creating user because we don't want to loop!
+				remove_action( 'user_register', array( 'EED_WP_Users_Admin', 'sync_with_contact') );
 				$user_id = wp_create_user( apply_filters( 'FHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__username', $attendee->email(), $password, $attendee->email() ), $password, $attendee->email() );
 				$user_created = TRUE;
 				if ( $user_id instanceof WP_Error ) {
@@ -490,6 +492,8 @@ class EED_WP_Users_SPCO  extends EED_Module {
 				$user = new WP_User( $user_id );
 			}
 
+			//remove our existing action for updating users via saves in the admin to prevent recursion
+			remove_action( 'profile_update', array( 'EED_WP_Users_Admin', 'sync_with_contact' ) );
 			wp_update_user(
 				array(
 					'ID' => $user->ID,

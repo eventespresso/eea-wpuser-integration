@@ -1,4 +1,5 @@
 <?php
+if ( ! defined('EVENT_ESPRESSO_VERSION')) exit('No direct script access allowed');
 /**
  * This file contains the module for the EE WP Users addon
  *
@@ -6,7 +7,6 @@
  * @package  EE WP Users
  * @subpackage modules
  */
-if ( ! defined('EVENT_ESPRESSO_VERSION')) exit('No direct script access allowed');
 /**
  *
  * EED_WP_Users_SPCO module.  Takes care of WP Users integration with SPCO.

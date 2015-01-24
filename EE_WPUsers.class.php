@@ -26,10 +26,15 @@ class EE_WPUsers extends EE_Addon {
 				'version' => EE_WPUSERS_VERSION,
 				'min_core_version' => '4.6.0.alpha',
 				'main_file_path' => EE_WPUSERS_PLUGIN_FILE,
+				'config_class' => 'EE_WPUsers_Config',
+				'config_name' => 'user_integration',
 				'module_paths' => array(
 					EE_WPUSERS_PATH . 'EED_WP_Users_SPCO.module.php',
 					EE_WPUSERS_PATH . 'EED_WP_Users_Admin.module.php'
 				 ),
+				'autoloader_paths' => array(
+					'EE_WPUsers_Config' => EE_WPUSERS_PATH . 'EE_WPUsers_Config.php'
+					),
 				// if plugin update engine is being used for auto-updates. not needed if PUE is not being used.
 				'pue_options' => array(
 					'pue_plugin_slug' => 'eea-wpuser-integration',

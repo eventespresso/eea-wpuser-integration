@@ -86,9 +86,6 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		//ajax calls
 		add_action( 'wp_ajax_ee_process_login_form', array( 'EED_WP_Users_SPCO', 'process_login_form' ), 10 );
 		add_action( 'wp_ajax_nopriv_ee_process_login_form', array( 'EED_WP_Users_SPCO', 'process_login_form' ), 10 );
-
-		//other admin side hooks
-		add_action('AHEE__event_tickets_datetime_ticket_row_template_before_close', array('EED_WP_Users_SPCO', 'insert_ticket_meta_interface'), 10, 1);
 	}
 
 
@@ -539,21 +536,6 @@ class EED_WP_Users_SPCO  extends EED_Module {
 			$registrations = $spco->checkout->transaction->registrations( $spco->checkout->reg_cache_where_params, TRUE );
 		}
 		return $registrations;
-	}
-
-
-
-	public static function insert_ticket_meta_interface($TKT_ID) {
-		$Ticket_model = EEM_Ticket::instance();
-		$ticket = $Ticket_model->get_one_by_ID($TKT_ID);
-		if ($ticket instanceof EE_Ticket) {
-			$template_args = array(
-				'TKT_WPU_meta' => $ticket->get_extra_meta('TKT_WPU_meta', TRUE),
-				'ticket_meta_help_link' => ''
-			);
-			$template = EE_WPUSERS_TEMPLATE_PATH . 'event_tickets_datetime_ticket_row_metadata.template.php';
-			EEH_Template::locate_template($template, $template_args, TRUE, FALSE);
-		}
 	}
 
 

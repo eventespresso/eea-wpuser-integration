@@ -33,7 +33,8 @@ class EE_WPUsers extends EE_Addon {
 					EE_WPUSERS_PATH . 'EED_WP_Users_Admin.module.php'
 				 ),
 				'autoloader_paths' => array(
-					'EE_WPUsers_Config' => EE_WPUSERS_PATH . 'EE_WPUsers_Config.php'
+					'EE_WPUsers_Config' => EE_WPUSERS_PATH . 'EE_WPUsers_Config.php',
+					'EE_SPCO_Reg_Step_WP_User_Login' => EE_WPUSERS_PATH . 'EE_SPCO_Reg_Step_WP_User_Login.class.php'
 					),
 				// if plugin update engine is being used for auto-updates. not needed if PUE is not being used.
 				'pue_options' => array(

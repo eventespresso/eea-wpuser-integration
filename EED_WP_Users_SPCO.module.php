@@ -65,6 +65,10 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 		//hook into spco for styles and scripts.
 		add_action( 'AHEE__EED_Single_Page_Checkout__enqueue_styles_and_scripts__attendee_information', array( 'EED_WP_Users_SPCO', 'enqueue_scripts_styles' ) );
+
+
+		//hook into spco for adding additional reg step
+		add_filter( 'AHEE__SPCO__load_reg_steps__reg_steps_to_load', array( 'EED_WP_Users_SPCO', 'register_login_reg_step' ) );
 	}
 
 
@@ -595,17 +599,22 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * credentials match.
 	 *
 	 * @since 1.0.0
+	 * @param array $login_args If included this is being called externally for processing.
+	 * @param bool   $handle_return  Used by external callers to indicate they'll take care of the
+	 *                               		      return of data.
 	 *
 	 * @return json response.
 	 */
-	public static function process_login_form() {
+	public static function process_login_form( $login_args = array(), $handle_return = true ) {
 		$success = true;
 		$field_input = array();
+		$login_args = (array) $login_args;
+		$handle_return = (bool) $handle_return;
 
 		//first verify we have the necessary data.
-		$user_login = EE_Registry::instance()->REQ->get( 'login_name' );
-		$user_pass = EE_Registry::instance()->REQ->get( 'login_pass' );
-		$rememberme = EE_Registry::instance()->REQ->get( 'rememberme' );
+		$user_login = isset( $login_args['user_login'] ) ? $login_args['user_login'] : EE_Registry::instance()->REQ->get( 'login_name' );
+		$user_pass = isset( $login_args['login_pass'] ) ? $login_args['login_pass'] : EE_Registry::instance()->REQ->get( 'login_pass' );
+		$rememberme = isset( $login_args['rememberme'] ) ? $login_args['rememberme'] :EE_Registry::instance()->REQ->get( 'rememberme' );
 
 
 		if ( empty( $user_login ) ) {
@@ -631,7 +640,11 @@ class EED_WP_Users_SPCO  extends EED_Module {
 						)
 				)
 			);
-			self::_return_json( $return_data );
+			if ( $handle_return ) {
+				self::_return_json( $return_data );
+			} else {
+				return $return_data;
+			}
 		}
 
 		//validate user creds and login if successful
@@ -661,8 +674,36 @@ class EED_WP_Users_SPCO  extends EED_Module {
 					'show_errors_in_context' => false
 					)
 				);
+			//let's set the $current_user global to the signed on user.
+			global $current_user;
+			$current_user = $user;
 		}
-		self::_return_json( $return_data );
+		if ( $handle_return ) {
+			self::_return_json( $return_data );
+		} else {
+			return $return_data;
+		}
+	}
+
+
+
+
+	/**
+	 * callback for AHEE__SPCO__load_reg_steps__reg_steps_to_load.
+	 * Take care of registering a login step IF the event requires it.
+	 *
+	 * @param array $reg_steps
+	 *
+	 * @return array an array of reg step configuration
+	 */
+	public static function register_login_reg_step( $reg_steps ) {
+		$reg_steps[5] = array(
+			'file_path' => EE_WPUSERS_PATH,
+			'class_name' => 'EE_SPCO_Reg_Step_WP_User_Login',
+			'slug' => 'wpuser_login',
+			'has_hooks' => false
+			);
+		return $reg_steps;
 	}
 
 

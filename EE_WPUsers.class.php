@@ -66,6 +66,48 @@ class EE_WPUsers extends EE_Addon {
 		return $user_id ? (int) $user_id : NULL;
 	}
 
+
+
+
+	/**
+	 * used to determine if forced login is turned on for the event or not.
+	 *
+	 * @param int|EE_Event $event Either event_id or EE_Event object.
+	 *
+	 * @return bool   true YES forced login turned on false NO forced login turned off.
+	 */
+	public static function is_event_force_login( $event ) {
+		$event = $event instanceof EE_Event ? $event : EE_Registry::instance()->load_model( 'Event' )->get_one_by_ID( (int) $event );
+		$settings = $event instanceof EE_Event ? $event->get_post_meta( 'ee_wpuser_integration_settings', true ) : array();
+		if ( !empty( $settings ) ) {
+			return (bool) ( isset( $settings['forced_login'] ) ? $settings['forced_login'] : false );
+		}
+		return false;
+	}
+
+
+
+	/**
+	 * used to update the force login setting for an event.
+	 *
+	 * @param int|EE_Event $event Either the EE_Event object or int.
+	 * @param bool $force_login value.  If turning off you can just not send.
+	 *
+	 * @throws EE_Error (via downstream activity)
+	 * @return mixed Returns meta_id if the meta doesn't exist, otherwise returns true on success and false on failure. NOTE: If the meta_value passed to this function is the same as the value that is already in the database, this function returns false.
+	 */
+	public static function update_event_force_login( $event, $force_login = false ) {
+		$event = $event instanceof EE_Event ? $event : EE_Registry::instance()->load_model( 'Event' )->get_one_by_ID( (int) $event );
+
+		if ( ! $event instanceof EE_Event ) {
+			return false;
+		}
+		$settings = $event->get_post_meta( 'ee_wpuser_integration_settings', true );
+		$settings = empty( $settings ) ? array() : $settings;
+		$settings['forced_login'] = $force_login;
+		return $event->update_post_meta( 'ee_wpuser_integration_settings', $settings );
+	}
+
 }
 
 // end of class EE_WPUsers

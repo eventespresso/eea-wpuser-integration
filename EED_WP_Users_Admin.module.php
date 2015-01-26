@@ -35,9 +35,34 @@ class EED_WP_Users_Admin  extends EED_Module {
 
 		//hook into attendee saves
 		add_filter( 'FHEE__Registrations_Admin_Page__insert_update_cpt_item__attendee_update', array( 'EED_WP_Users_Admin', 'add_sync_with_wp_users_callback' ), 10 );
+
+		//hook into registration_form_admin_page routes and config.
+		add_filter( 'FHEE__Extend_Registration_Form_Admin_Page__page_setup__page_routes', array( 'EED_WP_Users_Admin', 'add_wp_user_default_settings_route' ), 10, 2 );
+		add_filter( 'FHEE__Extend_Registration_Form_Admin_Page__page_setup__page_config', array( 'EED_WP_Users_Admin', 'add_wp_user_default_settings_config' ), 10, 2 );
+
+		//hooking into event editor
+		add_action( 'add_meta_boxes', array( 'EED_WP_Users_Admin', 'add_metaboxes' ) );
+		add_filter( 'FHEE__Events_Admin_Page___insert_update_cpt_item__event_update_callbacks', array( 'EED_WP_Users_Admin', 'set_callback_save_wp_user_event_setting' ), 10, 2 );
+		//other admin side hooks
+		//add_action('AHEE__event_tickets_datetime_ticket_row_template_before_close', array('EED_WP_Users_Admin', 'insert_ticket_meta_interface'), 10, 1);
 	}
 	public static function enqueue_scripts_styles() {}
 	public function run( $WP ) {}
+
+
+
+	/**
+	 * Register metaboxes for event editor.
+	 */
+	public static function add_metaboxes() {
+		$page = EE_Registry::instance()->REQ->get( 'page' );
+		$route = EE_Registry::instance()->REQ->get( 'action' );
+
+		// on event editor page?
+		if ( $page == 'espresso_events' && ( $route == 'edit' || $route == 'create_new' ) ) {
+			add_meta_box( 'eea_wp_user_integration', __('User Integration Settings', 'event_espresso' ), array( 'EED_WP_Users_Admin', 'event_editor_metabox' ), null, 'side', 'default' );
+		}
+	}
 
 
 
@@ -290,5 +315,285 @@ class EED_WP_Users_Admin  extends EED_Module {
 		update_user_meta( $user->ID, 'EE_Attendee_ID', $att->ID() );
 		return $att;
 	}
+
+
+
+
+	/**
+	 * callback for FHEE__Extend_Registration_Form_Admin_Page__page_setup__page_routes.
+	 * Add additional routes for saving WP_User settings to the Registration Form admin page system
+	 *
+	 * @param array        $page_routes              current array of page routes.
+	 * @param EE_Admin_Page $admin_page
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public static function add_wp_user_default_settings_route( $page_routes, EE_Admin_Page $admin_page ) {
+		$page_routes['wp_user_settings'] = array(
+			'func' => array( 'EED_WP_Users_Admin', 'wp_user_settings' ),
+			'args' => array( $admin_page ),
+			'capability' => 'manage_options'
+			);
+		$page_routes['update_wp_user_settings'] = array(
+			'func' => array( 'EED_WP_Users_Admin', 'update_wp_user_settings' ),
+			'args' => array( $admin_page ),
+			'capability' => 'manage_options',
+			'noheader' => true
+			);
+		return $page_routes;
+	}
+
+
+	/**
+	 * callback for the wp_user_settings route.
+	 *
+	 * @param EE_Admin_Page $admin_page
+	 * @return string html for displaying wp_user_settings.
+	 */
+	public static function wp_user_settings( EE_Admin_Page $admin_page ) {
+		$template_args['admin_page_content'] = self::_wp_user_settings_form()->get_html_and_js();
+		$admin_page->set_add_edit_form_tags( 'update_wp_user_settings' );
+		$admin_page->set_publish_post_box_vars( null, false, false, null, false );
+		$admin_page->set_template_args( $template_args );
+		$admin_page->display_admin_page_with_sidebar();
+	}
+
+
+
+
+
+	/**
+	 * This outputs the settings form for WP_User_integration.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string html form.
+	 */
+	protected static function _wp_user_settings_form() {
+		EE_Registry::instance()->load_helper( 'HTML' );
+		EE_Registry::instance()->load_helper( 'Template' );
+
+		return new EE_Form_Section_Proper(
+			array(
+				'name' => 'wp_user_settings_form',
+				'html_id' => 'wp_user_settings_form',
+				'layout_strategy' => new EE_Div_Per_Section_Layout(),
+				'subsections' => apply_filters( 'FHEE__EED_WP_Users_Admin___wp_user_settings_form__form_subsections',
+					array(
+						'main_settings_hdr' => new EE_Form_Section_HTML( EEH_HTML::h3( __('WP User Integration Defaults', 'event_espresso' ) ) ),
+						'main_settings' => EED_WP_Users_Admin::_main_settings()
+						)
+					)
+				)
+			);
+	}
+
+
+
+
+	/**
+	 * Output the main settings section for wp_user_integration settings page.
+	 *
+	 * @return string html form.
+	 */
+	protected static function _main_settings() {
+		return new EE_Form_Section_Proper(
+			array(
+				'name' => 'wp_user_settings_tbl',
+				'html_id' => 'wp_user_settings_tbl',
+				'html_class' => 'form-table',
+				'layout_strategy' => new EE_Admin_Two_Column_Layout(),
+				'subsections' => apply_filters( 'FHEE__EED_WP_Users_Admin___main_settigns__form_subsections',
+					array(
+						'force_login' => new EE_Yes_No_Input(
+							array(
+								'html_label_text' => __( 'Default setting for Login Required on Registration', 'event_espresso' ),
+								'html_help_text' => __( 'When this is set to "Yes", that means when you create an event the default for the "Login Required" setting on that event will be set to "Yes".  When Login Required is set to "Yes" on an event it means that before users can register they MUST be logged in.  You can still override this on each event.', 'event_espresso' ),
+								'default' => isset( EE_Registry::instance()->CFG->addons->user_integration->force_login ) ? EE_Registry::instance()->CFG->addons->user_integration->force_login : false,
+								'display_html_label_text' => false
+								)
+							)
+						)
+					)
+				)
+			);
+	}
+
+
+
+
+	/**
+	 * callback for the update_wp_user_settings route.
+	 * This handles the config update when the settings are saved.
+	 *
+	 * @param EE_Admin_Page $admin_page
+	 *
+	 * @return void
+	 */
+	public static function update_wp_user_settings( EE_Admin_Page $admin_page ) {
+		$config = EE_Registry::instance()->CFG->addons->user_integration;
+		try {
+			$form = self::_wp_user_settings_form();
+			if ( $form->was_submitted() ) {
+				//capture form data
+				$form->receive_form_submission();
+
+				//validate_form_data
+				if ( $form->is_valid() ) {
+					$valid_data = $form->valid_data();
+					$config->force_login = $valid_data['main_settings']['force_login'];
+				}
+			} else {
+				if ( $form->submission_error_message() != '' ) {
+					EE_Error::add_error( $form->submission_error_message(), __FILE__, __FUNCTION__, __LINE__ );
+				}
+			}
+		} catch( EE_Error $e ) {
+			$e->get_error();
+		}
+
+		EE_Error::add_success( __('User Integration Settings updated.', 'event_espresso' ) );
+		EE_Registry::instance()->CFG->update_config( 'addons', 'user_integration', $config );
+		$admin_page->redirect_after_action( false, '', '', array( 'action' => 'wp_user_settings' ), true );
+	}
+
+
+
+
+	/**
+	 * callback for FHEE__Extend_Registration_Form_Admin_Page__page_setup__page_config.
+	 * Add additional config for saving WP_User settings to the Registration Form admin page system.
+	 *
+	 * @param array        $page_config current page config.
+	 * @param EE_Admin_Page $admin_page
+	 * @since  1.0.0
+	 *
+	 * @return array
+	 */
+	public static function add_wp_user_default_settings_config( $page_config, EE_Admin_Page $admin_page) {
+		$page_config['wp_user_settings'] = array(
+			'nav' => array(
+				'label' => __( 'User Integration Settings', 'event_espresso' ),
+				'order' => 50
+				),
+			'require_nonce' => false,
+			'metaboxes' => array( '_publish_post_box', '_espresso_news_post_box', '_espresso_links_post_box' )
+			);
+		return $page_config;
+	}
+
+
+
+
+	/**
+	 * This is the metabox content for the wp user integration in the event editor.
+	 *
+	 * @param WP_Post $post
+	 * @param array $metabox metabox arguments
+	 *
+	 * @return string html for metabox content.
+	 */
+	public static function event_editor_metabox( $post, $metabox ) {
+		//setup form and print out!
+		echo self::_get_event_editor_wp_users_form( $post )->get_html_and_js();
+	}
+
+
+
+
+	/**
+	 * Generate the event editor wp user settings form.
+	 *
+	 * @return EE_Form_Section_Proper
+	 */
+	protected static function _get_event_editor_wp_users_form( $post ) {
+		//do we have an existing force login setting for this event?
+		$config = isset( EE_Registry::instance()->CFG->addons->user_integration ) ? EE_Registry::instance()->CFG->addons->user_integration : false;
+		$default = $config ? $config->force_login : false;
+		$force_login = isset( $post->ID ) ? EE_WPUsers::is_event_force_login( $post->ID ) : $default;
+		return new EE_Form_Section_Proper(
+			array(
+				'name' => 'wp_user_event_settings_form',
+				'html_id' => 'wp_user_event_settings_form',
+				'layout_strategy' => new EE_Div_Per_Section_Layout(),
+				'subsections' => apply_filters( 'FHEE__EED_WP_Users_Admin__event_editor_metabox__wp_user_form_content', array(
+					'force_login' => new EE_Yes_No_Input(
+						array(
+							'html_label_text' => __('Force Login for registrations?', 'event_espresso' ),
+							'html_help_text' => __( 'If yes, then all people registering for this event must login before they can register', 'event_espresso' ),
+							'default' => $force_login,
+							'display_html_label_text' => true
+							)
+						) )
+					)
+				)
+			);
+	}
+
+
+	/**
+	 * callback for FHEE__Events_Admin_Page___insert_update_cpt_item__event_update_callbacks
+	 * Set the callback for updating wp_user_settings on event update.
+	 *
+	 * @param  array $callbacks existing array of callbacks.
+	 */
+	public static function set_callback_save_wp_user_event_setting( $callbacks ) {
+		$callbacks[] = array( 'EED_WP_Users_Admin', 'save_wp_user_event_setting' );
+		return $callbacks;
+	}
+
+
+
+
+	/**
+	 * Callback for FHEE__Events_Admin_Page___insert_update_cpt_item__event_update_callbacks.
+	 * Saving WP_User event specific settings when events updated.
+	 *
+	 * @param EE_Event $event
+	 * @param array   $req_data request data.
+	 *
+	 * @return bool   true success, false fail.
+	 */
+	public static function save_wp_user_event_setting( EE_Event $event, $req_data ) {
+		try {
+			$form = self::_get_event_editor_wp_users_form();
+			if ( $form->was_submitted() ) {
+				$form->receive_form_submission();
+
+				if ( $form->is_valid() ) {
+					$valid_data = $form->valid_data();
+					EE_WPUsers::update_event_force_login( $event, $valid_data['force_login'] );
+				}
+			} else {
+				if ( $form->submission_error_message() != '' ) {
+					EE_Error::add_error( $form->submission_error_message(), __FILE__, __FUNCTION__, __LINE__ );
+					return false;
+				}
+			}
+		} catch( EE_Error $e ) {
+			$e->get_error();
+		}
+
+		EE_Error::add_success( __('User Integration Event Settings updated.', 'event_espresso' ) );
+		return true;
+	}
+
+
+
+
+	public static function insert_ticket_meta_interface($TKT_ID) {
+		$Ticket_model = EEM_Ticket::instance();
+		$ticket = $Ticket_model->get_one_by_ID($TKT_ID);
+		if ($ticket instanceof EE_Ticket) {
+			$template_args = array(
+				'TKT_WPU_meta' => $ticket->get_extra_meta('TKT_WPU_meta', TRUE),
+				'ticket_meta_help_link' => ''
+			);
+			$template = EE_WPUSERS_TEMPLATE_PATH . 'event_tickets_datetime_ticket_row_metadata.template.php';
+			EEH_Template::locate_template($template, $template_args, TRUE, FALSE);
+		}
+	}
+
 
 } //end EED_WP_Users_Admin

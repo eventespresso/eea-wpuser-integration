@@ -65,6 +65,10 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 		//hook into spco for styles and scripts.
 		add_action( 'AHEE__EED_Single_Page_Checkout__enqueue_styles_and_scripts__attendee_information', array( 'EED_WP_Users_SPCO', 'enqueue_scripts_styles' ) );
+
+
+		//hook into spco for adding additional reg step
+		add_filter( 'AHEE__SPCO__load_reg_steps__reg_steps_to_load', array( 'EED_WP_Users_SPCO', 'register_login_reg_step' ) );
 	}
 
 
@@ -76,6 +80,8 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 		//hook into filters/actions done on ajax but ONLY EE_FRONT_AJAX requests
 		if (  EE_FRONT_AJAX ) {
+			add_filter( 'FHEE__EEH_Form_Fields__generate_question_groups_html__after_question_group_questions', array( 'EED_WP_Users_SPCO', 'primary_reg_sync_messages' ), 10, 4 );
+			add_filter('FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value', array('EED_WP_Users_SPCO', 'filter_answer_for_wpuser'), 10, 3);
 			add_filter( 'FHEE_EE_Single_Page_Checkout__save_registration_items__find_existing_attendee', array( 'EED_WP_Users_SPCO', 'maybe_sync_existing_attendee' ), 10, 3 );
 
 			add_filter( 'FHEE__EE_SPCO_Reg_Step_Attendee_Information___process_registrations__pre_registration_process', array( 'EED_WP_Users_SPCO', 'verify_user_access' ), 10, 6 );
@@ -86,9 +92,6 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		//ajax calls
 		add_action( 'wp_ajax_ee_process_login_form', array( 'EED_WP_Users_SPCO', 'process_login_form' ), 10 );
 		add_action( 'wp_ajax_nopriv_ee_process_login_form', array( 'EED_WP_Users_SPCO', 'process_login_form' ), 10 );
-
-		//other admin side hooks
-		add_action('AHEE__event_tickets_datetime_ticket_row_template_before_close', array('EED_WP_Users_SPCO', 'insert_ticket_meta_interface'), 10, 1);
 	}
 
 
@@ -145,11 +148,11 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * @return string                                content to retun
 	 */
 	public static function primary_reg_sync_messages( $content, EE_Registration $registration, EE_Question_Group $question_group, EE_SPCO_Reg_Step_Attendee_Information $spco ) {
-		if ( ! is_user_logged_in() || ( is_user_logged_in() && ! $registration->is_primary_registrant() ) ) {
+		if ( ! is_user_logged_in() || ( is_user_logged_in() && ! $registration->is_primary_registrant() ) || $question_group->ID() != EEM_Question_Group::system_personal ) {
 			return $content;
 		}
 
-		return $content . '<br><div class="highlight-bg">' . sprintf( __('%1$sNote%2$s: Changes made in these answers will be synced with your user profile.', 'event_espresso' ), '<strong>', '</strong>' ) . '</div>';
+		return '<br><div class="highlight-bg">' . sprintf( __('%1$sNote%2$s: Changes made in your Personal Information details will be synced with your user profile.', 'event_espresso' ), '<strong>', '</strong>' ) . '</div>' . $content;
 	}
 
 
@@ -543,21 +546,6 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 
 
-	public static function insert_ticket_meta_interface($TKT_ID) {
-		$Ticket_model = EEM_Ticket::instance();
-		$ticket = $Ticket_model->get_one_by_ID($TKT_ID);
-		if ($ticket instanceof EE_Ticket) {
-			$template_args = array(
-				'TKT_WPU_meta' => $ticket->get_extra_meta('TKT_WPU_meta', TRUE),
-				'ticket_meta_help_link' => ''
-			);
-			$template = EE_WPUSERS_TEMPLATE_PATH . 'event_tickets_datetime_ticket_row_metadata.template.php';
-			EEH_Template::locate_template($template, $template_args, TRUE, FALSE);
-		}
-	}
-
-
-
 
 	/**
 	 * Returns the EE_Attendee object attached to the given wp user.
@@ -613,17 +601,22 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * credentials match.
 	 *
 	 * @since 1.0.0
+	 * @param array $login_args If included this is being called externally for processing.
+	 * @param bool   $handle_return  Used by external callers to indicate they'll take care of the
+	 *                               		      return of data.
 	 *
 	 * @return json response.
 	 */
-	public static function process_login_form() {
+	public static function process_login_form( $login_args = array(), $handle_return = true ) {
 		$success = true;
 		$field_input = array();
+		$login_args = (array) $login_args;
+		$handle_return = (bool) $handle_return;
 
 		//first verify we have the necessary data.
-		$user_login = EE_Registry::instance()->REQ->get( 'login_name' );
-		$user_pass = EE_Registry::instance()->REQ->get( 'login_pass' );
-		$rememberme = EE_Registry::instance()->REQ->get( 'rememberme' );
+		$user_login = isset( $login_args['user_login'] ) ? $login_args['user_login'] : EE_Registry::instance()->REQ->get( 'login_name' );
+		$user_pass = isset( $login_args['login_pass'] ) ? $login_args['login_pass'] : EE_Registry::instance()->REQ->get( 'login_pass' );
+		$rememberme = isset( $login_args['rememberme'] ) ? $login_args['rememberme'] :EE_Registry::instance()->REQ->get( 'rememberme' );
 
 
 		if ( empty( $user_login ) ) {
@@ -649,7 +642,11 @@ class EED_WP_Users_SPCO  extends EED_Module {
 						)
 				)
 			);
-			self::_return_json( $return_data );
+			if ( $handle_return ) {
+				self::_return_json( $return_data );
+			} else {
+				return $return_data;
+			}
 		}
 
 		//validate user creds and login if successful
@@ -680,7 +677,32 @@ class EED_WP_Users_SPCO  extends EED_Module {
 					)
 				);
 		}
-		self::_return_json( $return_data );
+		if ( $handle_return ) {
+			self::_return_json( $return_data );
+		} else {
+			return $return_data;
+		}
+	}
+
+
+
+
+	/**
+	 * callback for AHEE__SPCO__load_reg_steps__reg_steps_to_load.
+	 * Take care of registering a login step IF the event requires it.
+	 *
+	 * @param array $reg_steps
+	 *
+	 * @return array an array of reg step configuration
+	 */
+	public static function register_login_reg_step( $reg_steps ) {
+		$reg_steps[5] = array(
+			'file_path' => EE_WPUSERS_PATH,
+			'class_name' => 'EE_SPCO_Reg_Step_WP_User_Login',
+			'slug' => 'wpuser_login',
+			'has_hooks' => false
+			);
+		return $reg_steps;
 	}
 
 

@@ -399,6 +399,8 @@ class EED_WP_Users_Admin  extends EED_Module {
 	 * @return string html form.
 	 */
 	protected static function _main_settings() {
+		global $wp_roles;
+
 		return new EE_Form_Section_Proper(
 			array(
 				'name' => 'wp_user_settings_tbl',
@@ -414,9 +416,26 @@ class EED_WP_Users_Admin  extends EED_Module {
 								'default' => isset( EE_Registry::instance()->CFG->addons->user_integration->force_login ) ? EE_Registry::instance()->CFG->addons->user_integration->force_login : false,
 								'display_html_label_text' => false
 								)
+							),
+						'auto_create_user' => new EE_Yes_No_Input(
+							array(
+								'html_label_text' => __( 'Default setting for User Creation on Registration.', 'event_espresso' ),
+								'html_help_text' => __( 'When this is set to "Yes", that means when you create an event the default for the "Create User On Registration" setting on that event will be set to "Yes".  When this setting is set to "Yes" on an event it means that when new non-logged in users register for an event, a new WP_User is created for them.  You can still override this on each event.', 'event_espresso' ),
+								'default' => isset( EE_Registry::instance()->CFG->addons->user_integration->auto_create_user ) ? EE_Registry::instance()->CFG->addons->user_integration->auto_create_user : false,
+								'display_html_label_text' => false
+								)
+							),
+						'default_wp_user_role' => new EE_Select_Input(
+							$wp_roles->get_names(),
+							array(
+								'html_label_text' => __( 'Default role for User Creation on Registration.', 'event_espresso' ),
+								'html_help_text' => __( 'On new events, when User creation is set to yes, this setting indicates what the default role for new users will be on creation. You can still override this on each event.', 'event_espresso' ),
+								'default' => isset( EE_Registry::instance()->CFG->addons->user_integration->default_wp_role ) ? EE_Registry::instance()->CFG->addons->user_integration->default_wp_role : 'subscriber',
+								'display_html_label_text' => false
+								)
 							)
-						)
-					)
+						) //end form subsections
+					) //end apply_filters for form subsections
 				)
 			);
 	}
@@ -509,10 +528,10 @@ class EED_WP_Users_Admin  extends EED_Module {
 	 * @return EE_Form_Section_Proper
 	 */
 	protected static function _get_event_editor_wp_users_form( $post ) {
-		//do we have an existing force login setting for this event?
-		$config = isset( EE_Registry::instance()->CFG->addons->user_integration ) ? EE_Registry::instance()->CFG->addons->user_integration : false;
-		$default = $config ? $config->force_login : false;
-		$force_login = isset( $post->ID ) ? EE_WPUsers::is_event_force_login( $post->ID ) : $default;
+		global $wp_roles;
+		$evt_id = isset( $post->ID ) ? $post->ID : 0;
+		EE_Registry::instance()->load_helper( 'HTML' );
+
 		return new EE_Form_Section_Proper(
 			array(
 				'name' => 'wp_user_event_settings_form',
@@ -523,13 +542,33 @@ class EED_WP_Users_Admin  extends EED_Module {
 						array(
 							'html_label_text' => __('Force Login for registrations?', 'event_espresso' ),
 							'html_help_text' => __( 'If yes, then all people registering for this event must login before they can register', 'event_espresso' ),
-							'default' => $force_login,
+							'default' => EE_WPUsers::is_event_force_login( $evt_id ),
 							'display_html_label_text' => true
 							)
-						) )
+						),
+					'spacing1' => new EE_Form_Section_HTML( '<br>' ),
+					'auto_user_create' => new EE_Yes_No_Input(
+						array(
+							'html_label_text' => __('Auto Create users with registrations?', 'event_espresso' ),
+							'html_help_text' => __( 'If yes, then when non-logged in users register for this event, a user will automatically be created.', 'event_espresso' ),
+							'default' => EE_WPUsers::is_auto_user_create_on( $evt_id ),
+							'display_html_label_text' => true
+							)
+						),
+					'spacing2' => new EE_Form_Section_HTML( '<br>' ),
+					'default_user_create_role' => new EE_Select_Input(
+						$wp_roles->get_names(),
+						array(
+							'html_label_text' => __('Default role for auto-created users:', 'event_espresso' ),
+							'html_help_text' => __( 'When users are auto-created, what default role do you want them to have?', 'event_espresso' ),
+							'default' => EE_WPUsers::default_user_create_role( $evt_id ),
+							'display_html_label_text' => true
+							)
+						),
 					)
 				)
-			);
+			)
+		);
 	}
 
 
@@ -565,6 +604,8 @@ class EED_WP_Users_Admin  extends EED_Module {
 				if ( $form->is_valid() ) {
 					$valid_data = $form->valid_data();
 					EE_WPUsers::update_event_force_login( $event, $valid_data['force_login'] );
+					EE_WPUsers::update_auto_create_user( $event, $valid_data['auto_user_create'] );
+					EE_WPUsers::update_default_wp_user_role( $event, $valid_data['default_user_create_role'] );
 				}
 			} else {
 				if ( $form->submission_error_message() != '' ) {

@@ -78,14 +78,51 @@ class EE_WPUsers extends EE_Addon {
 	 * @return bool   true YES forced login turned on false NO forced login turned off.
 	 */
 	public static function is_event_force_login( $event ) {
-		$event = $event instanceof EE_Event ? $event : EE_Registry::instance()->load_model( 'Event' )->get_one_by_ID( (int) $event );
-		$settings = $event instanceof EE_Event ? $event->get_post_meta( 'ee_wpuser_integration_settings', true ) : array();
-		if ( !empty( $settings ) ) {
-			return (bool) ( isset( $settings['forced_login'] ) ? $settings['forced_login'] : false );
-		}
-		return false;
+		return self::_get_wp_user_event_setting( 'force_login', $event );
 	}
 
+
+
+	public static function is_auto_user_create_on( $event ) {
+		return self::_get_wp_user_event_setting( 'auto_create_user', $event );
+	}
+
+
+	public static function default_user_create_role( $event ) {
+		return self::_get_wp_user_event_setting( 'default_wp_user_role', $event );
+	}
+
+
+
+	/**
+	 * This retrieves the specific wp_user setting for an event as indicated by key.
+	 *
+	 * @param string $key   What setting are we retrieving
+	 * @param int|EE_Event EE_Event  or event id
+	 *
+	 * @return mixed Whatever the value for the key is or what is set as the global default if it doesn't
+	 * exist.
+	 */
+	protected static function _get_wp_user_event_setting( $key, $event ) {
+		//any global defaults?
+		$config = isset( EE_Registry::instance()->CFG->addons->user_integration ) ? EE_Registry::instance()->CFG->addons->user_integration : false;
+		$global_default = array(
+			'force_login' => $config && isset( $config->force_login ) ? $config->force_login : false,
+			'auto_create_user' => $config && isset( $config->auto_create_user ) ? $config->auto_create_user : false,
+			'default_wp_user_role' => $config && isset( $config->default_wp_user_role ) ? $config->default_wp_user_role : 'subscriber'
+			);
+
+
+		$event = $event instanceof EE_Event ? $event : EE_Registry::instance()->load_model( 'Event' )->get_one_by_ID( (int) $event );
+		$settings = $event instanceof EE_Event ? $event->get_post_meta( 'ee_wpuser_integration_settings', true ) : array();
+		if ( ! empty( $settings ) ) {
+			$value =  isset( $settings[$key] ) ? $settings[$key] : $global_default[$key];
+
+			//since post_meta *might* return an empty string.  If the default global value is boolean, then let's make sure we cast the value returned from the post_meta as boolean in case its an empty string.
+			return is_bool( $global_default[$key] ) ? (bool) $value : $value;
+		}
+		return $global_default[$key];
+	}
 
 
 	/**
@@ -95,9 +132,53 @@ class EE_WPUsers extends EE_Addon {
 	 * @param bool $force_login value.  If turning off you can just not send.
 	 *
 	 * @throws EE_Error (via downstream activity)
-	 * @return mixed Returns meta_id if the meta doesn't exist, otherwise returns true on success and false on failure. NOTE: If the meta_value passed to this function is the same as the value that is already in the database, this function returns false.
+	 * @return mixed Returns meta_id if the meta doesn't exist, otherwise returns true on success
+	 *                          and false on failure. NOTE: If the meta_value passed to this function is the
+	 *                          same as the value that is already in the database, this function returns false.
 	 */
 	public static function update_event_force_login( $event, $force_login = false ) {
+		return self::_update_wp_user_event_setting( 'force_login', $event, $force_login );
+	}
+
+
+
+
+	/**
+	 * used to update the auto create user setting for an event.
+	 *
+	 * @param int|EE_Event $event Either the EE_Event object or int.
+	 * @param bool $auto_create value.  If turning off you can just not send.
+	 *
+	 * @throws EE_Error (via downstream activity)
+	 * @return mixed Returns meta_id if the meta doesn't exist, otherwise returns true on success
+	 *                          and false on failure. NOTE: If the meta_value passed to this function is the
+	 *                          same as the value that is already in the database, this function returns false.
+	 */
+	public static function update_auto_create_user( $event, $auto_create = false ) {
+		return self::_update_wp_user_event_setting( 'auto_create_user', $event, $auto_create );
+	}
+
+
+
+
+	public static function update_default_wp_user_role( $event, $default_role = 'subscriber' ) {
+		return self::_update_wp_user_event_setting( 'default_wp_user_role', $event, $default_role );
+	}
+
+
+
+	/**
+	 * used to update the wp_user event specific settings.
+	 *
+	 * @param string $key     What setting is being updated.
+	 * @param int|EE_Event $event Either the EE_Event object or id.
+	 * @param mixed $value The value being updated.
+	 *
+	 * @return mixed Returns meta_id if the meta doesn't exist, otherwise returns true on success
+	 *                          and false on failure. NOTE: If the meta_value passed to this function is the
+	 *                          same as the value that is already in the database, this function returns false.
+	 */
+	protected static function _update_wp_user_event_setting( $key, $event, $value ) {
 		$event = $event instanceof EE_Event ? $event : EE_Registry::instance()->load_model( 'Event' )->get_one_by_ID( (int) $event );
 
 		if ( ! $event instanceof EE_Event ) {
@@ -105,7 +186,7 @@ class EE_WPUsers extends EE_Addon {
 		}
 		$settings = $event->get_post_meta( 'ee_wpuser_integration_settings', true );
 		$settings = empty( $settings ) ? array() : $settings;
-		$settings['forced_login'] = $force_login;
+		$settings[$key] = $value;
 		return $event->update_post_meta( 'ee_wpuser_integration_settings', $settings );
 	}
 

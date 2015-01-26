@@ -164,6 +164,8 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * the reg form to be reflected on the profile attached to their account.  Note this ONLY should
 	 * appear if the user is logged in.
 	 *
+	 * @todo  THIS IS NOT IMPLEMENTED YET.
+	 *
 	 * @param array                                $form_subsections        existing form subsections
 	 * @param EE_Registration                       $registration
 	 * @param EE_Question_Group                     $question_group
@@ -198,6 +200,8 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * callback for FHEE__EE_SPCO_Reg_Step_Attendee_Information___save_registration_form_input
 	 * that we'll read to remove and process any form input injected by WP_User_Integration into the
 	 * registration process.
+	 *
+	 * @todo  THIS IS NOT IMPLEMENTED YET.
 	 *
 	 * @param bool                                 $processed    return true to stop normal spco processing of
 	 *                                                           	        input.
@@ -435,9 +439,8 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * 	  user to the attendee processor).  However, we will sync the given details with the WP
 	 * 	  User Profile.
 	 * 	 - If user is NOT logged in, then we create a user for the primary registrant data but ONLY
-	 * 	   if there is not already a user existing for the given attendee data.
-	 * 	 - @todo the above step will only get done if admins have flagged for new users to get
-	 * 	    created on registration.
+	 * 	   if there is not already a user existing for the given attendee data AND only if automatic
+	 * 	   user creation is turned on for this event.
 	 *
 	 *
 	 * @param EE_SPCO_Reg_Step_Attendee_Information $spco
@@ -481,9 +484,15 @@ class EED_WP_Users_SPCO  extends EED_Module {
 				}
 			}
 
+			$event = $registration->event();
 
 			//no existing user? then we'll create the user from the date in the attendee form.
 			if ( ! $user instanceof WP_User ) {
+				//if this event does NOT allow automatic user creation then let's bail.
+				if ( ! EE_WPUsers::is_auto_user_create_on( $event ) ) {
+					return; //no we do NOT auto create users please.
+				}
+
 				$password = wp_generate_password( 12, false );
 				//remove our action for creating contacts on creating user because we don't want to loop!
 				remove_action( 'user_register', array( 'EED_WP_Users_Admin', 'sync_with_contact') );
@@ -513,8 +522,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 			if ( $user_created ) {
 				do_action( 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_created', $user, $attendee, $registration );
 				//set user role
-				//@todo let's make this an option set via the admin.
-				$user->set_role('subscriber');
+				$user->set_role( EE_WPUsers::default_user_create_role($event) );
 				update_user_meta( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
 			}
 

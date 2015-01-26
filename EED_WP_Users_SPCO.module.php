@@ -148,11 +148,11 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * @return string                                content to retun
 	 */
 	public static function primary_reg_sync_messages( $content, EE_Registration $registration, EE_Question_Group $question_group, EE_SPCO_Reg_Step_Attendee_Information $spco ) {
-		if ( ! is_user_logged_in() || ( is_user_logged_in() && ! $registration->is_primary_registrant() ) ) {
+		if ( ! is_user_logged_in() || ( is_user_logged_in() && ! $registration->is_primary_registrant() ) || $question_group->ID() != EEM_Question_Group::system_personal ) {
 			return $content;
 		}
 
-		return $content . '<br><div class="highlight-bg">' . sprintf( __('%1$sNote%2$s: Changes made in these answers will be synced with your user profile.', 'event_espresso' ), '<strong>', '</strong>' ) . '</div>';
+		return '<br><div class="highlight-bg">' . sprintf( __('%1$sNote%2$s: Changes made in your Personal Information details will be synced with your user profile.', 'event_espresso' ), '<strong>', '</strong>' ) . '</div>' . $content;
 	}
 
 

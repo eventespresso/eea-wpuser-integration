@@ -399,6 +399,8 @@ class EED_WP_Users_Admin  extends EED_Module {
 	 * @return string html form.
 	 */
 	protected static function _main_settings() {
+		global $wp_roles;
+
 		return new EE_Form_Section_Proper(
 			array(
 				'name' => 'wp_user_settings_tbl',
@@ -414,9 +416,26 @@ class EED_WP_Users_Admin  extends EED_Module {
 								'default' => isset( EE_Registry::instance()->CFG->addons->user_integration->force_login ) ? EE_Registry::instance()->CFG->addons->user_integration->force_login : false,
 								'display_html_label_text' => false
 								)
+							),
+						'auto_create_user' => new EE_Yes_No_Input(
+							array(
+								'html_label_text' => __( 'Default setting for User Creation on Registration.', 'event_espresso' ),
+								'html_help_text' => __( 'When this is set to "Yes", that means when you create an event the default for the "Create User On Registration" setting on that event will be set to "Yes".  When this setting is set to "Yes" on an event it means that when new non-logged in users register for an event, a new WP_User is created for them.  You can still override this on each event.', 'event_espresso' ),
+								'default' => isset( EE_Registry::instance()->CFG->addons->user_integration->auto_create_user ) ? EE_Registry::instance()->CFG->addons->user_integration->auto_create_user : false,
+								'display_html_label_text' => false
+								)
+							),
+						'default_wp_user_role' => new EE_Select_Input(
+							$wp_roles->get_names(),
+							array(
+								'html_label_text' => __( 'Default role for User Creation on Registration.', 'event_espresso' ),
+								'html_help_text' => __( 'On new events, when User creation is set to yes, this setting indicates what the default role for new users will be on creation. You can still override this on each event.', 'event_espresso' ),
+								'default' => isset( EE_Registry::instance()->CFG->addons->user_integration->default_wp_role ) ? EE_Registry::instance()->CFG->addons->user_integration->default_wp_role : 'subscriber',
+								'display_html_label_text' => false
+								)
 							)
-						)
-					)
+						) //end form subsections
+					) //end apply_filters for form subsections
 				)
 			);
 	}

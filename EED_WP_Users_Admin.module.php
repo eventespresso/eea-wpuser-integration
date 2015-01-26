@@ -39,6 +39,7 @@ class EED_WP_Users_Admin  extends EED_Module {
 		//hook into registration_form_admin_page routes and config.
 		add_filter( 'FHEE__Extend_Registration_Form_Admin_Page__page_setup__page_routes', array( 'EED_WP_Users_Admin', 'add_wp_user_default_settings_route' ), 10, 2 );
 		add_filter( 'FHEE__Extend_Registration_Form_Admin_Page__page_setup__page_config', array( 'EED_WP_Users_Admin', 'add_wp_user_default_settings_config' ), 10, 2 );
+		add_filter( 'FHEE__EE_Admin_Page___publish_post_box__box_label', array( 'EED_WP_Users_Admin', 'modify_settings_publish_box_label' ), 10, 3 );
 
 		//hooking into event editor
 		add_action( 'add_meta_boxes', array( 'EED_WP_Users_Admin', 'add_metaboxes' ) );
@@ -577,6 +578,27 @@ class EED_WP_Users_Admin  extends EED_Module {
 
 		EE_Error::add_success( __('User Integration Event Settings updated.', 'event_espresso' ) );
 		return true;
+	}
+
+
+
+
+
+	/**
+	 * Callback for FHEE__EE_Admin_Page___publish_post_box__box_label.
+	 * Used to change the label to something more descriptive for the WP_Users settings page.
+	 *
+	 * @param string        $box_label  original label
+	 * @param string        $route      The route (used to target the specific box)
+	 * @param EE_Admin_Page $admin_page
+	 *
+	 * @return string        New label
+	 */
+	public static function modify_settings_publish_box_label( $box_label, $route, EE_Admin_Page $admin_page )  {
+		if ( $route == 'wp_user_settings' ) {
+			$box_label = __('Update Settings', 'event_espresso' );
+		}
+		return $box_label;
 	}
 
 

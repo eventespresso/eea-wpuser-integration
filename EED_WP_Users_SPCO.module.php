@@ -62,6 +62,9 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 		add_action('AHEE__EE_Single_Page_Checkout__process_attendee_information__end', array('EED_WP_Users_SPCO', 'process_wpuser_for_attendee'), 10, 2);
 
+		//notifications
+		add_action( 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_created', array( 'EED_WP_Users_SPCO', 'new_user_notifications'), 10, 4 );
+
 
 		//hook into spco for styles and scripts.
 		add_action( 'AHEE__EED_Single_Page_Checkout__enqueue_styles_and_scripts__attendee_information', array( 'EED_WP_Users_SPCO', 'enqueue_scripts_styles' ) );
@@ -87,6 +90,9 @@ class EED_WP_Users_SPCO  extends EED_Module {
 			add_filter( 'FHEE__EE_SPCO_Reg_Step_Attendee_Information___process_registrations__pre_registration_process', array( 'EED_WP_Users_SPCO', 'verify_user_access' ), 10, 6 );
 
 			add_action('AHEE__EE_Single_Page_Checkout__process_attendee_information__end', array('EED_WP_Users_SPCO', 'process_wpuser_for_attendee'), 10, 2);
+
+			//notifications
+			add_action( 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_created', array( 'EED_WP_Users_SPCO', 'new_user_notifications'), 10, 4 );
 		}
 
 		//ajax calls
@@ -520,7 +526,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 			//if user created then send notification and attach attendee to user
 			if ( $user_created ) {
-				do_action( 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_created', $user, $attendee, $registration );
+				do_action( 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_created', $user, $attendee, $registration, $password );
 				//set user role
 				$user->set_role( EE_WPUsers::default_user_create_role($event) );
 				update_user_meta( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
@@ -532,6 +538,27 @@ class EED_WP_Users_SPCO  extends EED_Module {
 				update_user_meta( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
 			}
 		} //end registrations loop
+	}
+
+
+
+
+	/**
+	 * This is the callback for AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_created action.
+	 * Used to send off notifications when new user created.
+	 *
+	 * @since  1.0.0
+	 *
+	 * @param WP_User         $user         user that was created
+	 * @param EE_Attendee     $attendee
+	 * @param EE_Registration $registration
+	 * @param string          $password     password used to create user.
+	 *
+	 * @return void
+	 */
+	public static function new_user_notifications( WP_User $user, EE_Attendee $attendee, EE_Registration $registration, $password ) {
+		//for now we just use the existing core wp notifications.
+		wp_new_user_notification( $user->ID, $password );
 	}
 
 

@@ -30,7 +30,8 @@ class EE_WPUsers extends EE_Addon {
 				'config_name' => 'user_integration',
 				'module_paths' => array(
 					EE_WPUSERS_PATH . 'EED_WP_Users_SPCO.module.php',
-					EE_WPUSERS_PATH . 'EED_WP_Users_Admin.module.php'
+					EE_WPUSERS_PATH . 'EED_WP_Users_Admin.module.php',
+					EE_WPUSERS_PATH . 'EED_WP_Users_Ticket_Selector.module.php'
 				 ),
 				'autoloader_paths' => array(
 					'EE_WPUsers_Config' => EE_WPUSERS_PATH . 'EE_WPUsers_Config.php',

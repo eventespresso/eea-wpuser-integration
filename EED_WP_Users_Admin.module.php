@@ -39,14 +39,20 @@ class EED_WP_Users_Admin  extends EED_Module {
 		//hook into registration_form_admin_page routes and config.
 		add_filter( 'FHEE__Extend_Registration_Form_Admin_Page__page_setup__page_routes', array( 'EED_WP_Users_Admin', 'add_wp_user_default_settings_route' ), 10, 2 );
 		add_filter( 'FHEE__Extend_Registration_Form_Admin_Page__page_setup__page_config', array( 'EED_WP_Users_Admin', 'add_wp_user_default_settings_config' ), 10, 2 );
+		add_filter( 'FHEE__Extend_Events_Admin_Page__page_setup__page_config', array( 'EED_WP_Users_Admin', 'add_ticket_capability_help_tab' ), 10, 2 );
 		add_filter( 'FHEE__EE_Admin_Page___publish_post_box__box_label', array( 'EED_WP_Users_Admin', 'modify_settings_publish_box_label' ), 10, 3 );
 
 		//hooking into event editor
 		add_action( 'add_meta_boxes', array( 'EED_WP_Users_Admin', 'add_metaboxes' ) );
 		add_filter( 'FHEE__Events_Admin_Page___insert_update_cpt_item__event_update_callbacks', array( 'EED_WP_Users_Admin', 'set_callback_save_wp_user_event_setting' ), 10, 2 );
-		//other admin side hooks
-		//add_action('AHEE__event_tickets_datetime_ticket_row_template_before_close', array('EED_WP_Users_Admin', 'insert_ticket_meta_interface'), 10, 1);
+
+		//hook into ticket editor in event editor.
+		add_action('AHEE__event_tickets_datetime_ticket_row_template__advanced_details_end', array('EED_WP_Users_Admin', 'insert_ticket_meta_interface'), 10, 2);
+		add_action( 'AHEE__espresso_events_Pricing_Hooks___update_tkts_new_ticket', array( 'EED_WP_Users_Admin', 'update_capability_on_ticket') , 10, 4 );
+		add_action( 'AHEE__espresso_events_Pricing_Hooks___update_tkts_update_ticket', array( 'EED_WP_Users_Admin', 'update_capability_on_ticket' ), 10, 4 );
 	}
+
+
 	public static function enqueue_scripts_styles() {}
 	public function run( $WP ) {}
 
@@ -506,6 +512,34 @@ class EED_WP_Users_Admin  extends EED_Module {
 
 
 
+
+	/**
+	 * Callback for FHEE__Extend_Events_Admin_Page__page_setup__page_config.
+	 * Just injecting config for help tab contents added for ticket capability fields.
+	 *
+	 * @param array        $page_config current page config
+	 * @param EE_Admin_Page $admin_page
+	 * @since 1.0.0
+	 *
+	 * @return array
+	 */
+	public static function add_ticket_capability_help_tab( $page_config, EE_Admin_Page $admin_page ) {
+		EE_Registry::instance()->load_helper('Template');
+		$file = EE_WPUSERS_TEMPLATE_PATH . 'ticket_capability_help_content.template.php';
+		$page_config['create_new']['help_tabs']['ticket_capability_info'] = array(
+			'title' => __( 'Ticket Capability Restrictions', 'event_espresso' ),
+			'content' => EEH_Template::display_template($file,array(),true)
+			);
+		$page_config['edit']['help_tabs']['ticket_capability_info'] = array(
+			'title' => __( 'Ticket Capability Restrictions', 'event_espresso' ),
+			'content' => EEH_Template::display_template($file,array(),true)
+			);
+		return $page_config;
+	}
+
+
+
+
 	/**
 	 * This is the metabox content for the wp user integration in the event editor.
 	 *
@@ -529,7 +563,8 @@ class EED_WP_Users_Admin  extends EED_Module {
 	 */
 	protected static function _get_event_editor_wp_users_form( $post ) {
 		global $wp_roles;
-		$evt_id = isset( $post->ID ) ? $post->ID : 0;
+		$evt_id = $post instanceof EE_Event ? $post->ID() : null;
+		$evt_id = empty( $evt_id ) &&  isset( $post->ID ) ? $post->ID : 0;
 		EE_Registry::instance()->load_helper( 'HTML' );
 
 		return new EE_Form_Section_Proper(
@@ -597,7 +632,7 @@ class EED_WP_Users_Admin  extends EED_Module {
 	 */
 	public static function save_wp_user_event_setting( EE_Event $event, $req_data ) {
 		try {
-			$form = self::_get_event_editor_wp_users_form();
+			$form = self::_get_event_editor_wp_users_form( $event );
 			if ( $form->was_submitted() ) {
 				$form->receive_form_submission();
 
@@ -645,16 +680,95 @@ class EED_WP_Users_Admin  extends EED_Module {
 
 
 
-	public static function insert_ticket_meta_interface($TKT_ID) {
-		$Ticket_model = EEM_Ticket::instance();
-		$ticket = $Ticket_model->get_one_by_ID($TKT_ID);
-		if ($ticket instanceof EE_Ticket) {
-			$template_args = array(
-				'TKT_WPU_meta' => $ticket->get_extra_meta('TKT_WPU_meta', TRUE),
-				'ticket_meta_help_link' => ''
-			);
-			$template = EE_WPUSERS_TEMPLATE_PATH . 'event_tickets_datetime_ticket_row_metadata.template.php';
-			EEH_Template::locate_template($template, $template_args, TRUE, FALSE);
+
+
+
+	/**
+	 * Callback for AHEE__event_tickets_datetime_ticket_row_template__advanced_details_end.
+	 * This is used to add the form to the tickets for the capabilities.
+	 *
+	 * @since 1.0.0
+	 * @param string|int $tkt_row This will either be the ticket row number for an existing ticket or
+	 *                                             'TICKETNUM' for ticket skeleton.
+	 * @param int $TKT_ID          The id for a Ticket or 0 (which is not for any ticket)
+	 *
+	 * @return string form for capabilities required.
+	 */
+	public static function insert_ticket_meta_interface($tkt_row, $TKT_ID) {
+		//build our form and print.
+		echo self::_get_ticket_capability_required_form( $tkt_row, $TKT_ID )->get_html_and_js();
+	}
+
+
+
+
+	/**
+	 * Form generator for capability field on tickets.
+	 *
+	 * @since 1.0.0
+	 * @see EED_WP_Users_Admin::insert_ticket_meta_interface for params documentation
+	 *
+	 * @return string
+	 */
+	protected static function _get_ticket_capability_required_form( $tkt_row, $TKT_ID ) {
+		$ticket = EE_Registry::instance()->load_model('Ticket')->get_one_by_ID( $TKT_ID );
+		$current_cap = $ticket instanceof EE_Ticket ? $ticket->get_extra_meta( 'ee_ticket_cap_required', true, '' ) : '';
+
+		EE_Registry::instance()->load_helper( 'HTML' );
+
+		return new EE_Form_Section_Proper(
+			array(
+				'name' => 'wp-user-ticket-capability-container-' . $tkt_row,
+				'html_class' => 'wp-user-ticket-capability-container',
+				'layout_strategy' => new EE_Div_Per_Section_Layout(),
+				'subsections' => apply_filters( 'FHEE__EED_WP_Users_Admin___get_ticket_capability_required_form__form_subsections',
+					array(
+						'ticket_capability_hdr-' . $tkt_row => new EE_Form_Section_HTML( EEH_HTML::h5( __( 'Ticket Capability Requirement', 'event_espresso' ). EEH_Template::get_help_tab_link( 'ticket_capability_info' ), '', 'tickets-heading' )),
+						'TKT_capability' => new EE_Text_Input(
+							array(
+								'html_class' => 'TKT-capability',
+								'html_name' => 'wp_user_ticket_capability_input[' . $tkt_row . '][TKT_capability]',
+								'html_label_text' => __('WP User Capability required for purchasing this ticket:', 'event_espresso'),
+								'default' => $current_cap,
+								'display_html_label_text' => true
+								)
+							)
+						) // end EE_Form_Section_Proper subsections
+					) // end subsections apply_filters
+				) //end  main EE_Form_Section_Proper options array
+			); //end EE_Form_Section_Proper
+	}
+
+
+
+
+
+
+	/**
+	 * Callback for AHEE__espresso_events_Pricing_Hooks___update_tkts_new_ticket and
+	 * AHEE__espresso_events_Pricing_Hooks___update_tkts_update_ticket.
+	 * Used to hook into ticket saves so that we update any capability requirement set for a ticket.
+	 *
+	 * @param EE_Ticket $tkt
+	 * @param int         $tkt_row       The ticket row this ticket corresponds with (used for knowing
+	 *                                   	   what form element to retrieve from).
+	 * @param array    $tkt_form_data The original incoming ticket form data.
+	 * @param array    $all_form_data All incoming form data for ticket editor (includes datetime data)
+	 *
+	 * @return void      This is an action callback so returns are ignored.
+	 */
+	public static function update_capability_on_ticket( EE_Ticket $tkt, $tkt_row, $tkt_form_data, $all_form_data ) {
+		try {
+			$form = self::_get_ticket_capability_required_form($tkt_row, $tkt->ID());
+			if ( $form->was_submitted() ) {
+				$form->receive_form_submission();
+				if ( $form->is_valid() ) {
+					$valid_data = $form->valid_data();
+					$tkt->update_extra_meta( 'ee_ticket_cap_required', $valid_data['TKT_capability'] );
+				}
+			}
+		} catch ( EE_Error $e ) {
+			$e->get_error();
 		}
 	}
 

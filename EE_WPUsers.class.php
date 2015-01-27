@@ -1,9 +1,12 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) )
-	exit( 'No direct script access allowed' );
+if (!defined('ABSPATH'))
+	exit('No direct script access allowed');
 
-define( 'EE_WPUSERS_BASENAME', plugin_basename( EE_WPUSERS_PLUGIN_FILE ));
+//define constants
+define( 'EE_WPUSERS_PATH', plugin_dir_path( __FILE__ ) );
+define( 'EE_WPUSERS_URL', plugin_dir_url( __FILE__ ) );
+define( 'EE_WPUSERS_TEMPLATE_PATH', EE_WPUSERS_PATH . 'templates/' );
 
 /**
  * Class definition for the EE_WPUsers object
@@ -13,10 +16,6 @@ define( 'EE_WPUSERS_BASENAME', plugin_basename( EE_WPUSERS_PLUGIN_FILE ));
  */
 class EE_WPUsers extends EE_Addon {
 
-
-
-
-
 	/**
 	 * Set up
 	 */
@@ -24,124 +23,174 @@ class EE_WPUsers extends EE_Addon {
 		// register addon via Plugin API
 		EE_Register_Addon::register(
 				'EE_WPUsers', array(
-			'version' => EE_WPUSERS_VERSION,
-			'min_core_version' => '4.3.0',
-			'main_file_path' => EE_WPUSERS_PLUGIN_FILE,
-			// if plugin update engine is being used for auto-updates. not needed if PUE is not being used.
-			'pue_options' => array(
-				'pue_plugin_slug' => 'eea-wpuser-integration',
-				'plugin_basename' => EE_WPUSERS_BASENAME,
-				'checkPeriod' => '24',
-				'use_wp_update' => FALSE
-			)
+				'version' => EE_WPUSERS_VERSION,
+				'min_core_version' => '4.6.0.alpha',
+				'main_file_path' => EE_WPUSERS_PLUGIN_FILE,
+				'config_class' => 'EE_WPUsers_Config',
+				'config_name' => 'user_integration',
+				'module_paths' => array(
+					EE_WPUSERS_PATH . 'EED_WP_Users_SPCO.module.php',
+					EE_WPUSERS_PATH . 'EED_WP_Users_Admin.module.php',
+					EE_WPUSERS_PATH . 'EED_WP_Users_Ticket_Selector.module.php'
+				 ),
+				'autoloader_paths' => array(
+					'EE_WPUsers_Config' => EE_WPUSERS_PATH . 'EE_WPUsers_Config.php',
+					'EE_SPCO_Reg_Step_WP_User_Login' => EE_WPUSERS_PATH . 'EE_SPCO_Reg_Step_WP_User_Login.class.php'
+					),
+				// if plugin update engine is being used for auto-updates. not needed if PUE is not being used.
+				'pue_options' => array(
+					'pue_plugin_slug' => 'eea-wpuser-integration',
+					'checkPeriod' => '24',
+					'use_wp_update' => FALSE
 				)
+			)
 		);
-
-		add_filter( 'FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value', array( 'EE_WPUsers', 'filterAnswerForWPUser' ), 10, 3 );
-		add_action( 'AHEE__EE_Single_Page_Checkout__process_attendee_information__end', array( 'EE_WPUsers', 'actionAddAttendeeAsWPUser' ), 10, 2 );
-
 	}
 
+
+	/**
+	 * other helper methods
+	 */
+
+
+	/**
+	 * Used to get a user id for a given EE_Attendee id.
+	 * If none found then null is returned.
+	 *
+	 * @param int     $att_id The attendee id to find a user match with.
+	 *
+	 * @return int|null     $user_id if found otherwise null.
+	 */
+	public static function get_attendee_user( $att_id ) {
+		global $wpdb;
+		$query = "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = 'EE_Attendee_ID' AND meta_value = '%d'";
+		$user_id = $wpdb->get_var( $wpdb->prepare( $query, (int) $att_id ) );
+		return $user_id ? (int) $user_id : NULL;
+	}
 
 
 
 
 	/**
-	 * Added to filter that processes the return to the registration form of whether and answer to the question exists for that
-	 * @param type $value
-	 * @param type $registration
-	 * @param type $question_id
-	 * @return type
+	 * used to determine if forced login is turned on for the event or not.
+	 *
+	 * @param int|EE_Event $event Either event_id or EE_Event object.
+	 *
+	 * @return bool   true YES forced login turned on false NO forced login turned off.
 	 */
-	public static function filterAnswerForWPUser( $value, $registration, $question_id ) {
-		if ( empty( $value ) ) {
-			$current_user = wp_get_current_user();
+	public static function is_event_force_login( $event ) {
+		return self::_get_wp_user_event_setting( 'force_login', $event );
+	}
 
-			if ( $current_user instanceof WP_User ) {
-				switch ( $question_id ) {
 
-					case 1:
-						$value = $current_user->get( 'first_name' );
-						break;
 
-					case 2:
-						$value = $current_user->get( 'last_name' );
-						break;
+	public static function is_auto_user_create_on( $event ) {
+		return self::_get_wp_user_event_setting( 'auto_create_user', $event );
+	}
 
-					case 3:
-						$value = $current_user->get( 'user_email' );
-						break;
 
-					default:
-				}
-			}
+	public static function default_user_create_role( $event ) {
+		return self::_get_wp_user_event_setting( 'default_wp_user_role', $event );
+	}
+
+
+
+	/**
+	 * This retrieves the specific wp_user setting for an event as indicated by key.
+	 *
+	 * @param string $key   What setting are we retrieving
+	 * @param int|EE_Event EE_Event  or event id
+	 *
+	 * @return mixed Whatever the value for the key is or what is set as the global default if it doesn't
+	 * exist.
+	 */
+	protected static function _get_wp_user_event_setting( $key, $event ) {
+		//any global defaults?
+		$config = isset( EE_Registry::instance()->CFG->addons->user_integration ) ? EE_Registry::instance()->CFG->addons->user_integration : false;
+		$global_default = array(
+			'force_login' => $config && isset( $config->force_login ) ? $config->force_login : false,
+			'auto_create_user' => $config && isset( $config->auto_create_user ) ? $config->auto_create_user : false,
+			'default_wp_user_role' => $config && isset( $config->default_wp_user_role ) ? $config->default_wp_user_role : 'subscriber'
+			);
+
+
+		$event = $event instanceof EE_Event ? $event : EE_Registry::instance()->load_model( 'Event' )->get_one_by_ID( (int) $event );
+		$settings = $event instanceof EE_Event ? $event->get_post_meta( 'ee_wpuser_integration_settings', true ) : array();
+		if ( ! empty( $settings ) ) {
+			$value =  isset( $settings[$key] ) ? $settings[$key] : $global_default[$key];
+
+			//since post_meta *might* return an empty string.  If the default global value is boolean, then let's make sure we cast the value returned from the post_meta as boolean in case its an empty string.
+			return is_bool( $global_default[$key] ) ? (bool) $value : $value;
 		}
-		return $value;
+		return $global_default[$key];
+	}
 
+
+	/**
+	 * used to update the force login setting for an event.
+	 *
+	 * @param int|EE_Event $event Either the EE_Event object or int.
+	 * @param bool $force_login value.  If turning off you can just not send.
+	 *
+	 * @throws EE_Error (via downstream activity)
+	 * @return mixed Returns meta_id if the meta doesn't exist, otherwise returns true on success
+	 *                          and false on failure. NOTE: If the meta_value passed to this function is the
+	 *                          same as the value that is already in the database, this function returns false.
+	 */
+	public static function update_event_force_login( $event, $force_login = false ) {
+		return self::_update_wp_user_event_setting( 'force_login', $event, $force_login );
 	}
 
 
 
 
-
-	public static function actionAddAttendeeAsWPUser( $ee_Single_Page_Checkout, $valid_data ) {
-		foreach ( $valid_data as $registrant ) {
-			// Try to find a pre-existing attendee. If SPCO gave us access to the registration object, wouldn't have to do this step.
-			$attendee = EEM_Attendee::instance()->get_attendee( array(
-				'ATT_fname' => $registrant[ 'fname' ],
-				'ATT_lname' => $registrant[ 'lname' ],
-				'ATT_email' => $registrant[ 'email' ]
-			) );
-
-
-			if ( $attendee instanceof EE_Attendee ) { // should always be a match, since SPCO just finished putting the attendee in the DB
-				// Try to find an existing WP user matching the Attendee. Just match by email, since that should be unique in WP land.
-				$user = get_user_by( 'email', $registrant[ 'email' ] );
-				if ( $user != FALSE ) { // if there is a pre-existing attendee-wpuser connection, should always be 1-1, but update just to make sure and cause it's the same number of lines of code to test as to push the value onto a wp user that didn't have a attendee associated with it.
-					update_user_meta( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
-				} else { // no pre-existing wp-user, create one
-					// Generate the password and create the user
-					$password = wp_generate_password( 12, false );
-					$user_id = wp_create_user( apply_filters( 'FHEE__EE_WPUsers__actionAddAttendeeAsWPUser__username', $registrant[ 'email' ], $registrant ), $password, $registrant[ 'email' ] );
-
-					if ( $user_id instanceof WP_Error ) {
-						// @todo something went boom! put in some error handling
-					} else { // user was added, fill in the details
-						// Set the users details
-						//Additional fields can be found here: http://codex.wordpress.org/Function_Reference/wp_update_user
-						wp_update_user(
-								array(
-									'ID' => $user_id,
-									'nickname' => $registrant[ 'fname' ] . ' ' . $registrant[ 'lname' ],
-									'display_name' => $registrant[ 'fname' ] . ' ' . $registrant[ 'lname' ],
-									'first_name' => $registrant[ 'fname' ],
-									'last_name' => $registrant[ 'lname' ],
-									'description' => __( 'Registered via event registration form.', 'event_espresso' ),
-								)
-						);
-
-						// Set the role
-						$user = new WP_User( $user_id );
-						$user->set_role( 'subscriber' );
-
-						// Email the user
-						wp_mail( $registrant[ 'email' ], 'Welcome to ' . EE_Config::instance()->get_config_option( 'name' ), 'Your Username: ' . apply_filters( 'FHEE__WPUsers_create_wp_username', $registrant[ 'email' ], $registrant ) . ' Your Password: ' . $password );
-						update_user_meta( $user_id, 'EE_Attendee_ID', $attendee->ID() );
-					} // end of filling in the details
-				} // end of wp-user creation
-			} else {  // SOL?
-			} // end of test to make sure is attendee
-		} // end of loop over attendees
-
+	/**
+	 * used to update the auto create user setting for an event.
+	 *
+	 * @param int|EE_Event $event Either the EE_Event object or int.
+	 * @param bool $auto_create value.  If turning off you can just not send.
+	 *
+	 * @throws EE_Error (via downstream activity)
+	 * @return mixed Returns meta_id if the meta doesn't exist, otherwise returns true on success
+	 *                          and false on failure. NOTE: If the meta_value passed to this function is the
+	 *                          same as the value that is already in the database, this function returns false.
+	 */
+	public static function update_auto_create_user( $event, $auto_create = false ) {
+		return self::_update_wp_user_event_setting( 'auto_create_user', $event, $auto_create );
 	}
 
 
 
-// end of function actionAddAttendeeAsWPUser
+
+	public static function update_default_wp_user_role( $event, $default_role = 'subscriber' ) {
+		return self::_update_wp_user_event_setting( 'default_wp_user_role', $event, $default_role );
+	}
+
+
+
+	/**
+	 * used to update the wp_user event specific settings.
+	 *
+	 * @param string $key     What setting is being updated.
+	 * @param int|EE_Event $event Either the EE_Event object or id.
+	 * @param mixed $value The value being updated.
+	 *
+	 * @return mixed Returns meta_id if the meta doesn't exist, otherwise returns true on success
+	 *                          and false on failure. NOTE: If the meta_value passed to this function is the
+	 *                          same as the value that is already in the database, this function returns false.
+	 */
+	protected static function _update_wp_user_event_setting( $key, $event, $value ) {
+		$event = $event instanceof EE_Event ? $event : EE_Registry::instance()->load_model( 'Event' )->get_one_by_ID( (int) $event );
+
+		if ( ! $event instanceof EE_Event ) {
+			return false;
+		}
+		$settings = $event->get_post_meta( 'ee_wpuser_integration_settings', true );
+		$settings = empty( $settings ) ? array() : $settings;
+		$settings[$key] = $value;
+		return $event->update_post_meta( 'ee_wpuser_integration_settings', $settings );
+	}
 
 }
-
-
-
 
 // end of class EE_WPUsers

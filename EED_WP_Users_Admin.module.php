@@ -45,7 +45,7 @@ class EED_WP_Users_Admin  extends EED_Module {
 		add_action( 'add_meta_boxes', array( 'EED_WP_Users_Admin', 'add_metaboxes' ) );
 		add_filter( 'FHEE__Events_Admin_Page___insert_update_cpt_item__event_update_callbacks', array( 'EED_WP_Users_Admin', 'set_callback_save_wp_user_event_setting' ), 10, 2 );
 		//other admin side hooks
-		//add_action('AHEE__event_tickets_datetime_ticket_row_template_before_close', array('EED_WP_Users_Admin', 'insert_ticket_meta_interface'), 10, 1);
+		add_action('AHEE__event_tickets_datetime_ticket_row_template__advanced_details_end', array('EED_WP_Users_Admin', 'insert_ticket_meta_interface'), 10, 2);
 	}
 	public static function enqueue_scripts_styles() {}
 	public function run( $WP ) {}
@@ -645,17 +645,60 @@ class EED_WP_Users_Admin  extends EED_Module {
 
 
 
-	public static function insert_ticket_meta_interface($TKT_ID) {
-		$Ticket_model = EEM_Ticket::instance();
-		$ticket = $Ticket_model->get_one_by_ID($TKT_ID);
-		if ($ticket instanceof EE_Ticket) {
-			$template_args = array(
-				'TKT_WPU_meta' => $ticket->get_extra_meta('TKT_WPU_meta', TRUE),
-				'ticket_meta_help_link' => ''
-			);
-			$template = EE_WPUSERS_TEMPLATE_PATH . 'event_tickets_datetime_ticket_row_metadata.template.php';
-			EEH_Template::locate_template($template, $template_args, TRUE, FALSE);
-		}
+
+
+
+	/**
+	 * Callback for AHEE__event_tickets_datetime_ticket_row_template__advanced_details_end.
+	 * This is used to add the form to the tickets for the capabilities.
+	 *
+	 * @since 1.0.0
+	 * @param string|int $tkt_row This will either be the ticket row number for an existing ticket or
+	 *                                             'TICKETNUM' for ticket skeleton.
+	 * @param int $TKT_ID          The id for a Ticket or 0 (which is not for any ticket)
+	 *
+	 * @return string form for capabilities required.
+	 */
+	public static function insert_ticket_meta_interface($tkt_row, $TKT_ID) {
+		//build our form and print.
+		echo self::_get_ticket_capability_required_form( $tkt_row, $TKT_ID )->get_html_and_js();
+	}
+
+
+
+
+	/**
+	 * Form generator for capability field on tickets.
+	 *
+	 * @since 1.0.0
+	 * @see EED_WP_Users_Admin::insert_ticket_meta_interface for params documentation
+	 *
+	 * @return string
+	 */
+	protected static function _get_ticket_capability_required_form( $tkt_row, $TKT_ID ) {
+		$ticket = EE_Registry::instance()->load_model('Ticket')->get_one_by_ID( $TKT_ID );
+		$current_cap = $ticket instanceof EE_Ticket ? $ticket->get_extra_meta( 'ee_ticket_cap_required', true, '' ) : '';
+
+		return new EE_Form_Section_Proper(
+			array(
+				'html_id' => 'wp-user-ticket-capability-container-' . $tkt_row,
+				'html_class' => 'wp-user-ticket-capability-container',
+				'layout_strategy' => new EE_Div_Per_Section_Layout(),
+				'subsections' => apply_filters( 'FHEE__EED_WP_Users_Admin___get_ticket_capability_required_form__form_subsections',
+					array(
+						'TKT_capability' => new EE_Text_Input(
+							array(
+								'html_class' => 'TKT-capability',
+								'html_name' => 'wp_user_ticket_capability_input[' . $tkt_row . '][TKT_capability]',
+								'html_label_text' => __('WP User Capability required for purchasing this ticket:', 'event_espresso'),
+								'default' => $current_cap,
+								'display_html_label_text' => true
+								)
+							)
+						) // end EE_Form_Section_Proper subsections
+					) // end subsections apply_filters
+				) //end  main EE_Form_Section_Proper options array
+			); //end EE_Form_Section_Proper
 	}
 
 

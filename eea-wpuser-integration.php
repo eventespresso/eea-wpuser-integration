@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) )
   Plugin Name: 	Event Espresso - WP Users (EE4.6+)
   Plugin URI: 	http://www.eventespresso.com
   Description: 	This adds the WP users integration.
-  Version: 	1.0.0.rc.003
+  Version: 	1.0.0.rc.004
   Author: 	Event Espresso
   Author URI: 	http://www.eventespresso.com
   License: 	GPLv2
@@ -35,7 +35,7 @@ if ( ! defined( 'ABSPATH' ) )
  * @package 	EE WPUsers
  *
  */
-define( 'EE_WPUSERS_VERSION', '1.0.0.rc.003' );
+define( 'EE_WPUSERS_VERSION', '1.0.0.rc.004' );
 define( 'EE_WPUSERS_PLUGIN_FILE', __FILE__ );
 
 

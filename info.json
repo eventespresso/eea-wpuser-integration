@@ -14,5 +14,7 @@
 	],
 	"github" : true,
 	"awsbucket" : "",
-	"awsregion" : ""
+	"awsregion" : "",
+	"srcBuildFolderName" : "eea-wpuser-integration",
+	"textDomain" : "event_espresso"
 }

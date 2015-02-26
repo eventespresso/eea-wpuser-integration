@@ -48,7 +48,7 @@ class EE_WPUsers_Config extends EE_Config_Base {
 	 * @since 1.0.0
 	 * @var string
 	 */
-	public $default_wp_role;
+	public $default_wp_user_role;
 
 
 	/**
@@ -58,7 +58,7 @@ class EE_WPUsers_Config extends EE_Config_Base {
 	public function __construct() {
 		$this->force_login = false;
 		$this->auto_create_user = false;
-		$this->default_wp_role = 'subscriber';
+		$this->default_wp_user_role = 'subscriber';
 	}
 
 } //end EE_WPUsers_Config

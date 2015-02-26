@@ -436,7 +436,7 @@ class EED_WP_Users_Admin  extends EED_Module {
 							array(
 								'html_label_text' => __( 'Default role for User Creation on Registration.', 'event_espresso' ),
 								'html_help_text' => __( 'On new events, when User creation is set to yes, this setting indicates what the default role for new users will be on creation. You can still override this on each event.', 'event_espresso' ),
-								'default' => isset( EE_Registry::instance()->CFG->addons->user_integration->default_wp_role ) ? EE_Registry::instance()->CFG->addons->user_integration->default_wp_role : 'subscriber',
+								'default' => isset( EE_Registry::instance()->CFG->addons->user_integration->default_wp_user_role ) ? EE_Registry::instance()->CFG->addons->user_integration->default_wp_user_role : 'subscriber',
 								'display_html_label_text' => false
 								)
 							)
@@ -469,6 +469,8 @@ class EED_WP_Users_Admin  extends EED_Module {
 				if ( $form->is_valid() ) {
 					$valid_data = $form->valid_data();
 					$config->force_login = $valid_data['main_settings']['force_login'];
+					$config->auto_create_user = $valid_data['main_settings']['auto_create_user'];
+					$config->default_wp_user_role = $valid_data['main_settings']['default_wp_user_role'];
 				}
 			} else {
 				if ( $form->submission_error_message() != '' ) {

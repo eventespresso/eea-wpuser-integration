@@ -270,7 +270,7 @@ class EED_WP_Users_Admin  extends EED_Module {
 		//no attached EE_Attendee. Is there an existing attendee that matches this user's details?
 		$att = self::_find_existing_attendee_from_wpuser( $user );
 		if ( $att instanceof EE_Attendee ) {
-			update_user_meta( $user->ID, 'EE_Attendee_ID', $existing_attendee->ID() );
+			update_user_meta( $user->ID, 'EE_Attendee_ID', $att->ID() );
 		} else {
 			$att = self::_create_attendee_and_attach_wpuser( $user );
 		}

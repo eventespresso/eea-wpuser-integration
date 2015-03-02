@@ -1,6 +1,6 @@
 {
 	"versionFile" : "eea-wpuser-integration.php",
-	"slug" : "eea-wpuser-integration",
+	"slug" : "eea-wp-user-integration",
 	"name" : "EE4 WPuser Integration",
 	"archiveBaseUrl" : "http://build.eventespresso.com/",
 	"archiveBasePath" : "~/www/build/",

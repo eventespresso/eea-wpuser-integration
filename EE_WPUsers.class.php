@@ -39,7 +39,7 @@ class EE_WPUsers extends EE_Addon {
 					),
 				// if plugin update engine is being used for auto-updates. not needed if PUE is not being used.
 				'pue_options' => array(
-					'pue_plugin_slug' => 'eea-wpuser-integration',
+					'pue_plugin_slug' => 'eea-wp-user-integration',
 					'checkPeriod' => '24',
 					'use_wp_update' => FALSE
 				)

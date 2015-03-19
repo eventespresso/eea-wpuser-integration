@@ -185,11 +185,11 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		}
 		$identifier = 'sync_with_user_profile';
 		$input_constructor_args = array(
-			'html_name' => 'ee_reg_qstn[' . $registration->reg_url_link() . '][' . $identifier .']',
-			'html_id' => 'ee_reg_qstn-' . $registration->reg_url_link() . '-' . $identifier,
+			'html_name' => 'ee_reg_qstn[' . $registration->ID() . '][' . $identifier .']',
+			'html_id' => 'ee_reg_qstn-' . $registration->ID() . '-' . $identifier,
 			'html_class' => 'ee-reg-qstn',
 			'required' => TRUE,
-			'html_label_id' => 'ee_reg_qstn-' . $registration->reg_url_link() . '-' . $identifier,
+			'html_label_id' => 'ee_reg_qstn-' . $registration->ID() . '-' . $identifier,
 			'html_label_class' => 'ee-reg-qstn',
 			'html_label_text' => __( 'Sync changes with your user profile?', 'event_espresso' ),
 			'default' => TRUE
@@ -320,7 +320,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 								} else {
 									$error_message = '<p>' . __('You have entered an email address that matches an existing user account in our system.  You can only submit registrations for your own account or for a person that does not exist in the system.  Please use a different email address.', 'event_espresso' ) . '</p>';
 									$stop_processing = TRUE;
-									$field_input_error[] = 'ee_reg_qstn-' . $reg_url_link . '-email';
+									$field_input_error[] = 'ee_reg_qstn-' . $registration->ID() . '-email';
 								}
 							} else {
 								//user is NOT logged in, so let's prompt them to log in.
@@ -335,7 +335,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 								 */
 								$error_message .= '<a class="ee-roundish ee-orange ee-button float-right ee-wpuser-login-button" href="' . wp_login_url( $spco->checkout->redirect_url ) . '">' . __('Login', 'event_espresso') . '</a>';
 								$stop_processing = TRUE;
-								$field_input_error[] = 'ee_reg_qstn-' . $reg_url_link . '-email';
+								$field_input_error[] = 'ee_reg_qstn-' . $registration->ID() . '-email';
 							}
 						}
 					}

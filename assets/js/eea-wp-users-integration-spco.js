@@ -21,6 +21,8 @@ jQuery(document).ready( function($) {
 			ajaxData: {}
 		},
 
+		submitListenerSet : false,
+
 		processResponse : function( response ) {
 			//make sure we ALWAYS clear the WPUSPCO notices.
 			this.clearNotices();
@@ -88,13 +90,23 @@ jQuery(document).ready( function($) {
 			this.params.loginForm = $('#ee-login-form-container').clone().html();
 			this.showDialog( this.params.loginForm, 'attention' );
 			position_dialog(4);
+			this.setSubmitListener();
+			return;
+		},
+
+
+
+		setSubmitListener : function() {
+			if ( this.submitListenerSet ) {
+				return;
+			}
 			//add listener for login submit
 			dialogHelper.dialogContentContainer.on('submit', '.ee-login-form', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
 				WPUSPCO.processLogin();
 			});
-			return;
+			this.submitListenerSet = true;
 		},
 
 

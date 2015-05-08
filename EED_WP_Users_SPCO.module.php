@@ -40,7 +40,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		 * 	- If users answer no, then what happens?  The existing EE_Attendee record (if
 		 * 	any) would have to be left alone, the existing wp user record would be left alone.
 		 * 	However, we would not be able to attached the new attendee record to the user
-		 * 	profile because only ONE should really be attached (otherwise how woudl autofill
+		 * 	profile because only ONE should really be attached (otherwise how would autofill
 		 * 	of forms work?).  So perhaps what we'd do when "no" is answered is a new
 		 * 	attendee record is created but just not attached to the user id?  That means there
 		 * 	would be no record of attendee or registration on that user profile (which might be
@@ -334,6 +334,10 @@ class EED_WP_Users_SPCO  extends EED_Module {
 								 * browsers will just stay on the loaded page.
 								 */
 								$error_message .= '<a class="ee-roundish ee-orange ee-button float-right ee-wpuser-login-button" href="' . wp_login_url( $spco->checkout->redirect_url ) . '">' . __('Login', 'event_espresso') . '</a>';
+								if ( get_option( 'users_can_register' ) ) {
+									$registration_url = ! EE_Registry::instance()->CFG->addons->user_integration->registration_page ? wp_registration_url() : EE_Registry::instance()->CFG->addons->user_integration->registration_page;
+									$error_message .= '<a class="ee-wpuser-register-link float-right" href="' . $registration_url . '">' . __( 'Register', 'event_espresso' ) . '</a>';
+								}
 								$stop_processing = TRUE;
 								$field_input_error[] = 'ee_reg_qstn-' . $registration->ID() . '-email';
 							}

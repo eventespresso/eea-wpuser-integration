@@ -407,6 +407,8 @@ class EED_WP_Users_Admin  extends EED_Module {
 	protected static function _main_settings() {
 		global $wp_roles;
 
+		$registration_turned_off_msg = get_option( 'users_can_register' ) ? '' : '<br><div class="error inline"><p></p>' . sprintf( __( 'Registration is currently turned off for your site, so the registration link will not show.  If you want the registration link to show please %sgo here%s to turn it on.', 'event_espresso' ), '<a href="' . admin_url( 'options-general.php' ) . '">', '</a>' ) . '</p></div>';
+
 		return new EE_Form_Section_Proper(
 			array(
 				'name' => 'wp_user_settings_tbl',
@@ -423,6 +425,14 @@ class EED_WP_Users_Admin  extends EED_Module {
 								'display_html_label_text' => false
 								)
 							),
+						'registration_page' => new EE_Text_Input(
+							array(
+								'html_label_text' => __( 'Registration Page URL (if different from default WordPress Registration)', 'event_espresso' ),
+								'html_help_text' => __( 'When login is required on an event, this will be the url used for the registration link on the login form', 'event_espresso' ) . $registration_turned_off_msg,
+								'default' => isset( EE_Registry::instance()->CFG->addons->user_integration->registration_page ) ? EE_Registry::instance()->CFG->addons->user_integration->registration_page : '',
+								'display_html_label_text' => true
+							)
+						),
 						'auto_create_user' => new EE_Yes_No_Input(
 							array(
 								'html_label_text' => __( 'Default setting for User Creation on Registration.', 'event_espresso' ),
@@ -469,6 +479,7 @@ class EED_WP_Users_Admin  extends EED_Module {
 				if ( $form->is_valid() ) {
 					$valid_data = $form->valid_data();
 					$config->force_login = $valid_data['main_settings']['force_login'];
+					$config->registration_page = $valid_data['main_settings']['registration_page'];
 					$config->auto_create_user = $valid_data['main_settings']['auto_create_user'];
 					$config->default_wp_user_role = $valid_data['main_settings']['default_wp_user_role'];
 				}

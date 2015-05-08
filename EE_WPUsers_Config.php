@@ -28,6 +28,15 @@ class EE_WPUsers_Config extends EE_Config_Base {
 	public $force_login;
 
 
+	/**
+	 * Global setting for what gets used for the registration page url.
+	 *
+	 * @since 1.1.3
+	 * @var
+	 */
+	public $registration_page;
+
+
 
 	/**
 	 * Global default setting for whether a new wp_user is created on frontend when a registration has
@@ -57,6 +66,7 @@ class EE_WPUsers_Config extends EE_Config_Base {
 	 */
 	public function __construct() {
 		$this->force_login = false;
+		$this->registration_page = '';
 		$this->auto_create_user = false;
 		$this->default_wp_user_role = 'subscriber';
 	}

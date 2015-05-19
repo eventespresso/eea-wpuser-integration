@@ -24,12 +24,16 @@ class EED_WP_Users_Admin  extends EED_Module {
 
 	public static function set_hooks() {}
 	public static function set_hooks_admin() {
+		add_action( 'admin_enqueue_scripts', array( 'EED_WP_Users_Admin', 'admin_enqueue_scripts_styles' ) );
+
 		//hook into EE contact publish metabox.
 		add_action( 'post_submitbox_misc_actions', array( 'EED_WP_Users_Admin', 'add_link_to_wp_user_account' ) );
 
 		//hook into wp users
 		add_action( 'edit_user_profile', array( 'EED_WP_Users_Admin', 'add_link_to_ee_contact_details') );
 		add_action( 'show_user_profile', array( 'EED_WP_Users_Admin', 'add_link_to_ee_contact_details' ) );
+		add_action( 'edit_user_profile', array( 'EED_WP_Users_Admin', 'view_registrations_for_contact' ) );
+		add_action( 'show_user_profile', array( 'EED_WP_Users_Admin', 'view_registrations_for_contact' ) );
 		add_action( 'profile_update', array( 'EED_WP_Users_Admin', 'sync_with_contact' ), 10, 2 );
 		add_action( 'user_register', array( 'EED_WP_Users_Admin', 'sync_with_contact') );
 
@@ -53,7 +57,15 @@ class EED_WP_Users_Admin  extends EED_Module {
 	}
 
 
-	public static function enqueue_scripts_styles() {}
+	public static function admin_enqueue_scripts_styles() {
+		if ( get_current_screen()->base == 'profile' || get_current_screen()->base == 'user-edit') {
+			wp_register_style('ee-admin-css', EE_ADMIN_URL . 'assets/ee-admin-page.css', array(), EVENT_ESPRESSO_VERSION);
+			wp_register_style('espresso_att', REG_ASSETS_URL . 'espresso_attendees_admin.css', array('ee-admin-css'), EVENT_ESPRESSO_VERSION );
+			wp_enqueue_style('espresso_att');
+		}
+	}
+
+
 	public function run( $WP ) {}
 
 
@@ -115,6 +127,41 @@ class EED_WP_Users_Admin  extends EED_Module {
 			<a href="<?php echo $url; ?>" title="<?php _e('Click to view WordPress user profile', 'event_espresso'); ?>"><?php _e('WordPress User Profile', 'event_espresso'); ?></a>
 		</div>
 		<?php
+	}
+
+
+	/**
+	 * callback for edit_user_profile that is used to display a table of all the registrations this
+	 * user is connected with.
+	 *
+	 * @param WP_User $user
+	 * @return string
+	 */
+	public static function view_registrations_for_contact( $user ) {
+		if ( ! $user instanceof WP_User ) {
+			return '';
+		}
+
+		//is there an attadched EE_Attendee?
+		$att_id = get_user_meta( $user->ID, 'EE_Attendee_ID', true );
+
+		if ( empty( $att_id ) ) {
+			return; //bail, no attached attendee_id.
+		}
+
+		//grab contact
+		$contact = EEM_Attendee::instance()->get_one_by_ID( $att_id );
+
+		//if no contact then bail
+		if ( ! $contact instanceof EE_Attendee ) {
+			return;
+		}
+
+		$template_args = array(
+			'attendee' => $contact,
+			'registrations' => $contact->get_many_related( 'Registration' )
+		);
+		EEH_Template::display_template( EE_WPUSERS_TEMPLATE_PATH . 'eea-wp-users-registrations-table.template.php', $template_args  );
 	}
 
 

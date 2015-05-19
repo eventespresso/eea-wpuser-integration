@@ -231,12 +231,17 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	/**
 	 * Added to filter that processes the return to the registration form of whether and answer to the question exists for that
 	 * @param type $value
-	 * @param type $registration
+	 * @param EE_Registration $registration
 	 * @param type $question_id
 	 * @return type
 	 */
-	public static function filter_answer_for_wpuser($value, $registration, $question_id) {
-		if (empty($value)) {
+	public static function filter_answer_for_wpuser($value, EE_Registration $registration, $question_id) {
+		//only fill for primary registrant
+		if ( ! $registration->is_primary_registrant() ) {
+			return $value;
+		}
+
+		if ( empty($value) ) {
 			$current_user = wp_get_current_user();
 
 			if ($current_user instanceof WP_User) {

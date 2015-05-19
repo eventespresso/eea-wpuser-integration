@@ -72,6 +72,9 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 		//hook into spco for adding additional reg step
 		add_filter( 'AHEE__SPCO__load_reg_steps__reg_steps_to_load', array( 'EED_WP_Users_SPCO', 'register_login_reg_step' ) );
+
+		//hook into spco reg form for additional information
+		add_action( 'AHEE__attendee_information__reg_step_start', array( 'EED_WP_Users_SPCO', 'maybe_login_notice' ), 10 );
 	}
 
 
@@ -364,6 +367,46 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		}
 
 		return $stop_processing;
+	}
+
+
+	/**
+	 * Callback for AHEE__SPCO__before_registration_steps action hook to display a login required notice if revisiting
+	 * to edit attendee information.
+	 *
+	 *
+	 * @param EE_SPCO_Reg_Step_Attendee_Information $reg_step
+	 * @return string  HTML content to show before the reg form.
+	 */
+	public static function maybe_login_notice( EE_SPCO_Reg_Step_Attendee_Information $reg_step ) {
+		$content = '';
+
+		//first if this isn't a revisit OR $reg_step is invalid then get out nothing to see here.
+		if ( ! $reg_step->checkout->revisit ) {
+			return;
+		}
+
+		//keeping the message simple for now.  If user is not logged in, and event for the displayed registration automatically
+		//creates registrations, then they must log in before editing registration.
+		$registrations = $reg_step->checkout->transaction->registrations( $reg_step->checkout->reg_cache_where_params );
+		$event_creates_user = false;
+		if ( $registrations ) {
+			foreach ( $registrations as $registration ) {
+				if ( $reg_step->checkout->visit_allows_processing_of_this_registration( $registration ) ) {
+					if ( EE_WPUsers::is_auto_user_create_on( $registration->event_ID() ) ) {
+						$event_creates_user = true;
+					}
+				}
+			}
+		}
+
+		if ( ! is_user_logged_in() && $event_creates_user ) {
+			$content = '<div class="ee-attention">';
+			$content .= '<p>' . sprintf( __( 'You are only able to edit your information once you have %slogged%s in.  If you recently registered, please check your email for your account information which will allow you to log in.', 'event_espresso' ), '<a href="' . wp_login_url() . '">', '</a>' ) . '</p>';
+			$content .= '</div>';
+		}
+
+		echo $content;
 	}
 
 

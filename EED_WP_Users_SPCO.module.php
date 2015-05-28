@@ -517,6 +517,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 					return; //get out because something went wrong with creating the user.
 				}
 				$user = new WP_User( $user_id );
+				update_user_meta( $user->ID, 'description', apply_filters( 'FHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_description_field', __( 'Registered via event registration form', 'event_espresso' ), $user, $attendee, $registration ) );
 			}
 
 			//remove our existing action for updating users via saves in the admin to prevent recursion
@@ -527,8 +528,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 					'nickname' => $attendee->fname(),
 					'display_name' => $attendee->full_name(),
 					'first_name' => $attendee->fname(),
-					'last_name' => $attendee->lname(),
-					'description' => apply_filters( 'FHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_description_field', __( 'Registered via event registration form', 'event_espresso' ), $user, $attendee, $registration )
+					'last_name' => $attendee->lname()
 					)
 				);
 

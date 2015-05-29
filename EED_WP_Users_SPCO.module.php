@@ -383,7 +383,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 		//first if this isn't a revisit OR $reg_step is invalid then get out nothing to see here.
 		if ( ! $reg_step->checkout->revisit ) {
-			return;
+			return $content;
 		}
 
 		//keeping the message simple for now.  If user is not logged in, and event for the displayed registration automatically

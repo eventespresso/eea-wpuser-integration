@@ -539,6 +539,8 @@ class EED_WP_Users_SPCO  extends EED_Module {
 				//set user role
 				$user->set_role( EE_WPUsers::default_user_create_role($event) );
 				update_user_meta( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
+			} else {
+				do_action( 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_updated', $user, $attendee, $registration );
 			}
 
 			//failsafe just in case this is a logged in user not created by this system that has never had an attendee record attached.
@@ -546,6 +548,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 			if ( empty( $att_id ) ) {
 				update_user_meta( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
 			}
+
 		} //end registrations loop
 	}
 

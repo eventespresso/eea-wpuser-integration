@@ -20,7 +20,7 @@ $pagination_html = EEH_Template::get_paging_html(
 	$page,
 	$per_page,
 	$url,
-	true,
+	false,
 	'ee_mye_page',
 	array(
 		'single' => __( 'event', 'event_espresso' ),

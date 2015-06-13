@@ -18,13 +18,19 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			return;
 		}
 
+		EE_Registry::instance()->load_core( 'Request_Handler' );
 
 		//if user is not logged in, let's redirect to wp-login.php
 		if ( ! is_user_logged_in() ) {
-			$redirect_url = esc_url( site_url( $_SERVER['REQUEST_URI'] ) );
-			wp_safe_redirect( add_query_arg( array( 'redirect_to' => $redirect_url ), site_url( '/wp-login.php?') ) );
+			$redirect_url = EES_Espresso_My_Events::get_current_page( $WP );
+			wp_safe_redirect( add_query_arg( array( 'redirect_to' => $redirect_url ), site_url( '/wp-login.php') ) );
 		} else {
 			add_action( 'wp_enqueue_scripts', array( 'EES_Espresso_My_Events', 'enqueue_styles_and_scripts' ) );
+
+			//was a resend registration confirmation in the request?
+			if ( EE_Registry::instance()->REQ->is_set( 'resend' ) ) {
+				EE_Espresso_My_Events::resend_reg_confirmation_email();
+			}
 		}
 	}
 
@@ -39,6 +45,30 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 	 */
 	public static function enqueue_styles_and_scripts() {
 
+	}
+
+
+	/**
+	 * Just a helper method for getting the url for the displayed page.
+	 * @param  WP|null $WP
+	 * @return bool|string|void
+	 */
+	public static function get_current_page( $WP  = null ) {
+		$post_id = EE_Registry::instance()->REQ->get_post_id_from_request( $WP );
+		if  ( $post_id ) {
+			$current_page = get_permalink( $post_id );
+		} else {
+			if ( empty( $WP ) || ! $WP instanceof WP ) {
+				global $wp;
+				$WP = $wp;
+			}
+			if ( $WP->request ) {
+				$current_page = site_url( $WP->request );
+			} else {
+				$current_page = esc_url( site_url( $_SERVER['REQUEST_URI'] ) );
+			}
+		}
+		return $current_page;
 	}
 
 
@@ -80,13 +110,13 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 		//set default attributes and filter
 		$default_shortcode_attributes = apply_filters( 'FHEE__EES_Espresso_My_Events__process_shortcode__default_shortcode_atts', array(
 			'template' => 'simple_list_table',
-			'your_events_title' => __( 'Your Events', 'event_espresso' ),
-			'your_tickets_title' => __( 'Your Tickets', 'event_espresso' ),
+			'your_events_title' => esc_html__( 'Your Events', 'event_espresso' ),
+			'your_tickets_title' => esc_html__( 'Your Tickets', 'event_espresso' ),
 			'per_page' => 10
 		) );
 
 		//merge with defaults
-		$attributes = array_merge( $default_shortcode_attributes, $attributes );
+		$attributes = array_merge( $default_shortcode_attributes, (array) $attributes );
 		$template_args = $this->_get_template_args( $attributes );
 
 		return EEH_Template::locate_template( $template_args['template_path'], $template_args, true, true );
@@ -170,16 +200,24 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 	 *
 	 * @param int   $att_id     This should be the ID of the EE_Attendee being queried against
 	 * @param array $template_args  The generated template args for the template.
-	 * @return EE_Base_Class[]
+	 * @return array Returns an array:
+	 *               array(
+	 *                  'objects' => array(), //an array of EE_Base_Class objects
+	 *                  'object_count' => 0, //count of all records matching query params without limits.
+	 *               );
 	 */
 	protected function _get_template_objects( $att_id, $template_args = array() ) {
+		$object_info = array(
+			'objects' => array(),
+			'object_count' => 0
+		);
 
 		//required values available?
 		if ( empty( $template_args )
 		     || empty( $template_args['object_type'] )
 			 || empty( $template_args['per_page'] )
 			 || empty( $template_args['page'] ) ) {
-			return array(); //need info yo.
+			return $object_info; //need info yo.
 		}
 
 		$offset = ( $template_args['page'] - 1 ) * $template_args['per_page'];
@@ -197,10 +235,12 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			);
 		} else {
 			//get out no valid object_types here.
-			return array();
+			return $object_info;
 		}
 
-		return EE_Registry::instance()->load_model( $template_args['object_type'] )->get_all( $query_args );
+		$object_info['objects'] = EE_Registry::instance()->load_model( $template_args['object_type'] )->get_all( $query_args );
+		$object_info['object_count'] = EE_Registry::instance()->load_model( $template_args['object_type'] )->count( array( $query_args[0] ), null, true );
+		return $object_info;
 	}
 
 
@@ -214,7 +254,19 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 	protected function _get_template_args( $attributes ) {
 		//any parameters coming from the request?
 		$per_page = (int) EE_Registry::instance()->REQ->get( 'per_page', $attributes['per_page'] );
-		$page = (int) EE_Registry::instance()->REQ->get( 'page', 1 );
+		$page = (int) EE_Registry::instance()->REQ->get( 'ee_mye_page', false );
+
+		//if $page is empty then it's likely this is being loaded outside of ajax and wp has usurped
+		//the page value for its query.  So let's see if its in the query.
+		if ( ! $page ) {
+			global $wp_query;
+			if ( $wp_query instanceof $wp_query && isset( $wp_query->query ) && isset( $wp_query->query['paged'] ) ) {
+				$page = $wp_query->query['paged'];
+			} else {
+				$page = 1;
+			}
+		}
+
 
 		$template = $attributes['template'] ? $attributes['template'] : 'simple_list_table';
 		$template_info = $this->_get_template_info( $template );
@@ -228,7 +280,8 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			'template_slug' => $template_info['template'],
 			'per_page' => $per_page,
 			'template_path' => $template_info['path'],
-			'page' => $page
+			'page' => $page,
+			'object_count' => 0
 		);
 
 		//grab any contact that is attached to this user
@@ -237,8 +290,51 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 		//if there is an attached attendee we can use that to retrieve all the related events and
 		//registrations.  Otherwise those will be left empty.
 		if ( $att_id ) {
-			$template_args['objects'] = $this->_get_template_objects( $att_id, $template_args );
+			$object_info = $this->_get_template_objects( $att_id, $template_args );
+			$template_args['objects'] = $object_info['objects'];
+			$template_args['object_count'] = $object_info['object_count'];
 		}
 		return $template_args;
 	}
+
+
+	/**
+	 * 	Resend Registration Confirmation Email.
+	 */
+	public static function resend_reg_confirmation_email() {
+		EE_Registry::instance()->load_core( 'Request_Handler' );
+		$reg_url_link = EE_Registry::instance()->REQ->get( 'token' );
+
+		// was a REG_ID passed ?
+		if ( $reg_url_link ) {
+			$registration = EE_Registry::instance()->load_model( 'Registration' )->get_one( array( array( 'REG_url_link' => $reg_url_link )));
+			if ( $registration instanceof EE_Registration ) {
+				// resend email
+				EED_Messages::process_resend( array( '_REG_ID' => $registration->ID() ));
+			} else {
+				EE_Error::add_error(
+					__( 'The Registration Confirmation email could not be sent because a valid Registration could not be retrieved from the database.', 'event_espresso' ),
+					__FILE__, __FUNCTION__, __LINE__
+				);
+			}
+		} else {
+			EE_Error::add_error(
+				__( 'The Registration Confirmation email could not be sent because a registration token is missing or invalid.', 'event_espresso' ),
+				__FILE__, __FUNCTION__, __LINE__
+			);
+		}
+		// request sent via AJAX ?
+		if ( EE_FRONT_AJAX ) {
+			echo json_encode( EE_Error::get_notices( FALSE ));
+			die();
+			// or was JS disabled ?
+		} else {
+			// save errors so that they get picked up on the next request
+			EE_Error::get_notices( TRUE, TRUE );
+			wp_safe_redirect(
+					EES_Espresso_My_Events::get_current_page()
+				);
+		}
+	}
+
 } //end EES_Espresso_My_Events

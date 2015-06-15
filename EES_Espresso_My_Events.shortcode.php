@@ -44,7 +44,8 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 	 *
 	 */
 	public static function enqueue_styles_and_scripts() {
-
+		wp_register_style( 'ees-my-events', EE_WPUSERS_URL . 'assets/css/ees-espresso-my-events.css', array( 'espresso_default' ), EVENT_ESPRESSO_VERSION );
+		wp_enqueue_style( 'ees-my-events' );
 	}
 
 

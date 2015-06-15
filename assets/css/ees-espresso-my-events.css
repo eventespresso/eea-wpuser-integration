@@ -1,0 +1,65 @@
+.espresso-my-events a .dashicons, .espresso-my-events a .ee-icon {
+    text-decoration: none;
+}
+
+.espresso-my-events .espresso-my-events-pagination-container {
+    float: right;
+}
+
+.espresso-my-events .espresso-my-events-pagination-container .disabled {
+    display: none;
+}
+
+.espresso-my-events .espresso-my-events-pagination-container .pagination-links {
+    padding: 8px;
+    background-color: #eee;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+/** status colors **/
+/**
+ * important rules are needed here to keep status strips consistent across themes
+ */
+.espresso-my-events-table tr th.ee-status-strip, .espresso-my-events-table tr td.ee-status-strip {
+    padding: 0px !important;
+    margin: 0px !important;
+    width: 4px;
+}
+
+.espresso-my-events-table tr td.ee-status-strip {
+    -webkit-box-shadow:inset 0px 0px 0px 5px;
+    -moz-box-shadow:inset 0px 0px 0px 5px;
+    box-shadow:inset 0px 0px 0px 5px;
+}
+
+/*pending payment*/
+.espresso-my-events-table tr td.reg-status-RPP {
+    color: #00B1CA;
+}
+
+/*cancelled*/
+.espresso-my-events-table tr td.reg-status-RCN {
+    color : #AC9D9C;
+}
+
+/*declined*/
+.espresso-my-events-table tr td.reg-status-RDC {
+    color : #E44064;
+}
+
+/*approved*/
+.espresso-my-events-table tr td.reg-status-RAP {
+    color : #70CC50;
+}
+
+/*not-approved*/
+.espresso-my-events-table tr td.reg-status-RNA {
+    border-left-color : #E76700;
+}
+
+/*not-approved*/
+.espresso-my-events-table tr td.reg-status-RIC {
+    border-left-color : #FCB93C;
+}

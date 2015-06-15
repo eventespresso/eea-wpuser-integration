@@ -38,10 +38,17 @@
 .espresso-my-events-table tr td.reg-status-RPP {
     color: #00B1CA;
 }
+.ee-status-RPP {
+    background-color: #00B1CA;
+}
 
 /*cancelled*/
 .espresso-my-events-table tr td.reg-status-RCN {
     color : #AC9D9C;
+}
+
+.ee-status-RCN {
+    background-color: #ac9d9c;
 }
 
 /*declined*/
@@ -49,9 +56,17 @@
     color : #E44064;
 }
 
+.ee-status-RDC {
+    background-color: #e44064;
+}
+
 /*approved*/
 .espresso-my-events-table tr td.reg-status-RAP {
     color : #70CC50;
+}
+
+.ee-status-RAP {
+    background-color: #70CC50;
 }
 
 /*not-approved*/
@@ -59,7 +74,58 @@
     border-left-color : #E76700;
 }
 
+.ee-status-RNA {
+    background-color: #E76700;
+}
+
 /*not-approved*/
 .espresso-my-events-table tr td.reg-status-RIC {
     border-left-color : #FCB93C;
+}
+
+.ee-status-RIC {
+    background-color: #FCB93C;
+}
+
+
+/* legend container  - taken from ee-admin-page.css */
+/** LIST-TABLE-LEGEND **/
+.espresso-my-events-legend-list {
+    margin-top   : 0;
+    padding      : 5px;
+    margin-right : 20px;
+    float: left;
+}
+
+.espresso-my-events-legend-list dt {
+    line-height : 25px;
+    font-weight: normal;
+}
+
+.ee-status-legend {
+    display        : inline-block;
+    width          : 18px;
+    height         : 18px;
+    vertical-align : middle;
+}
+
+.espresso-my-events-legend-container .dashicons,
+.espresso-my-events-legend-container .ee-icon {
+    font-size : 18px;
+    vertical-align: middle;
+}
+.espresso-my-events-legend-container .ee-icon-size-8 {
+    vertical-align: top;
+    margin-bottom: .5em;
+}
+
+.ee-legend-description {
+    margin-left : 10px;
+}
+
+.ee-status-legend-box {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
 }

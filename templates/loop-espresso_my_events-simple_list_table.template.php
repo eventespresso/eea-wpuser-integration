@@ -86,9 +86,12 @@ $pagination_html = EEH_Template::get_paging_html(
 			<?php endforeach; ?>
 		</tbody>
 	</table>
-	<div class="espresso-my-events-pagination-container <?php echo $template_slug;?>-pagination">
-		<?php echo $pagination_html; ?>
+	<div class="espresso-my-events-footer">
+		<div class="espresso-my-events-pagination-container <?php echo $template_slug;?>-pagination">
+			<?php echo $pagination_html; ?>
+		</div>
 		<div style="clear:both"></div>
+		<?php EEH_Template::locate_template( EE_WPUSERS_TEMPLATE_PATH . 'status-legend-espresso_my_events.template.php', array(), true, false ); ?>
 	</div>
 	<?php else : ?>
 		<div class="no-events-container">

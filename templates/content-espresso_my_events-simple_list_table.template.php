@@ -7,6 +7,7 @@
  */
 ?>
 <tr>
+	<td class="ee-status-strip reg-status-<?php echo $registration->status_ID(); ?>"></td>
 	<td>
 		<a href="<?php echo get_permalink( $registration->event_ID() ); ?>"><?php echo $registration->event_name(); ?></a>
 	</td>

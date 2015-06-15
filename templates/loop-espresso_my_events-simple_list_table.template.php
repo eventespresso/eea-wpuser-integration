@@ -34,6 +34,8 @@ $pagination_html = EEH_Template::get_paging_html(
 	<table class="espresso-my-events-table <?php echo $template_slug;?>_table">
 		<thead>
 			<tr>
+				<th scope="col" class="espresso-my-events-reg-status ee-status-strip">
+				</th>
 				<th scope="col" class="espresso-my-events-event-th">
 					<?php echo apply_filters(
 						'FHEE__loop-espresso_my_events__table_header_event',
@@ -86,6 +88,7 @@ $pagination_html = EEH_Template::get_paging_html(
 	</table>
 	<div class="espresso-my-events-pagination-container <?php echo $template_slug;?>-pagination">
 		<?php echo $pagination_html; ?>
+		<div style="clear:both"></div>
 	</div>
 	<?php else : ?>
 		<div class="no-events-container">

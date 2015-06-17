@@ -25,8 +25,9 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			$redirect_url = EES_Espresso_My_Events::get_current_page( $WP );
 			wp_safe_redirect( add_query_arg( array( 'redirect_to' => $redirect_url ), site_url( '/wp-login.php') ) );
 		} else {
-			add_action( 'wp_enqueue_scripts', array( 'EES_Espresso_My_Events', 'enqueue_styles_and_scripts' ) );
-
+			if ( ! has_action( 'wp_enqueue_scripts', array( 'EES_Espresso_My_Events', 'enqueue_styles_and_scripts' ) ) ) {
+				add_action( 'wp_enqueue_scripts', array( 'EES_Espresso_My_Events', 'enqueue_styles_and_scripts' ) );
+			}
 			//was a resend registration confirmation in the request?
 			if ( EE_Registry::instance()->REQ->is_set( 'resend' ) ) {
 				EE_Espresso_My_Events::resend_reg_confirmation_email();
@@ -44,6 +45,10 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 	 *
 	 */
 	public static function enqueue_styles_and_scripts() {
+		static $scripts_loaded = false;
+		if ( $scripts_loaded ) {
+			return;
+		}
 		wp_register_style( 'ees-my-events', EE_WPUSERS_URL . 'assets/css/ees-espresso-my-events.css', array( 'espresso_default' ), EVENT_ESPRESSO_VERSION );
 		wp_enqueue_style( 'ees-my-events' );
 	}
@@ -91,7 +96,6 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 	 * @return string
 	 */
 	public function process_shortcode( $attributes = array() ) {
-
 		//if fallback processor is running, then let's exit because this is currently unsupported
 		if ( apply_filters( 'FHEE__fallback_shortcode_processor__EES_Espresso_Events', false ) ) {
 			if ( WP_DEBUG ) {

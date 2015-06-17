@@ -27,6 +27,9 @@
 			</thead>
 			<tbody>
 			<?php foreach( $registrations as $registration ) : ?>
+				<?php
+					$final_price = method_exists( $registration, 'final_price' ) ? $registration->final_price() : $registration->price_paid();
+				?>
 				<tr>
 					<td class="jst-left">
 						<?php
@@ -53,7 +56,7 @@
 						?>
 					</td>
 					<td class="jst-left"><?php echo $registration->reg_code();?></td>
-					<td class="jst-rght"><?php echo EEH_Template::format_currency( $registration->price_paid() );?></td>
+					<td class="jst-rght"><?php echo EEH_Template::format_currency( $final_price );?></td>
 				</tr>
 			<?php endforeach; ?>
 			</tbody>

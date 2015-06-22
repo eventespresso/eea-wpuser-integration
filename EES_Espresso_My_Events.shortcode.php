@@ -18,10 +18,12 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			return;
 		}
 
-		EE_Registry::instance()->load_core( 'Request_Handler' );
+		//register our check for whether we continue loading or redirect.  Has to run on a later hook where we have access
+		//to is_singular() or is_archive().
+		add_filter( 'parse_query', array( 'EES_Espresso_My_Events', 'setup_for_load' ), 10 );
 
-		//if user is not logged in, let's redirect to wp-login.php
-		if ( ! is_user_logged_in() ) {
+		//if user is not logged in and this is a page with the shortcode on it, let's redirect to wp-login.php
+		if ( ! is_user_logged_in() && is_singular() ) {
 			$redirect_url = EES_Espresso_My_Events::get_current_page( $WP );
 			wp_safe_redirect( add_query_arg( array( 'redirect_to' => $redirect_url ), site_url( '/wp-login.php') ) );
 		} else {
@@ -32,6 +34,31 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			if ( EE_Registry::instance()->REQ->is_set( 'resend' ) ) {
 				EE_Espresso_My_Events::resend_reg_confirmation_email();
 			}
+		}
+	}
+
+
+
+	public static function setup_for_load() {
+		EE_Registry::instance()->load_core( 'Request_Handler' );
+		$load_assets = false;
+		//if user is not logged in and this is a page with the shortcode on it, let's redirect to wp-login.php
+		if ( ! is_user_logged_in() && is_singular() ) {
+			$redirect_url = EES_Espresso_My_Events::get_current_page();
+			wp_safe_redirect( add_query_arg( array( 'redirect_to' => $redirect_url ), site_url( '/wp-login.php') ) );
+			$load_assets = true;
+		} else {
+			//was a resend registration confirmation in the request?
+			if ( EE_Registry::instance()->REQ->is_set( 'resend' ) ) {
+				EE_Espresso_My_Events::resend_reg_confirmation_email();
+			}
+		}
+
+		//conditionally load assets
+		if ( $load_assets
+			&& ! has_action( 'wp_enqueue_scripts', array( 'EES_Espresso_My_Events', 'enqueue_styles_and_scripts' ) )
+		) {
+				add_action( 'wp_enqueue_scripts', array( 'EES_Espresso_My_Events', 'enqueue_styles_and_scripts' ) );
 		}
 	}
 
@@ -105,6 +132,16 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			} else {
 				return '';
 			}
+		}
+
+		//last check for whether user is logged in.  If not, then we display a link to login.
+		if ( ! is_user_logged_in() ) {
+			$redirect_url = EES_Espresso_My_Events::get_current_page();
+			return apply_filters(
+				'FHEE__Espresso_My_Events__process_shortcode__redirect_to_login_instructions',
+				'<a href="' . add_query_arg( array( 'redirect_to' => $redirect_url ), site_url( '/wp-login.php') ) . '">'
+				. esc_html__( 'Login to see your events.', 'event_espresso' ) . '</a>'
+			);
 		}
 
 		//if made it here then all assets should be loaded and we are good to go!

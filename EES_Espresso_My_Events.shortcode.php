@@ -139,7 +139,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			$redirect_url = EES_Espresso_My_Events::get_current_page();
 			return apply_filters(
 				'FHEE__Espresso_My_Events__process_shortcode__redirect_to_login_instructions',
-				'<a href="' . add_query_arg( array( 'redirect_to' => $redirect_url ), site_url( '/wp-login.php') ) . '">'
+				'<a class="ee-wpui-login-link" href="' . add_query_arg( array( 'redirect_to' => $redirect_url ), site_url( '/wp-login.php') ) . '">'
 				. esc_html__( 'Login to see your events.', 'event_espresso' ) . '</a>'
 			);
 		}

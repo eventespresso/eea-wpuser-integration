@@ -20,33 +20,17 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 
 		//register our check for whether we continue loading or redirect.  Has to run on a later hook where we have access
 		//to is_singular() or is_archive().
-		add_filter( 'parse_query', array( 'EES_Espresso_My_Events', 'setup_for_load' ), 10 );
-
-		//if user is not logged in and this is a page with the shortcode on it, let's redirect to wp-login.php
-		if ( ! is_user_logged_in() && is_singular() ) {
-			$redirect_url = EES_Espresso_My_Events::get_current_page( $WP );
-			wp_safe_redirect( add_query_arg( array( 'redirect_to' => $redirect_url ), site_url( '/wp-login.php') ) );
-		} else {
-			if ( ! has_action( 'wp_enqueue_scripts', array( 'EES_Espresso_My_Events', 'enqueue_styles_and_scripts' ) ) ) {
-				add_action( 'wp_enqueue_scripts', array( 'EES_Espresso_My_Events', 'enqueue_styles_and_scripts' ) );
-			}
-			//was a resend registration confirmation in the request?
-			if ( EE_Registry::instance()->REQ->is_set( 'resend' ) ) {
-				EE_Espresso_My_Events::resend_reg_confirmation_email();
-			}
-		}
+		add_filter( 'parse_query', array( $this, 'setup_for_load' ), 10 );
 	}
 
 
 
-	public static function setup_for_load() {
+	public function setup_for_load() {
 		EE_Registry::instance()->load_core( 'Request_Handler' );
-		$load_assets = false;
 		//if user is not logged in and this is a page with the shortcode on it, let's redirect to wp-login.php
 		if ( ! is_user_logged_in() && is_singular() ) {
 			$redirect_url = EES_Espresso_My_Events::get_current_page();
 			wp_safe_redirect( add_query_arg( array( 'redirect_to' => $redirect_url ), site_url( '/wp-login.php') ) );
-			$load_assets = true;
 		} else {
 			//was a resend registration confirmation in the request?
 			if ( EE_Registry::instance()->REQ->is_set( 'resend' ) ) {
@@ -55,16 +39,26 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 		}
 
 		//conditionally load assets
-		if ( $load_assets
-			&& ! has_action( 'wp_enqueue_scripts', array( 'EES_Espresso_My_Events', 'enqueue_styles_and_scripts' ) )
+		if ( ! has_action( 'wp_enqueue_scripts', array( 'EES_Espresso_My_Events', 'enqueue_styles_and_scripts' ) )
 		) {
 				add_action( 'wp_enqueue_scripts', array( 'EES_Espresso_My_Events', 'enqueue_styles_and_scripts' ) );
 		}
 	}
 
 
+
+
+	/**
+	 * The following two methods are called on every page load.  So only use them for hooks to be set globally.
+	 * Even though these are not abstract methods, they are required because they get called by the
+	 * 'AHEE__EE_System__set_hooks_for_shortcodes_modules_and_addons' action that is set in EE_Config.
+	 */
 	public static function set_hooks() {}
-	public static function set_hooks_admin() {}
+	public static function set_hooks_admin() {
+		add_action( 'wp_ajax_ee_my_events_load_paged_template', array( 'EES_Espresso_My_Events', 'load_paged_template_via_ajax' ) );
+		add_action( 'wp_ajax_nopriv_ee_my_events_load_paged_template', array( 'EES_Espresso_My_Events', 'load_paged_template_via_ajax' ) );
+	}
+
 
 
 	/**
@@ -76,8 +70,10 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 		if ( $scripts_loaded ) {
 			return;
 		}
-		wp_register_style( 'ees-my-events', EE_WPUSERS_URL . 'assets/css/ees-espresso-my-events.css', array( 'espresso_default' ), EVENT_ESPRESSO_VERSION );
+		wp_register_style( 'ees-my-events', EE_WPUSERS_URL . 'assets/css/ees-espresso-my-events.css', array( 'espresso_default' ), EE_WPUSERS_VERSION );
+		wp_register_script( 'ees-my-events-js', EE_WPUSERS_URL . 'assets/js/ees-espresso-my-events.js', array( 'espresso_core' ), EE_WPUSERS_VERSION, true );
 		wp_enqueue_style( 'ees-my-events' );
+		wp_enqueue_script( 'ees-my-events-js' );
 	}
 
 
@@ -145,7 +141,39 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 		}
 
 		//if made it here then all assets should be loaded and we are good to go!
+		return $this->load_template($attributes);
+	}
 
+
+	/**
+	 * process ajax callback for the ee_my_events_load_paged_template action.
+	 */
+	public static function load_paged_template_via_ajax() {
+		$shortcode = EES_Espresso_My_Events::instance();
+		$template_content = $shortcode->load_template( array(), false );
+		$json_response = json_encode( array(
+			'content' => $template_content
+			)
+		);
+		// make sure there are no php errors or headers_sent.  Then we can set correct json header.
+		if ( NULL === error_get_last() || ! headers_sent() )
+			header('Content-Type: application/json; charset=UTF-8');
+		echo $json_response;
+		exit;
+	}
+
+
+
+	/**
+	 * This loads the template for the shortcode.
+	 *
+	 * @param array $attributes    Any provided attributes that are being used.  Optional. Ajax requests usually do not
+	 *                             have anything set for this.
+	 * @param bool  $with_wrapper  indicate whether to load the template with the wrapper or not.  Ajax calls typically
+	 *                             do not require the wrapper because its just the basic content that is changing.
+	 * @return string  The generated html.
+	 */
+	public function load_template( $attributes = array(), $with_wrapper = true ) {
 		//load helpers
 		EE_Registry::instance()->load_helper( 'Template' );
 
@@ -154,15 +182,37 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			'template' => 'simple_list_table',
 			'your_events_title' => esc_html__( 'Your Events', 'event_espresso' ),
 			'your_tickets_title' => esc_html__( 'Your Tickets', 'event_espresso' ),
-			'per_page' => 10
+			'per_page' => 10,
+			'with_wrapper' => $with_wrapper
 		) );
 
 		//merge with defaults
 		$attributes = array_merge( $default_shortcode_attributes, (array) $attributes );
 		$template_args = $this->_get_template_args( $attributes );
 
+		if ( ! EE_FRONT_AJAX ) {
+			$this->_enqueue_localized_js_object( $attributes );
+		}
+
 		return EEH_Template::locate_template( $template_args['template_path'], $template_args, true, true );
 	}
+
+
+	/**
+	 * This takes care of setting up the localized object for js calls.
+	 * We are able to set this up late in page load because our js is enqueued to load in the footer.
+	 * @param array $attributes  Incoming array of attributes to use in the localized js object
+	 */
+	public function _enqueue_localized_js_object( $attributes ) {
+		$attributes = (array) $attributes;
+		$js_object = array(
+			'template' => isset( $attributes['template'] ) ? $attributes['template'] : 'simple_list_table',
+			'per_page' => isset( $attributes['per_page'] ) ? $attributes['per_page'] : 10
+		);
+
+		wp_localize_script( 'ees-my-events-js', 'EE_MYE_JS', $js_object );
+	}
+
 
 
 	/**
@@ -183,7 +233,8 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			array(
 				'simple_list_table' => array(
 					'object_type' => 'Registration',
-					'path' => EE_WPUSERS_TEMPLATE_PATH . 'loop-espresso_my_events-simple_list_table.template.php'
+					'path' => EE_WPUSERS_TEMPLATE_PATH . 'loop-espresso_my_events-simple_list_table.template.php',
+
 				),
 				'event_section' => array(
 					'object_type' => 'Event',
@@ -317,13 +368,14 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 		$template_args = array(
 			'object_type' => $template_info['object_type'],
 			'objects' => array(),
-			'your_events_title' => $attributes['your_events_title'],
-			'your_tickets_title' => $attributes['your_tickets_title'],
+			'your_events_title' => isset( $attributes['your_events_title'] ) ? $attributes['your_events_title'] : $attributes['your_events_title'] ,
+			'your_tickets_title' => isset( $attributes['your_tickets_title'] ) ? $attributes['your_tickets_title'] : $attributes['your_tickets_title'],
 			'template_slug' => $template_info['template'],
 			'per_page' => $per_page,
 			'template_path' => $template_info['path'],
 			'page' => $page,
-			'object_count' => 0
+			'object_count' => 0,
+			'with_wrapper' => isset( $attributes['with_wrapper'] ) ? $attributes['with_wrapper'] : true,
 		);
 
 		//grab any contact that is attached to this user

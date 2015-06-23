@@ -4,6 +4,7 @@
 
 .espresso-my-events .espresso-my-events-pagination-container {
     float: right;
+    width: 35%;
 }
 
 .espresso-my-events .espresso-my-events-pagination-container .disabled {
@@ -128,4 +129,35 @@
     width: 18px;
     height: 18px;
     vertical-align: middle;
+}
+
+
+/** ajax related **/
+/** we're using the spinner from wp, copied because its foolproof **/
+.spinner {
+    background: url(../images/spinner.gif) no-repeat;
+    -webkit-background-size: 20px 20px;
+    background-size: 20px 20px;
+    display: inline-block;
+    visibility: hidden;
+    float: left;
+    vertical-align: middle;
+    opacity: 0.7;
+    filter: alpha(opacity=70);
+    width: 20px;
+    height: 20px;
+    margin: 4px 10px 0;
+}
+
+.spinner.is-active {
+    visibility: visible;
+}
+
+/**retina**/
+@media print,
+(-webkit-min-device-pixel-ratio: 1.25),
+(min-resolution: 120dpi) {
+    .spinner {
+        background-image: url(../images/spinner-2x.gif);
+    }
 }

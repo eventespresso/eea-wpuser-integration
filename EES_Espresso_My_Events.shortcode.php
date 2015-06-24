@@ -375,6 +375,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			'template_path' => $template_info['path'],
 			'page' => $page,
 			'object_count' => 0,
+			'att_id' => 0,
 			'with_wrapper' => isset( $attributes['with_wrapper'] ) ? $attributes['with_wrapper'] : true,
 		);
 
@@ -387,6 +388,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			$object_info = $this->_get_template_objects( $att_id, $template_args );
 			$template_args['objects'] = $object_info['objects'];
 			$template_args['object_count'] = $object_info['object_count'];
+			$template_args['att_id'] = $att_id;
 		}
 		return $template_args;
 	}

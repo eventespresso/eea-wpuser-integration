@@ -78,4 +78,17 @@ jQuery(document).ready( function($) {
     });
 
 
+    $( '.espresso-my-events').on( 'click', '.js-ee-my-events-toggle-details', function(e) {
+        e.stopPropagation();
+        var detailsrow = $(this).closest('tr').next();
+
+        //if details row is hidden then we have the wrong row.
+        if ( detailsrow.is(":visible") || ! detailsrow.length ) {
+            detailsrow = $(this).closest('tr').prev();
+        }
+        var summaryrow = $(this).closest('tr');
+        detailsrow.toggle( 1000 );
+        summaryrow.toggle();
+    });
+
 });

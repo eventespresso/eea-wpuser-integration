@@ -14,6 +14,7 @@
  * @type    string  $template_path      The full path to this template
  * @type    int     $page               What the current page is (for the paging html).
  * @type    string  $with_wrapper       Whether to include the wrapper containers or not.
+ * @type    int     $att_id             Attendee ID all the displayed data belongs to.
  */
 $url = EES_Espresso_My_Events::get_current_page();
 $pagination_html = EEH_Template::get_paging_html(
@@ -30,7 +31,7 @@ $pagination_html = EEH_Template::get_paging_html(
 ?>
 <?php if ( $with_wrapper ) : ?>
 <div class="espresso-my-events <?php echo $template_slug;?>_container">
-	<?php do_action( 'AHEE__loop-espresso_my_events__before', $object_type, $objects, $template_slug ); ?>
+	<?php do_action( 'AHEE__loop-espresso_my_events__before', $object_type, $objects, $template_slug, $att_id ); ?>
 	<h3><?php echo $your_events_title; ?></h3>
 	<div class="espresso-my-events-inner-content">
 <?php endif; //$with_wrapper check ?>
@@ -46,7 +47,8 @@ $pagination_html = EEH_Template::get_paging_html(
 							esc_html__( 'Event', 'event_espresso' ),
 							$object_type,
 							$objects,
-							$template_slug
+							$template_slug,
+							$att_id
 						); ?>
 					</th>
 					<th scope="col" class="espresso-my-events-ticket-th">
@@ -55,7 +57,8 @@ $pagination_html = EEH_Template::get_paging_html(
 							esc_html__( 'Ticket', 'event_espresso' ),
 							$object_type,
 							$objects,
-							$template_slug
+							$template_slug,
+							$att_id
 						); ?>
 					</th>
 					<th scope="col" class="espresso-my-events-location-th">
@@ -64,7 +67,8 @@ $pagination_html = EEH_Template::get_paging_html(
 							esc_html__( 'Location', 'event_espresso' ),
 							$object_type,
 							$objects,
-							$template_slug
+							$template_slug,
+							$att_id
 						); ?>
 					</th>
 					<th scope="col" class="espresso-my-events-actions-th">
@@ -73,21 +77,21 @@ $pagination_html = EEH_Template::get_paging_html(
 							esc_html__( 'Actions', 'event_espresso' ),
 							$object_type,
 							$objects,
-							$template_slug
+							$template_slug,
+							$att_id
 						); ?>
 					</th>
 				</tr>
 			</thead>
 			<tbody>
-				<?php foreach ( $objects as $object ) :
+				<?php foreach ( $objects as $object ) {
 					if ( ! $object instanceof EE_Registration ) {
 						continue;
 					}
 					$template_args = array( 'registration' => $object );
-					$template = EE_WPUSERS_TEMPLATE_PATH . 'content-espresso_my_events-simple_list_table.template.php';
+					$template      = EE_WPUSERS_TEMPLATE_PATH . 'content-espresso_my_events-simple_list_table.template.php';
 					EEH_Template::locate_template( $template, $template_args, true, false );
-					?>
-				<?php endforeach; ?>
+				} ?>
 			</tbody>
 		</table>
 		<div class="espresso-my-events-footer">
@@ -97,7 +101,7 @@ $pagination_html = EEH_Template::get_paging_html(
 				<div style="clear:both"></div>
 			</div>
 			<div style="clear:both"></div>
-			<?php EEH_Template::locate_template( EE_WPUSERS_TEMPLATE_PATH . 'status-legend-espresso_my_events.template.php', array(), true, false ); ?>
+			<?php EEH_Template::locate_template( EE_WPUSERS_TEMPLATE_PATH . 'status-legend-espresso_my_events.template.php', array( 'template_slug' => $template_slug ), true, false ); ?>
 		</div>
 		<?php else : ?>
 			<div class="no-events-container">
@@ -106,13 +110,14 @@ $pagination_html = EEH_Template::get_paging_html(
 							 esc_html__( 'You have no events yet', 'event_espresso' ),
 				             $object_type,
 				             $objects,
-				             $template_slug
+				             $template_slug,
+					         $att_id
 				         ); ?>
 		         </p>
 			</div>
 		<?php endif; ?>
-	</div>
 <?php if ( $with_wrapper ) : ?>
-	<?php do_action( 'AHEE__loop-espresso_my_events__after', $object_type, $objects, $template_slug ); ?>
+	</div>
+	<?php do_action( 'AHEE__loop-espresso_my_events__after', $object_type, $objects, $template_slug, $att_id ); ?>
 </div>
 <?php endif; //end $wrapper check?>

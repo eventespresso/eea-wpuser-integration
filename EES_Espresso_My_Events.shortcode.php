@@ -25,23 +25,27 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 
 
 
+	/**
+	 * setup_for_load
+	 *
+	 * @return void
+	 */
 	public function setup_for_load() {
 		EE_Registry::instance()->load_core( 'Request_Handler' );
 		//if user is not logged in and this is a page with the shortcode on it, let's redirect to wp-login.php
 		if ( ! is_user_logged_in() && is_singular() ) {
-			$redirect_url = EES_Espresso_My_Events::get_current_page();
-			wp_safe_redirect( add_query_arg( array( 'redirect_to' => $redirect_url ), site_url( '/wp-login.php') ) );
+			wp_safe_redirect(
+				add_query_arg( array( 'redirect_to' => EES_Espresso_My_Events::get_current_page() ), site_url( '/wp-login.php') )
+			);
 		} else {
 			//was a resend registration confirmation in the request?
 			if ( EE_Registry::instance()->REQ->is_set( 'resend' ) ) {
-				EE_Espresso_My_Events::resend_reg_confirmation_email();
+				EES_Espresso_My_Events::resend_reg_confirmation_email();
 			}
 		}
-
 		//conditionally load assets
-		if ( ! has_action( 'wp_enqueue_scripts', array( 'EES_Espresso_My_Events', 'enqueue_styles_and_scripts' ) )
-		) {
-				add_action( 'wp_enqueue_scripts', array( 'EES_Espresso_My_Events', 'enqueue_styles_and_scripts' ) );
+		if ( ! has_action( 'wp_enqueue_scripts', array( 'EES_Espresso_My_Events', 'enqueue_styles_and_scripts' ) ) ) {
+			add_action( 'wp_enqueue_scripts', array( 'EES_Espresso_My_Events', 'enqueue_styles_and_scripts' ) );
 		}
 	}
 
@@ -79,10 +83,10 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 
 	/**
 	 * Just a helper method for getting the url for the displayed page.
-	 * @param  WP|null $WP
+	 * @param  WP $WP
 	 * @return bool|string|void
 	 */
-	public static function get_current_page( $WP  = null ) {
+	public static function get_current_page( $WP = null ) {
 		$post_id = EE_Registry::instance()->REQ->get_post_id_from_request( $WP );
 		if  ( $post_id ) {
 			$current_page = get_permalink( $post_id );
@@ -149,6 +153,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 	 * process ajax callback for the ee_my_events_load_paged_template action.
 	 */
 	public static function load_paged_template_via_ajax() {
+		/** @type EES_Espresso_My_Events $shortcode */
 		$shortcode = EES_Espresso_My_Events::instance();
 		$template_content = $shortcode->load_template( array(), false );
 		$json_response = json_encode( array(
@@ -178,13 +183,16 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 		EE_Registry::instance()->load_helper( 'Template' );
 
 		//set default attributes and filter
-		$default_shortcode_attributes = apply_filters( 'FHEE__EES_Espresso_My_Events__process_shortcode__default_shortcode_atts', array(
-			'template' => 'simple_list_table',
-			'your_events_title' => esc_html__( 'Your Events', 'event_espresso' ),
-			'your_tickets_title' => esc_html__( 'Your Tickets', 'event_espresso' ),
-			'per_page' => 10,
-			'with_wrapper' => $with_wrapper
-		) );
+		$default_shortcode_attributes = apply_filters(
+			'FHEE__EES_Espresso_My_Events__process_shortcode__default_shortcode_atts',
+			array(
+				'template' => 'simple_list_table',
+				'your_events_title' => esc_html__( 'Your Events', 'event_espresso' ),
+				'your_tickets_title' => esc_html__( 'Your Tickets', 'event_espresso' ),
+				'per_page' => 10,
+				'with_wrapper' => $with_wrapper
+			)
+		);
 
 		//merge with defaults
 		$attributes = array_merge( $default_shortcode_attributes, (array) $attributes );
@@ -234,7 +242,6 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 				'simple_list_table' => array(
 					'object_type' => 'Registration',
 					'path' => EE_WPUSERS_TEMPLATE_PATH . 'loop-espresso_my_events-simple_list_table.template.php',
-
 				),
 				'event_section' => array(
 					'object_type' => 'Event',
@@ -268,23 +275,23 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			$template_info['template'] = $template_slug;
 			//next verify that there is an object type and that it matches one of the EE models used for querying.
 			$accepted_object_types = array( 'Event', 'Registration' );
-			if ( isset( $template_object_map[$template_slug]['object_type'] )
-			     && in_array( $template_object_map[$template_slug]['object_type'], $accepted_object_types ) ) {
+			if (
+				isset( $template_object_map[$template_slug]['object_type'] ) &&
+				in_array( $template_object_map[$template_slug]['object_type'], $accepted_object_types )
+			) {
 				//next verify that the path for the template is valid
 				if ( isset( $template_object_map[$template_slug]['path'] ) && EEH_File::is_readable( $template_object_map[$template_slug]['path'] ) ) {
-
 					//yay made it here you awesome template object you.
 					return $template_info;
 				}
 			}
-		} else {
-			//oh noes, not setup properly, so let's just use a safe known default.
-			return array(
-				'template' => 'simple_list_table',
-				'object_type' => 'Registration',
-				'path' => EE_WPUSERS_TEMPLATE_PATH . 'loop-espresso_my_events-simple_list_table.template.php'
-			);
 		}
+		//oh noes, not setup properly, so let's just use a safe known default.
+		return array(
+			'template' => 'simple_list_table',
+			'object_type' => 'Registration',
+			'path' => EE_WPUSERS_TEMPLATE_PATH . 'loop-espresso_my_events-simple_list_table.template.php'
+		);
 	}
 
 
@@ -321,18 +328,20 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 				0 => array( 'Registration.ATT_ID' => $att_id ),
 				'limit' => array( $offset, $template_args['per_page'] )
 			);
+			$model = EE_Registry::instance()->load_model( 'Event' );
 		} elseif ( $template_args['object_type'] == 'Registration' ) {
 			$query_args = array(
 				0 => array( 'ATT_ID' => $att_id ),
 				'limit' => array( $offset, $template_args['per_page'] )
 			);
+			$model = EE_Registry::instance()->load_model( 'Registration' );
 		} else {
 			//get out no valid object_types here.
 			return $object_info;
 		}
 
-		$object_info['objects'] = EE_Registry::instance()->load_model( $template_args['object_type'] )->get_all( $query_args );
-		$object_info['object_count'] = EE_Registry::instance()->load_model( $template_args['object_type'] )->count( array( $query_args[0] ), null, true );
+		$object_info['objects'] = $model->get_all( $query_args );
+		$object_info['object_count'] = $model->count( array( $query_args[0] ), null, true );
 		return $object_info;
 	}
 
@@ -347,7 +356,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 	protected function _get_template_args( $attributes ) {
 		//any parameters coming from the request?
 		$per_page = (int) EE_Registry::instance()->REQ->get( 'per_page', $attributes['per_page'] );
-		$page = (int) EE_Registry::instance()->REQ->get( 'ee_mye_page', false );
+		$page = (int) EE_Registry::instance()->REQ->get( 'ee_mye_page', 0 );
 
 		//if $page is empty then it's likely this is being loaded outside of ajax and wp has usurped
 		//the page value for its query.  So let's see if its in the query.

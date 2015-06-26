@@ -58,13 +58,13 @@ $registrations = $event->get_many_related('Registration', array( array( 'ATT_ID'
 			$venue = reset( $venues );
 			if ( $venue instanceof EE_Venue ) :
 			?>
-				<section class="ee-my-events-event-section-location-map ee-my-events-two-thirds">
+				<section class="ee-my-events-event-section-location-map ee-my-events-one-third">
 					<?php
 						EE_Registry::instance()->load_Helper( 'Venue_View' );
-						EEH_Venue_View::venue_gmap( $venue->ID() );
+						echo EEH_Venue_View::espresso_google_static_map( $venue );
 					?>
 				</section>
-				<section class="ee-my-events-event-section-location-details ee-my-events-one-third">
+				<section class="ee-my-events-event-section-location-details ee-my-events-two-thirds">
 					<strong><?php echo $venue->name(); ?></strong>
 					<?php echo EEH_Venue_View::venue_address( 'multiline', $venue->ID() ); ?>
 				</section>

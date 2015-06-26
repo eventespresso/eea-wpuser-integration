@@ -35,6 +35,27 @@
     cursor: pointer;
 }
 
+
+.espresso-my-events .ee-my-events-two-thirds {
+    width: 63%;
+    margin-left: 20px;
+}
+
+.espresso-my-events .ee-my-events-one-third {
+    width: 33.333%;
+}
+
+.espresso-my-events .ee-my-events-event-section-location-map {
+    float: left;
+    display:inline-block;
+}
+
+.espresso-my-events .ee-my-events-event-section-location-details {
+    float: left;
+    display:inline-block;
+}
+
+
 /** status colors **/
 /**
  * important rules are needed here to keep status strips consistent across themes

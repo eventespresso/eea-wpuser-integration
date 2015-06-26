@@ -35,7 +35,7 @@ class EE_DMS_EE_WPUsers_2_0_0 extends EE_Data_Migration_Script_Base{
 	 *				'Core', 'Calendar', 'Mailchimp',etc, Your addon's slug can be retrieved
 	 *				using $this->slug(). Your addon's entry database state is located
 	 *				at $current_database_state_of[ $this->slug() ] if it was previously
-	 *				intalled; if it wasn't previously installed its NOT in the array
+	 *				installed; if it wasn't previously installed its NOT in the array
 	 * @return boolean
 	 */
 	public function can_migrate_from_version($current_database_state_of) {

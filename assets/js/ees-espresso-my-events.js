@@ -19,7 +19,7 @@ jQuery(document).ready( function($) {
         doPagination: function( page, per_page, template ) {
             this.data.ee_mye_page = typeof page === 'undefined' ? 1 : page;
             this.data.per_page = typeof per_page === 'undefined' ? null : per_page;
-            this.data.template = typeof template === 'undefined' ? 'simple_list_table' : template;
+            this.data.template = typeof template === 'undefined' ? 'event_section' : template;
             this.data.successCallback = 'replaceTable';
             this.data.action = 'ee_my_events_load_paged_template';
             this.doAjax();

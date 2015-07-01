@@ -109,8 +109,8 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 	 * process_shortcode - ESPRESSO_MY_EVENTS - Return a list of event and registration information specific to the
 	 * logged in user.
 	 *
-	 * [ESPRESSO_MY_EVENTS] - defaults to use the "simple_list_table" layout for the returned events.
-	 * [ESPRESSO_MY_EVENTS template="event_section"] - the value for the template param will load a template matching
+	 * [ESPRESSO_MY_EVENTS] - defaults to use the "event_section" layout for the returned events.
+	 * [ESPRESSO_MY_EVENTS template="simple_list_table"] - the value for the template param will load a template matching
 	 *                                                  the given slug.
 	 * [ESPRESSO_MY_EVENTS your_events_title="Your Classes"] - a way to modify the default "Your Events" title to
 	 *                                                          something different
@@ -186,7 +186,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 		$default_shortcode_attributes = apply_filters(
 			'FHEE__EES_Espresso_My_Events__process_shortcode__default_shortcode_atts',
 			array(
-				'template' => 'simple_list_table',
+				'template' => 'event_section',
 				'your_events_title' => esc_html__( 'Your Events', 'event_espresso' ),
 				'your_tickets_title' => esc_html__( 'Your Tickets', 'event_espresso' ),
 				'per_page' => 10,
@@ -214,7 +214,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 	public function _enqueue_localized_js_object( $attributes ) {
 		$attributes = (array) $attributes;
 		$js_object = array(
-			'template' => isset( $attributes['template'] ) ? $attributes['template'] : 'simple_list_table',
+			'template' => isset( $attributes['template'] ) ? $attributes['template'] : 'event_section',
 			'per_page' => isset( $attributes['per_page'] ) ? $attributes['per_page'] : 10
 		);
 
@@ -288,9 +288,9 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 		}
 		//oh noes, not setup properly, so let's just use a safe known default.
 		return array(
-			'template' => 'simple_list_table',
+			'template' => 'event_section',
 			'object_type' => 'Registration',
-			'path' => EE_WPUSERS_TEMPLATE_PATH . 'loop-espresso_my_events-simple_list_table.template.php'
+			'path' => EE_WPUSERS_TEMPLATE_PATH . 'loop-espresso_my_events-event_section.template.php'
 		);
 	}
 
@@ -370,7 +370,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 		}
 
 
-		$template = $attributes['template'] ? $attributes['template'] : 'simple_list_table';
+		$template = $attributes['template'] ? $attributes['template'] : 'event_section';
 		$template_info = $this->_get_template_info( $template );
 
 		//define template_args

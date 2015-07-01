@@ -33,6 +33,9 @@ class EE_WPUsers extends EE_Addon {
 					EE_WPUSERS_PATH . 'EED_WP_Users_Admin.module.php',
 					EE_WPUSERS_PATH . 'EED_WP_Users_Ticket_Selector.module.php'
 				 ),
+				'shortcode_paths' => array(
+					EE_WPUSERS_PATH . 'EES_Espresso_My_Events.shortcode.php'
+				),
 				'autoloader_paths' => array(
 					'EE_WPUsers_Config' => EE_WPUSERS_PATH . 'EE_WPUsers_Config.php',
 					'EE_SPCO_Reg_Step_WP_User_Login' => EE_WPUSERS_PATH . 'EE_SPCO_Reg_Step_WP_User_Login.class.php'

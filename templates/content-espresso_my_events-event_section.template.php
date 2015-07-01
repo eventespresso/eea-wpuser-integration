@@ -12,14 +12,14 @@ $registrations = $event->get_many_related('Registration', array( array( 'ATT_ID'
 <tr class="ee-my-events-event-section-summary-row">
 	<td class="ee-status-strip event-status-<?php echo $event->get_active_status(); ?>"></td>
 	<td>
-		<a href="<?php echo get_permalink( $event->ID() ); ?>"><?php echo $event->name(); ?></a>
+		<a aria-labelledby="<?php printf( __( 'Link to %s', 'event_espresso' ), $event->name() ); ?>" href="<?php echo get_permalink( $event->ID() ); ?>"><?php echo $event->name(); ?></a>
 	</td>
 	<td>
 		<?php
 			$venues = $event->venues();
 			$venue_content = array();
 			foreach ( $venues as $venue ) :
-				$venue_content[] = '<a href="' . get_permalink( $venue->ID() ) . '">' . $venue->name() . '</a>';
+				$venue_content[] = '<a aria-labelledby="' . sprintf( __( 'Link to %', 'event_espresso' ), $venue->name() ) . '" href="' . get_permalink( $venue->ID() ) . '">' . $venue->name() . '</a>';
 			endforeach;
 			echo implode( '<br>', $venue_content );
 			?>

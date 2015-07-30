@@ -39,7 +39,7 @@ class EE_DMS_EE_WPUsers_2_0_0 extends EE_Data_Migration_Script_Base{
 	 * @return boolean
 	 */
 	public function can_migrate_from_version($current_database_state_of) {
-		$version_string = $current_database_state_of[$this->slug()];
+		$version_string = isset( $current_database_state_of[$this->slug()] ) ? $current_database_state_of[$this->slug()] : false;
 
 		//let's also determine if migrations are needed by the presence of any EE_Attendee_ID
 		//relations in the db.  If there are none then no migrations needed!

@@ -343,6 +343,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 									$registration_url = ! EE_Registry::instance()->CFG->addons->user_integration->registration_page ? wp_registration_url() : EE_Registry::instance()->CFG->addons->user_integration->registration_page;
 									$error_message .= '<a class="ee-wpuser-register-link float-right" href="' . $registration_url . '">' . __( 'Register', 'event_espresso' ) . '</a>';
 								}
+								$error_message .= '<div style="clear:both"></div>';
 								$stop_processing = TRUE;
 								$field_input_error[] = 'ee_reg_qstn-' . $registration->ID() . '-email';
 							}

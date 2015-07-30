@@ -143,7 +143,7 @@ class EED_WP_Users_Admin  extends EED_Module {
 		}
 
 		//is there an attadched EE_Attendee?
-		$att_id = get_user_meta( $user->ID, 'EE_Attendee_ID', true );
+		$att_id = get_user_option( 'EE_Attendee_ID', $user->ID );
 
 		if ( empty( $att_id ) ) {
 			return; //bail, no attached attendee_id.
@@ -178,7 +178,7 @@ class EED_WP_Users_Admin  extends EED_Module {
 		}
 
 		//is there an attached EE_Attendee?
-		$att_id = get_user_meta( $user->ID, 'EE_Attendee_ID', true );
+		$att_id = get_user_option( 'EE_Attendee_ID', $user->ID );
 
 		if ( empty( $att_id ) ) {
 			return; //bail, no attached attendee_id.
@@ -245,7 +245,7 @@ class EED_WP_Users_Admin  extends EED_Module {
 		}
 
 		//if we make it here then we're updating an existing user
-		$att_id = get_user_meta( $user->ID, 'EE_Attendee_ID', true );
+		$att_id = get_user_option( 'EE_Attendee_ID', $user->ID );
 
 		if ( empty( $att_id ) ) {
 			self::_connect_wp_user_with_contact( $user );
@@ -317,7 +317,7 @@ class EED_WP_Users_Admin  extends EED_Module {
 		//no attached EE_Attendee. Is there an existing attendee that matches this user's details?
 		$att = self::_find_existing_attendee_from_wpuser( $user );
 		if ( $att instanceof EE_Attendee ) {
-			update_user_meta( $user->ID, 'EE_Attendee_ID', $att->ID() );
+			update_user_option( $user->ID, 'EE_Attendee_ID', $att->ID() );
 		} else {
 			$att = self::_create_attendee_and_attach_wpuser( $user );
 		}
@@ -366,7 +366,7 @@ class EED_WP_Users_Admin  extends EED_Module {
 		$att->save();
 
 		//attach to user
-		update_user_meta( $user->ID, 'EE_Attendee_ID', $att->ID() );
+		update_user_option( $user->ID, 'EE_Attendee_ID', $att->ID() );
 		return $att;
 	}
 

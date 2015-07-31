@@ -193,7 +193,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 				'template' => 'event_section',
 				'your_events_title' => esc_html__( 'Your Events', 'event_espresso' ),
 				'your_tickets_title' => esc_html__( 'Your Tickets', 'event_espresso' ),
-				'per_page' => 10,
+				'per_page' => 100,
 				'with_wrapper' => $with_wrapper
 			)
 		);

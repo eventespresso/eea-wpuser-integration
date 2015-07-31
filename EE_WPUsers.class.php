@@ -31,11 +31,16 @@ class EE_WPUsers extends EE_Addon {
 				'module_paths' => array(
 					EE_WPUSERS_PATH . 'EED_WP_Users_SPCO.module.php',
 					EE_WPUSERS_PATH . 'EED_WP_Users_Admin.module.php',
-					EE_WPUSERS_PATH . 'EED_WP_Users_Ticket_Selector.module.php'
+					EE_WPUSERS_PATH . 'EED_WP_Users_Ticket_Selector.module.php',
 				 ),
+				'shortcode_paths' => array(
+					EE_WPUSERS_PATH . 'EES_Espresso_My_Events.shortcode.php'
+				),
+				'dms_paths' => array( EE_WPUSERS_PATH . 'core/data_migration_scripts' ),
 				'autoloader_paths' => array(
 					'EE_WPUsers_Config' => EE_WPUSERS_PATH . 'EE_WPUsers_Config.php',
-					'EE_SPCO_Reg_Step_WP_User_Login' => EE_WPUSERS_PATH . 'EE_SPCO_Reg_Step_WP_User_Login.class.php'
+					'EE_SPCO_Reg_Step_WP_User_Login' => EE_WPUSERS_PATH . 'EE_SPCO_Reg_Step_WP_User_Login.class.php',
+					'EE_DMS_2_0_0_user_option' => EE_WPUSERS_PATH . 'core/data_migration_scripts/2_0_0_stages/EE_DMS_2_0_0_user_option.dmsstage.php'
 					),
 				// if plugin update engine is being used for auto-updates. not needed if PUE is not being used.
 				'pue_options' => array(

@@ -343,6 +343,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 									$registration_url = ! EE_Registry::instance()->CFG->addons->user_integration->registration_page ? wp_registration_url() : EE_Registry::instance()->CFG->addons->user_integration->registration_page;
 									$error_message .= '<a class="ee-wpuser-register-link float-right" href="' . $registration_url . '">' . __( 'Register', 'event_espresso' ) . '</a>';
 								}
+								$error_message .= '<div style="clear:both"></div>';
 								$stop_processing = TRUE;
 								$field_input_error[] = 'ee_reg_qstn-' . $registration->ID() . '-email';
 							}
@@ -493,7 +494,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 				$user = get_user_by( 'email', $attendee->email() );
 
 				//does this user have the same att_id as the given att?  If NOT, then we do NOT update because it's possible there was a family member or something sharing the same email address but is a different attendee record.
-				$att_id = $user instanceof WP_User ? get_user_meta( $user->ID, 'EE_Attendee_ID', TRUE ) : $att_id;
+				$att_id = $user instanceof WP_User ? get_user_option( 'EE_Attendee_ID', $user->ID ) : $att_id;
 				if ( ! empty( $att_id ) && $att_id != $attendee->ID() ) {
 					return;
 				}
@@ -517,7 +518,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 					return; //get out because something went wrong with creating the user.
 				}
 				$user = new WP_User( $user_id );
-				update_user_meta( $user->ID, 'description', apply_filters( 'FHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_description_field', __( 'Registered via event registration form', 'event_espresso' ), $user, $attendee, $registration ) );
+				update_user_option( $user->ID, 'description', apply_filters( 'FHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_description_field', __( 'Registered via event registration form', 'event_espresso' ), $user, $attendee, $registration ) );
 			}
 
 			//remove our existing action for updating users via saves in the admin to prevent recursion
@@ -538,15 +539,15 @@ class EED_WP_Users_SPCO  extends EED_Module {
 				do_action( 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_created', $user, $attendee, $registration, $password );
 				//set user role
 				$user->set_role( EE_WPUsers::default_user_create_role($event) );
-				update_user_meta( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
+				update_user_option( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
 			} else {
 				do_action( 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_updated', $user, $attendee, $registration );
 			}
 
 			//failsafe just in case this is a logged in user not created by this system that has never had an attendee record attached.
-			$att_id = empty( $att_id ) ? get_user_meta( $user->ID, 'EE_Attendee_ID', true ) : $att_id;
+			$att_id = empty( $att_id ) ? get_user_option( 'EE_Attendee_ID', $user->ID ) : $att_id;
 			if ( empty( $att_id ) ) {
-				update_user_meta( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
+				update_user_option( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
 			}
 
 		} //end registrations loop
@@ -603,7 +604,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 */
 	public static function get_attendee_for_user( $user_or_id ) {
 		$user_id = $user_or_id instanceof WP_User ? $user_or_id->ID : (int) $user_or_id;
-		$attID = get_user_meta( $user_id, 'EE_Attendee_ID', true );
+		$attID = get_user_option( 'EE_Attendee_ID', $user_id );
 		$attendee = null;
 		if ( $attID ) {
 			$attendee = EEM_Attendee::instance()->get_one_by_ID( $attID );

@@ -1,0 +1,219 @@
+.espresso-my-events a .dashicons, .espresso-my-events a .ee-icon {
+    text-decoration: none;
+}
+
+.espresso-my-events .espresso-my-events-pagination-container {
+    float: right;
+    width: 35%;
+}
+
+.espresso-my-events .espresso-my-events-pagination-container .disabled {
+    display: none;
+}
+
+.espresso-my-events .espresso-my-events-pagination-container .pagination-links {
+    padding: 8px;
+    background-color: #eee;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+.espresso-my-events .ee-my-events-right-container {
+    float: right;
+}
+
+.espresso-my-events .ee-my-events-event-section-details-event-description h3 {
+    display: inline-block;
+}
+
+.espresso-my-events .ee-my-events-event-section-details-row {
+    display:none;
+}
+
+.espresso-my-events .js-ee-my-events-toggle-details {
+    cursor: pointer;
+}
+
+
+.espresso-my-events .ee-my-events-two-thirds {
+    width: 63%;
+    margin-left: 20px;
+}
+
+.espresso-my-events .ee-my-events-one-third {
+    width: 33.333%;
+}
+
+.espresso-my-events .ee-my-events-event-section-location-map {
+    float: left;
+    display:inline-block;
+}
+
+.espresso-my-events .ee-my-events-event-section-location-details {
+    float: left;
+    display:inline-block;
+}
+
+
+/** status colors **/
+/**
+ * important rules are needed here to keep status strips consistent across themes
+ */
+.espresso-my-events-table tr th.ee-status-strip, .espresso-my-events-table tr td.ee-status-strip {
+    padding: 0px !important;
+    margin: 0px !important;
+    width: 4px;
+}
+
+.espresso-my-events-table tr td.ee-status-strip {
+    -webkit-box-shadow:inset 0px 0px 0px 5px;
+    -moz-box-shadow:inset 0px 0px 0px 5px;
+    box-shadow:inset 0px 0px 0px 5px;
+}
+
+/*pending payment registration, upcoming event*/
+.espresso-my-events-table tr td.reg-status-RPP, .espresso-my-events-table tr td.event-status-DTU {
+    color: #00B1CA;
+}
+.ee-status-RPP, .ee-status-DTU {
+    background-color: #00B1CA;
+}
+
+/*cancelled registration, expired event*/
+.espresso-my-events-table tr td.reg-status-RCN, .espresso-my-events-table tr td.event-status-DTE {
+    color : #AC9D9C;
+}
+
+.ee-status-RCN, .ee-status-DTE {
+    background-color: #ac9d9c;
+}
+
+/*declined registration, cancelled event*/
+.espresso-my-events-table tr td.reg-status-RDC, .espresso-my-events-table tr td.event-status-DTC {
+    color : #E44064;
+}
+
+.ee-status-RDC, .ee-status-DTC {
+    background-color: #e44064;
+}
+
+/*approved registration, active event*/
+.espresso-my-events-table tr td.reg-status-RAP, .espresso-my-events-table tr td.event-status-DTA {
+    color : #70CC50;
+}
+
+.ee-status-RAP, .ee-status-DTA {
+    background-color: #70CC50;
+}
+
+/*not-approved registration*/
+.espresso-my-events-table tr td.reg-status-RNA {
+    border-left-color : #E76700;
+}
+
+.ee-status-RNA {
+    background-color: #E76700;
+}
+
+/*postponed event*/
+.espresso-my-events-table tr td.event-status-DTP {
+    color : #8A549A;
+}
+
+.ee-status-DTP {
+    background-color: #8A549A;
+}
+
+
+/*inactive event*/
+.espresso-my-events-table tr td.event-status-DTI {
+    color : #403A3A;
+}
+
+.ee-status-DTI {
+    background-color: #403A3A;
+}
+
+/*incomplete registration, sold out event*/
+.espresso-my-events-table tr td.reg-status-RIC, .espresso-my-events-table tr td.event-status-DTS {
+    border-left-color : #FCB93C;
+}
+
+.ee-status-RIC, .ee-status-DTS {
+    background-color: #FCB93C;
+}
+
+
+/* legend container  - taken from ee-admin-page.css */
+/** LIST-TABLE-LEGEND **/
+.espresso-my-events-legend-list {
+    margin-top   : 0;
+    padding      : 5px;
+    margin-right : 20px;
+    float: left;
+}
+
+.espresso-my-events-legend-list dt {
+    line-height : 25px;
+    font-weight: normal;
+}
+
+.ee-status-legend {
+    display        : inline-block;
+    width          : 18px;
+    height         : 18px;
+    vertical-align : middle;
+}
+
+.espresso-my-events-legend-container .dashicons,
+.espresso-my-events-legend-container .ee-icon {
+    font-size : 18px;
+    vertical-align: middle;
+}
+.espresso-my-events-legend-container .ee-icon-size-8 {
+    vertical-align: top;
+    margin-bottom: .5em;
+}
+
+.ee-legend-description {
+    margin-left : 10px;
+}
+
+.ee-status-legend-box {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+}
+
+
+/** ajax related **/
+/** we're using the spinner from wp, copied because its foolproof **/
+.spinner {
+    background: url(../images/spinner.gif) no-repeat;
+    -webkit-background-size: 20px 20px;
+    background-size: 20px 20px;
+    display: inline-block;
+    visibility: hidden;
+    float: left;
+    vertical-align: middle;
+    opacity: 0.7;
+    filter: alpha(opacity=70);
+    width: 20px;
+    height: 20px;
+    margin: 4px 10px 0;
+}
+
+.spinner.is-active {
+    visibility: visible;
+}
+
+/**retina**/
+@media print,
+(-webkit-min-device-pixel-ratio: 1.25),
+(min-resolution: 120dpi) {
+    .spinner {
+        background-image: url(../images/spinner-2x.gif);
+    }
+}

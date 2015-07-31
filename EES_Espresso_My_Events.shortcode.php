@@ -153,6 +153,10 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 	 * process ajax callback for the ee_my_events_load_paged_template action.
 	 */
 	public static function load_paged_template_via_ajax() {
+		//template tags file is not loaded apparently so need to load:
+		if ( is_readable( EE_PUBLIC . 'template_tags.php' )) {
+			require_once( EE_PUBLIC . 'template_tags.php' );
+		}
 		/** @type EES_Espresso_My_Events $shortcode */
 		$shortcode = EES_Espresso_My_Events::instance();
 		$template_content = $shortcode->load_template( array(), false );

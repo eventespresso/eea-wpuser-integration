@@ -24,7 +24,7 @@ class EE_DMS_2_0_0_user_option extends EE_Data_Migration_Script_Stage_Table {
 		// define tables
 		$this->_old_table 					= $wpdb->usermeta;
 		// build SQL WHERE clauses
-		$this->_extra_where_sql = "WHERE meta_key = 'EE_Attendee_ID'";
+		$this->_extra_where_sql = "WHERE meta_key LIKE '%EE_Attendee_ID'";
 		parent::__construct();
 	}
 

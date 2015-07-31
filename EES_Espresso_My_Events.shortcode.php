@@ -20,7 +20,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 
 		//register our check for whether we continue loading or redirect.  Has to run on a later hook where we have access
 		//to is_singular() or is_archive().
-		add_filter( 'parse_query', array( $this, 'setup_for_load' ), 10 );
+		add_action( 'parse_query', array( $this, 'setup_for_load' ), 10 );
 	}
 
 
@@ -78,6 +78,8 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 		wp_register_script( 'ees-my-events-js', EE_WPUSERS_URL . 'assets/js/ees-espresso-my-events.js', array( 'espresso_core' ), EE_WPUSERS_VERSION, true );
 		wp_enqueue_style( 'ees-my-events' );
 		wp_enqueue_script( 'ees-my-events-js' );
+		wp_localize_script( 'ees-my-events-js', 'eei18n', EE_Registry::$i18n_js_strings );
+
 	}
 
 
@@ -153,6 +155,10 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 	 * process ajax callback for the ee_my_events_load_paged_template action.
 	 */
 	public static function load_paged_template_via_ajax() {
+		//template tags file is not loaded apparently so need to load:
+		if ( is_readable( EE_PUBLIC . 'template_tags.php' )) {
+			require_once( EE_PUBLIC . 'template_tags.php' );
+		}
 		/** @type EES_Espresso_My_Events $shortcode */
 		$shortcode = EES_Espresso_My_Events::instance();
 		$template_content = $shortcode->load_template( array(), false );
@@ -189,7 +195,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 				'template' => 'event_section',
 				'your_events_title' => esc_html__( 'Your Events', 'event_espresso' ),
 				'your_tickets_title' => esc_html__( 'Your Tickets', 'event_espresso' ),
-				'per_page' => 10,
+				'per_page' => 100,
 				'with_wrapper' => $with_wrapper
 			)
 		);
@@ -389,7 +395,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 		);
 
 		//grab any contact that is attached to this user
-		$att_id = get_user_meta( get_current_user_id(), 'EE_Attendee_ID', true );
+		$att_id = get_user_option( 'EE_Attendee_ID', get_current_user_id() );
 
 		//if there is an attached attendee we can use that to retrieve all the related events and
 		//registrations.  Otherwise those will be left empty.

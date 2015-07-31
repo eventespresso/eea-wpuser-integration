@@ -41,7 +41,7 @@ jQuery(document).ready( function($) {
             $('.spinner', '.espresso-my-events').addClass('is-active');
             jQuery.ajax({
                 type: "POST",
-                url: ajaxurl,
+                url: eei18n.ajax_url,
                 data: EEMYEVENTS.data,
                 success: function( response, status, xhr ) {
                     var ct = xhr.getResponseHeader("content-type") || "";

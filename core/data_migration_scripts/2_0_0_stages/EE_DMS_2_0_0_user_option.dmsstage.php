@@ -28,6 +28,21 @@ class EE_DMS_2_0_0_user_option extends EE_Data_Migration_Script_Stage_Table {
 		parent::__construct();
 	}
 
+	/**
+	 * Override's parent in order to fix #8596, ie users who have already started
+	 * their migrations but are having issues (and have thus cached classes which
+	 * aren't fixed by #8594)
+	 * @global wpdb $wpdb
+	 * @param int $limit
+	 * @return array of arrays like $wpdb->get_results($sql, ARRAY_A)
+	 */
+	protected function _get_rows( $limit ){
+		global $wpdb;
+		$start_at_record = $this->count_records_migrated();
+		$query = "SELECT * FROM {$this->_old_table} WHERE meta_key LIKE '%EE_Attendee_ID' " . $wpdb->prepare("LIMIT %d, %d",$start_at_record,$limit);
+		return $wpdb->get_results($query,ARRAY_A);
+	}
+
 
 
 	/**

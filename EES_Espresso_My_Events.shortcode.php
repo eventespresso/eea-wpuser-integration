@@ -20,7 +20,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 
 		//register our check for whether we continue loading or redirect.  Has to run on a later hook where we have access
 		//to is_singular() or is_archive().
-		add_filter( 'parse_query', array( $this, 'setup_for_load' ), 10 );
+		add_action( 'parse_query', array( $this, 'setup_for_load' ), 10 );
 	}
 
 

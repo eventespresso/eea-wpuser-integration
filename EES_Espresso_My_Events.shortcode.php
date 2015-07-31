@@ -78,6 +78,8 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 		wp_register_script( 'ees-my-events-js', EE_WPUSERS_URL . 'assets/js/ees-espresso-my-events.js', array( 'espresso_core' ), EE_WPUSERS_VERSION, true );
 		wp_enqueue_style( 'ees-my-events' );
 		wp_enqueue_script( 'ees-my-events-js' );
+		wp_localize_script( 'ees-my-events-js', 'eei18n', EE_Registry::$i18n_js_strings );
+
 	}
 
 

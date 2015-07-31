@@ -389,7 +389,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 		);
 
 		//grab any contact that is attached to this user
-		$att_id = get_user_meta( get_current_user_id(), 'EE_Attendee_ID', true );
+		$att_id = get_user_option( 'EE_Attendee_ID', get_current_user_id() );
 
 		//if there is an attached attendee we can use that to retrieve all the related events and
 		//registrations.  Otherwise those will be left empty.

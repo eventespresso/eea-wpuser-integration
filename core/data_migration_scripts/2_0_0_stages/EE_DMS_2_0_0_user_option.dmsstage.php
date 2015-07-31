@@ -37,7 +37,7 @@ class EE_DMS_2_0_0_user_option extends EE_Data_Migration_Script_Stage_Table {
 		global $wpdb;
 		$attid = absint( $user_meta[ 'meta_value' ] );
 		$userid = absint( $user_meta['user_id'] );
-
+		$add_new = true;
 		//check for valid attid
 		if ( ! $attid ) {
 			$this->add_error(
@@ -47,7 +47,7 @@ class EE_DMS_2_0_0_user_option extends EE_Data_Migration_Script_Stage_Table {
 					$wpdb->last_error
 				)
 			);
-			return;
+			$add_new = false;
 		}
 
 		//check for valid userid
@@ -59,13 +59,17 @@ class EE_DMS_2_0_0_user_option extends EE_Data_Migration_Script_Stage_Table {
 					$wpdb->last_error
 				)
 			);
-			return;
+			$add_new = false;
 		}
 
-		//first transfer to user_option
-		update_user_option( $userid, 'EE_Attendee_ID', $attid );
+		if( $add_new ) {
+			//first transfer to user_option
+			update_user_option( $userid, 'EE_Attendee_ID', $attid );
+		}
 
 		//next delete the old meta
+		//even if the data was incomplete to insert a new one. We won't stop
+		//until every last one of them is gone
 		delete_user_meta( $userid, 'EE_Attendee_ID' );
 	}
 

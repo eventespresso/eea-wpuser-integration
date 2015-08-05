@@ -11,7 +11,7 @@
  * @type    string  $your_tickets_title The default label for the Tickets section
  * @type    string  $template_slug      The slug for the template.  For this template it will be 'simple_list_table'
  * @type    int     $per_page           What items are shown per page
- * @type    string  $template_path      The full path to this template
+ * @type    string  $path_to_template   The full path to this template
  * @type    int     $page               What the current page is (for the paging html).
  * @type    string  $with_wrapper       Whether to include the wrapper containers or not.
  * @type    int     $att_id             Attendee ID all the displayed data belongs to.
@@ -99,7 +99,7 @@ $pagination_html = EEH_Template::get_paging_html(
 				continue;
 			}
 			$template_args = array( 'event' => $object, 'your_tickets_title' => $your_tickets_title, 'att_id' => $att_id );
-			$template = EE_WPUSERS_TEMPLATE_PATH . 'content-espresso_my_events-event_section.template.php';
+			$template =  'content-espresso_my_events-event_section.template.php';
 			EEH_Template::locate_template( $template, $template_args, true, false );
 			?>
 		<?php endforeach; ?>
@@ -112,7 +112,7 @@ $pagination_html = EEH_Template::get_paging_html(
 			<div style="clear:both"></div>
 		</div>
 		<div style="clear:both"></div>
-		<?php EEH_Template::locate_template( EE_WPUSERS_TEMPLATE_PATH . 'status-legend-espresso_my_events.template.php', array( 'template_slug' => $template_slug ), true, false ); ?>
+		<?php EEH_Template::locate_template( 'status-legend-espresso_my_events.template.php', array( 'template_slug' => $template_slug ), true, false ); ?>
 	</div>
 <?php else : ?>
 	<div class="no-events-container">

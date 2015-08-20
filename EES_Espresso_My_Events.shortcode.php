@@ -32,17 +32,12 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 	 */
 	public function setup_for_load() {
 		EE_Registry::instance()->load_core( 'Request_Handler' );
-		//if user is not logged in and this is a page with the shortcode on it, let's redirect to wp-login.php
-		if ( ! is_user_logged_in() && is_singular() ) {
-			wp_safe_redirect(
-				add_query_arg( array( 'redirect_to' => EES_Espresso_My_Events::get_current_page() ), site_url( '/wp-login.php') )
-			);
-		} else {
-			//was a resend registration confirmation in the request?
-			if ( EE_Registry::instance()->REQ->is_set( 'resend' ) ) {
-				EES_Espresso_My_Events::resend_reg_confirmation_email();
-			}
+
+		//was a resend registration confirmation in the request?
+		if ( EE_Registry::instance()->REQ->is_set( 'resend' ) ) {
+			EES_Espresso_My_Events::resend_reg_confirmation_email();
 		}
+
 		//conditionally load assets
 		if ( ! has_action( 'wp_enqueue_scripts', array( 'EES_Espresso_My_Events', 'enqueue_styles_and_scripts' ) ) ) {
 			add_action( 'wp_enqueue_scripts', array( 'EES_Espresso_My_Events', 'enqueue_styles_and_scripts' ) );

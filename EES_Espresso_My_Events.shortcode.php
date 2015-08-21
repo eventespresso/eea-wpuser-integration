@@ -32,17 +32,12 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 	 */
 	public function setup_for_load() {
 		EE_Registry::instance()->load_core( 'Request_Handler' );
-		//if user is not logged in and this is a page with the shortcode on it, let's redirect to wp-login.php
-		if ( ! is_user_logged_in() && is_singular() ) {
-			wp_safe_redirect(
-				add_query_arg( array( 'redirect_to' => EES_Espresso_My_Events::get_current_page() ), site_url( '/wp-login.php') )
-			);
-		} else {
-			//was a resend registration confirmation in the request?
-			if ( EE_Registry::instance()->REQ->is_set( 'resend' ) ) {
-				EES_Espresso_My_Events::resend_reg_confirmation_email();
-			}
+
+		//was a resend registration confirmation in the request?
+		if ( EE_Registry::instance()->REQ->is_set( 'resend' ) ) {
+			EES_Espresso_My_Events::resend_reg_confirmation_email();
 		}
+
 		//conditionally load assets
 		if ( ! has_action( 'wp_enqueue_scripts', array( 'EES_Espresso_My_Events', 'enqueue_styles_and_scripts' ) ) ) {
 			add_action( 'wp_enqueue_scripts', array( 'EES_Espresso_My_Events', 'enqueue_styles_and_scripts' ) );
@@ -78,8 +73,6 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 		wp_register_script( 'ees-my-events-js', EE_WPUSERS_URL . 'assets/js/ees-espresso-my-events.js', array( 'espresso_core' ), EE_WPUSERS_VERSION, true );
 		wp_enqueue_style( 'ees-my-events' );
 		wp_enqueue_script( 'ees-my-events-js' );
-		wp_localize_script( 'ees-my-events-js', 'eei18n', EE_Registry::$i18n_js_strings );
-
 	}
 
 
@@ -188,6 +181,9 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 		//load helpers
 		EE_Registry::instance()->load_helper( 'Template' );
 
+		//add filter for locate template to add paths
+		add_filter( 'FHEE__EEH_Template__locate_template__template_folder_paths', array( 'EES_Espresso_My_Events', 'template_paths' ), 10 );
+
 		//set default attributes and filter
 		$default_shortcode_attributes = apply_filters(
 			'FHEE__EES_Espresso_My_Events__process_shortcode__default_shortcode_atts',
@@ -208,7 +204,22 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			$this->_enqueue_localized_js_object( $attributes );
 		}
 
-		return EEH_Template::locate_template( $template_args['template_path'], $template_args, true, true );
+		return EEH_Template::locate_template( $template_args['path_to_template'], $template_args, true, true );
+	}
+
+
+
+
+	/**
+	 * Callback for FHEE__EEH_Template__locate_template__template_folder_paths filter to register this shortcode's,
+	 * template paths for locate_template.
+	 *
+	 * @param $template_folder_paths
+	 * @return array
+	 */
+	public static function template_paths( $template_folder_paths ) {
+		$template_folder_paths[] = EE_WPUSERS_TEMPLATE_PATH;
+		return $template_folder_paths;
 	}
 
 
@@ -247,11 +258,11 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			array(
 				'simple_list_table' => array(
 					'object_type' => 'Registration',
-					'path' => EE_WPUSERS_TEMPLATE_PATH . 'loop-espresso_my_events-simple_list_table.template.php',
+					'path' => 'loop-espresso_my_events-simple_list_table.template.php',
 				),
 				'event_section' => array(
 					'object_type' => 'Event',
-					'path' => EE_WPUSERS_TEMPLATE_PATH . 'loop-espresso_my_events-event_section.template.php'
+					'path' => 'loop-espresso_my_events-event_section.template.php'
 				)
 			)
 		);
@@ -286,7 +297,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 				in_array( $template_object_map[$template_slug]['object_type'], $accepted_object_types )
 			) {
 				//next verify that the path for the template is valid
-				if ( isset( $template_object_map[$template_slug]['path'] ) && EEH_File::is_readable( $template_object_map[$template_slug]['path'] ) ) {
+				if ( isset( $template_object_map[$template_slug]['path'] ) && EEH_File::is_readable( EE_WPUSERS_TEMPLATE_PATH . $template_object_map[$template_slug]['path'] ) ) {
 					//yay made it here you awesome template object you.
 					return $template_info;
 				}
@@ -296,7 +307,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 		return array(
 			'template' => 'event_section',
 			'object_type' => 'Registration',
-			'path' => EE_WPUSERS_TEMPLATE_PATH . 'loop-espresso_my_events-event_section.template.php'
+			'path' => 'loop-espresso_my_events-event_section.template.php'
 		);
 	}
 
@@ -388,7 +399,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			'your_tickets_title' => isset( $attributes['your_tickets_title'] ) ? $attributes['your_tickets_title'] : $attributes['your_tickets_title'],
 			'template_slug' => $template_info['template'],
 			'per_page' => $per_page,
-			'template_path' => $template_info['path'],
+			'path_to_template' => $template_info['path'],
 			'page' => $page,
 			'object_count' => 0,
 			'att_id' => 0,

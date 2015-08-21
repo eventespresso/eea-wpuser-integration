@@ -107,7 +107,7 @@ $registrations = $event->get_many_related('Registration', array( array( 'ATT_ID'
 									continue;
 								}
 								$template_args = array( 'registration' => $registration );
-								$template      = EE_WPUSERS_TEMPLATE_PATH . 'content-espresso_my_events-event_section_tickets.template.php';
+								$template      =  'content-espresso_my_events-event_section_tickets.template.php';
 								EEH_Template::locate_template( $template, $template_args, true, false );
 							}
 							?>

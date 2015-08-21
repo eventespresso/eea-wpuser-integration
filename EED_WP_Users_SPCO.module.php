@@ -512,7 +512,16 @@ class EED_WP_Users_SPCO  extends EED_Module {
 				$password = wp_generate_password( 12, false );
 				//remove our action for creating contacts on creating user because we don't want to loop!
 				remove_action( 'user_register', array( 'EED_WP_Users_Admin', 'sync_with_contact') );
-				$user_id = wp_create_user( apply_filters( 'FHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__username', $attendee->email(), $password, $attendee->email() ), $password, $attendee->email() );
+				$user_id = wp_create_user(
+					apply_filters(
+						'FHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__username',
+						 $attendee->email(),
+						 $password,
+						 $registration
+					),
+					$password,
+					$attendee->email()
+				);
 				$user_created = TRUE;
 				if ( $user_id instanceof WP_Error ) {
 					return; //get out because something went wrong with creating the user.

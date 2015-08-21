@@ -343,7 +343,8 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 		if ( $template_args['object_type'] == 'Event' ) {
 			$query_args = array(
 				0 => array( 'Registration.ATT_ID' => $att_id ),
-				'limit' => array( $offset, $template_args['per_page'] )
+				'limit' => array( $offset, $template_args['per_page'] ),
+				'group_by' => 'EVT_ID'
 			);
 			$model = EE_Registry::instance()->load_model( 'Event' );
 		} elseif ( $template_args['object_type'] == 'Registration' ) {
@@ -356,7 +357,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			//get out no valid object_types here.
 			return $object_info;
 		}
-
+		
 		$object_info['objects'] = $model->get_all( $query_args );
 		$object_info['object_count'] = $model->count( array( $query_args[0] ), null, true );
 		return $object_info;

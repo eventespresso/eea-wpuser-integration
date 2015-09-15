@@ -580,7 +580,12 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 */
 	public static function new_user_notifications( WP_User $user, EE_Attendee $attendee, EE_Registration $registration, $password ) {
 		//for now we just use the existing core wp notifications.
-		wp_new_user_notification( $user->ID, $password );
+		global $wp_version;
+		if ( version_compare( $wp_version,  '4.3.1', '<' ) ) {
+			wp_new_user_notification( $user->ID, $password );
+		} else {
+			wp_new_user_notification( $user->ID, null, 'both' );
+		}
 	}
 
 

@@ -154,7 +154,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * @return string                                content to retun
 	 */
 	public static function primary_reg_sync_messages( $content, EE_Registration $registration, EE_Question_Group $question_group, EE_SPCO_Reg_Step_Attendee_Information $spco ) {
-		if ( ! is_user_logged_in() || ( is_user_logged_in() && ! $registration->is_primary_registrant() ) || $question_group->ID() != EEM_Question_Group::system_personal ) {
+		if ( ( ! is_user_logged_in() || ( is_user_logged_in() && ! $registration->is_primary_registrant() ) || $question_group->ID() != EEM_Question_Group::system_personal ) || ! EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact ) {
 			return $content;
 		}
 
@@ -382,6 +382,9 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * registration, then we will make sure we're always updating the existing attendee record
 	 * attached to the wp_user regardless of what might have been detected by spco.
 	 *
+	 * However, behaviour is controlled by EE_Config->addons->user_integration->sync_user_with_contact and no syncing will
+	 * happen if this is set to false and there is no existing relationship between a contact and a wpuser.
+	 *
 	 * @param mixed null|EE_Attendee          $existing_attendee Possibly an existing attendee
 	 *                                        					  already detected by SPCO
 	 * @param EE_Registration $registration
@@ -410,8 +413,10 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		 * what is attached to the user, then we'll change the firstname and lastname but not the
 		 * email address.  Otherwise we could end up with two wpusers in the system with the
 		 * same email address.
+		 *
+		 * Here we also skip the user sync if the EE_WPUsers_Config->sync_user_with_contact option is false
 		 */
-		if ( ! $att instanceof EE_Attendee ) {
+		if ( ! $att instanceof EE_Attendee || ! EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact ) {
 			return $existing_attendee;
 		}
 
@@ -530,15 +535,17 @@ class EED_WP_Users_SPCO  extends EED_Module {
 				update_user_option( $user->ID, 'description', apply_filters( 'FHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_description_field', __( 'Registered via event registration form', 'event_espresso' ), $user, $attendee, $registration ) );
 			}
 
-			//remove our existing action for updating users via saves in the admin to prevent recursion
-			remove_action( 'profile_update', array( 'EED_WP_Users_Admin', 'sync_with_contact' ) );
-			wp_update_user(
-				array(
-					'ID' => $user->ID,
-					'nickname' => $attendee->fname(),
-					'display_name' => $attendee->full_name(),
-					'first_name' => $attendee->fname(),
-					'last_name' => $attendee->lname()
+			// only do the below if syncing is enabled.
+			if ( EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact ) {
+				//remove our existing action for updating users via saves in the admin to prevent recursion
+				remove_action( 'profile_update', array( 'EED_WP_Users_Admin', 'sync_with_contact' ) );
+				wp_update_user(
+					array(
+						'ID'           => $user->ID,
+						'nickname'     => $attendee->fname(),
+						'display_name' => $attendee->full_name(),
+						'first_name'   => $attendee->fname(),
+						'last_name'    => $attendee->lname()
 					)
 				);
 			}

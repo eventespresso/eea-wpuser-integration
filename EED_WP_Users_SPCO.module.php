@@ -536,7 +536,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 			}
 
 			// only do the below if syncing is enabled.
-			if ( EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact ) {
+			if ( $user_created || EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact ) {
 				//remove our existing action for updating users via saves in the admin to prevent recursion
 				remove_action( 'profile_update', array( 'EED_WP_Users_Admin', 'sync_with_contact' ) );
 				wp_update_user(

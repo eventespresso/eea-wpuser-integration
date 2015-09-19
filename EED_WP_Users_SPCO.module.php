@@ -247,15 +247,15 @@ class EED_WP_Users_SPCO  extends EED_Module {
 			if ($current_user instanceof WP_User) {
 				switch ($question_id) {
 
-					case EEM_Attendee::fname_question_id:
+					case EEM_Attendee::system_question_fname:
 						$value = $current_user->get('first_name');
 						break;
 
-					case EEM_Attendee::lname_question_id:
+					case EEM_Attendee::system_question_lname:
 						$value = $current_user->get('last_name');
 						break;
 
-					case EEM_Attendee::email_question_id:
+					case EEM_Attendee::system_question_email:
 						$value = $current_user->get('user_email');
 						break;
 

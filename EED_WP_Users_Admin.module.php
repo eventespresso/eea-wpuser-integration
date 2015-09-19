@@ -453,7 +453,6 @@ class EED_WP_Users_Admin  extends EED_Module {
 	 */
 	protected static function _main_settings() {
 		global $wp_roles;
-
 		$registration_turned_off_msg = get_option( 'users_can_register' ) ? '' : '<br><div class="error inline"><p></p>' . sprintf( __( 'Registration is currently turned off for your site, so the registration link will not show.  If you want the registration link to show please %sgo here%s to turn it on.', 'event_espresso' ), '<a href="' . admin_url( 'options-general.php' ) . '">', '</a>' ) . '</p></div>';
 
 		return new EE_Form_Section_Proper(
@@ -496,6 +495,17 @@ class EED_WP_Users_Admin  extends EED_Module {
 								'default' => isset( EE_Registry::instance()->CFG->addons->user_integration->default_wp_user_role ) ? EE_Registry::instance()->CFG->addons->user_integration->default_wp_user_role : 'subscriber',
 								'display_html_label_text' => false
 								)
+							),
+						'sync_user_with_contact' => new EE_Yes_No_Input(
+							array(
+								'html_label_text' => __( 'Always sync contact information with WP user profile?', 'event_espresso' ) . EEH_Template::get_help_tab_link( 'user_sync_info'),
+								'html_help_text' => __(
+									'This global option is used to indicate behaviour when a logged in user registers for an event, and what happens to that user’s related contact, which in turn is related to the primary registration.',
+									'event_espresso'
+									),
+								'default' => isset( EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact ) ? EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact : true,
+								'display_html_label_text' => false
+								)
 							)
 						) //end form subsections
 					) //end apply_filters for form subsections
@@ -529,6 +539,7 @@ class EED_WP_Users_Admin  extends EED_Module {
 					$config->registration_page = $valid_data['main_settings']['registration_page'];
 					$config->auto_create_user = $valid_data['main_settings']['auto_create_user'];
 					$config->default_wp_user_role = $valid_data['main_settings']['default_wp_user_role'];
+					$config->sync_user_with_contact = $valid_data['main_settings']['sync_user_with_contact'];
 				}
 			} else {
 				if ( $form->submission_error_message() != '' ) {
@@ -564,9 +575,27 @@ class EED_WP_Users_Admin  extends EED_Module {
 				'order' => 50
 				),
 			'require_nonce' => false,
+			'help_tabs' => array(
+				'wp_user_settings_help_tab' => array(
+					'title' => __( 'WP User Settings', 'event_espresso' ),
+					'content' => self::_settings_help_tab_content()
+				)
+			),
 			'metaboxes' => array( '_publish_post_box', '_espresso_news_post_box', '_espresso_links_post_box' )
 			);
 		return $page_config;
+	}
+
+
+
+	/**
+	 * Callback for the WP Users Settings help tab content as set in the page_config array
+	 *
+	 * @return string
+	 */
+	protected static function _settings_help_tab_content() {
+		EE_Registry::instance()->load_helper( 'Template' );
+		return EEH_Template::display_template( EE_WPUSERS_TEMPLATE_PATH . 'settings_help_tab.help_tab.php', array(), true );
 	}
 
 

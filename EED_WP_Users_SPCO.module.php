@@ -415,7 +415,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 			return $existing_attendee;
 		}
 
-		if ( $existing_attendee instanceof EE_Attendee && $att->ID() != $existing_attendee->ID() ) {
+		if ( $existing_attendee instanceof EE_Attendee && $att->ID() !== $existing_attendee->ID() ) {
 			//only change first and last name for att, we'll leave the email address alone regardless of what its at.
 			if ( ! empty( $attendee_data['ATT_fname'] ) ) {
 				$att->set_fname( $attendee_data['ATT_fname'] );
@@ -511,18 +511,18 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 				$password = wp_generate_password( 12, false );
 				//remove our action for creating contacts on creating user because we don't want to loop!
-				remove_action( 'user_register', array( 'EED_WP_Users_Admin', 'sync_with_contact') );
+				remove_action( 'user_register', array( 'EED_WP_Users_Admin', 'sync_with_contact' ) );
 				$user_id = wp_create_user(
 					apply_filters(
 						'FHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__username',
-						 $attendee->email(),
-						 $password,
-						 $registration
+						$attendee->email(),
+						$password,
+						$registration
 					),
 					$password,
 					$attendee->email()
 				);
-				$user_created = TRUE;
+				$user_created = true;
 				if ( $user_id instanceof WP_Error ) {
 					return; //get out because something went wrong with creating the user.
 				}
@@ -541,13 +541,13 @@ class EED_WP_Users_SPCO  extends EED_Module {
 					'last_name' => $attendee->lname()
 					)
 				);
-
+			}
 
 			//if user created then send notification and attach attendee to user
 			if ( $user_created ) {
 				do_action( 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_created', $user, $attendee, $registration, $password );
 				//set user role
-				$user->set_role( EE_WPUsers::default_user_create_role($event) );
+				$user->set_role( EE_WPUsers::default_user_create_role( $event ) );
 				update_user_option( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
 			} else {
 				do_action( 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_updated', $user, $attendee, $registration );
@@ -558,7 +558,6 @@ class EED_WP_Users_SPCO  extends EED_Module {
 			if ( empty( $att_id ) ) {
 				update_user_option( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
 			}
-
 		} //end registrations loop
 	}
 
@@ -601,7 +600,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	public static function _get_registrations( EE_SPCO_Reg_Step_Attendee_Information $spco ) {
 		$registrations = array();
 		if ( $spco->checkout instanceof EE_Checkout && $spco->checkout->transaction instanceof EE_Transaction ) {
-			$registrations = $spco->checkout->transaction->registrations( $spco->checkout->reg_cache_where_params, TRUE );
+			$registrations = $spco->checkout->transaction->registrations( $spco->checkout->reg_cache_where_params, true );
 		}
 		return $registrations;
 	}

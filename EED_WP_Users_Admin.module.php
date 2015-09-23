@@ -257,6 +257,7 @@ class EED_WP_Users_Admin  extends EED_Module {
 				$att->set_email( $user->user_email );
 				$att->set_fname( $user->first_name );
 				$att->set_lname( $user->last_name );
+				$att->set( 'ATT_bio', $user->user_description );
 				$att->save();
 			}
 		}
@@ -294,7 +295,8 @@ class EED_WP_Users_Admin  extends EED_Module {
 				'ID' => $user_id,
 				'first_name' => $attendee->fname(),
 				'last_name' => $attendee->lname(),
-				'user_email' => $attendee->email()
+				'user_email' => $attendee->email(),
+				'description' => $attendee->get( 'ATT_bio' ),
 				)
 			);
 		return;
@@ -361,7 +363,8 @@ class EED_WP_Users_Admin  extends EED_Module {
 		$att = EE_Attendee::new_instance( array(
 			'ATT_fname' => $user->first_name,
 			'ATT_lname' => $user->last_name,
-			'ATT_email' => $user->user_email
+			'ATT_email' => $user->user_email,
+			'ATT_bio' => $user->user_description,
 			));
 		$att->save();
 

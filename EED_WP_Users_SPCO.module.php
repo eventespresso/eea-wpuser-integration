@@ -55,7 +55,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 		add_filter( 'FHEE__EEH_Form_Fields__generate_question_groups_html__after_question_group_questions', array( 'EED_WP_Users_SPCO', 'primary_reg_sync_messages' ), 10, 4 );
 
-		add_filter('FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value', array('EED_WP_Users_SPCO', 'filter_answer_for_wpuser'), 10, 3);
+		add_filter('FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value', array('EED_WP_Users_SPCO', 'filter_answer_for_wpuser'), 10, 4);
 		add_filter( 'FHEE_EE_Single_Page_Checkout__save_registration_items__find_existing_attendee', array( 'EED_WP_Users_SPCO', 'maybe_sync_existing_attendee' ), 10, 3 );
 
 		add_filter( 'FHEE__EE_SPCO_Reg_Step_Attendee_Information___process_registrations__pre_registration_process', array( 'EED_WP_Users_SPCO', 'verify_user_access' ), 10, 6 );
@@ -84,7 +84,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		//hook into filters/actions done on ajax but ONLY EE_FRONT_AJAX requests
 		if (  EE_FRONT_AJAX ) {
 			add_filter( 'FHEE__EEH_Form_Fields__generate_question_groups_html__after_question_group_questions', array( 'EED_WP_Users_SPCO', 'primary_reg_sync_messages' ), 10, 4 );
-			add_filter('FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value', array('EED_WP_Users_SPCO', 'filter_answer_for_wpuser'), 10, 3);
+			add_filter('FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value', array('EED_WP_Users_SPCO', 'filter_answer_for_wpuser'), 10, 4);
 			add_filter( 'FHEE_EE_Single_Page_Checkout__save_registration_items__find_existing_attendee', array( 'EED_WP_Users_SPCO', 'maybe_sync_existing_attendee' ), 10, 3 );
 
 			add_filter( 'FHEE__EE_SPCO_Reg_Step_Attendee_Information___process_registrations__pre_registration_process', array( 'EED_WP_Users_SPCO', 'verify_user_access' ), 10, 6 );
@@ -235,7 +235,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * @param type $question_id
 	 * @return type
 	 */
-	public static function filter_answer_for_wpuser($value, EE_Registration $registration, $question_id) {
+	public static function filter_answer_for_wpuser($value, EE_Registration $registration, $question_id, $system_id = null ) {
 		//only fill for primary registrant
 		if ( ! $registration->is_primary_registrant() ) {
 			return $value;
@@ -243,14 +243,45 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 		if ( empty($value) ) {
 			$current_user = wp_get_current_user();
-
-			//backward compat handling for different constants that may be available
-			$firstname = defined( 'EEM_Attendee::system_question_fname' ) ? EEM_Attendee::system_question_fname : EEM_Attendee::fname_question_id;
-			$lastname = defined( 'EEM_Attendee::system_question_lname' ) ? EEM_Attendee::system_question_lname : EEM_Attendee::lname_question_id;
-			$email = defined( 'EEM_Attendee::system_question_email' ) ? EEM_Attendee::system_question_email : EEM_Attendee::email_question_id;
+                        
+                        /*there was a temporary bug in EE core relating to $question_id being passed
+                         * in 4.8.10 it was a question's ID (eg 23)
+                         * but in 4.8.11 it was changed to a SYSTEM ID (eg 'email') 
+                         * (and the new constants, like EEM_Attendee::system_question_fname, were introduced)
+                         * but soon thereafter in order to fix that bug it was changed 
+                         * BACK to a proper question ID (eg 23) and a new parameter was passed,
+                         * $system_id
+                         */
+                        if( is_numeric( $question_id ) && ! defined( 'EEM_Attendee::system_question_fname' ) ) {
+                            //4.8.10-style. Use the old constants
+                            $firstname = EEM_Attendee::fname_question_id;
+                            $lastname = EEM_Attendee::lname_question_id;
+                            $email = EEM_Attendee::email_question_id;
+                            $id_to_use = $question_id;
+                        } elseif( ! is_numeric( $question_id ) && defined( 'EEM_Attendee::system_question_fname' ) ) {
+                            //4.8.11-style. Use the new constants
+                            $firstname = EEM_Attendee::system_question_fname;
+                            $lastname = EEM_Attendee::system_question_lname;
+                            $email = EEM_Attendee::system_question_email;
+                            $id_to_use = $question_id;
+                        } elseif( is_numeric( $question_id ) && defined( 'EEM_Attendee::system_question_fname' ) ) {
+                            //4.8.12-style. Use the new constants and the $system_id
+                            $firstname = EEM_Attendee::system_question_fname;
+                            $lastname = EEM_Attendee::system_question_lname;
+                            $email = EEM_Attendee::system_question_email;
+                            $id_to_use = $system_id;
+                        } else {
+                            // ! is_numeric( $question_id ) && defined( 'EEM_Attendee::system_question_fname' )
+                            //weird shouldn't ever happen. Just use the old default
+                            $firstname = EEM_Attendee::fname_question_id;
+                            $lastname = EEM_Attendee::lname_question_id;
+                            $email = EEM_Attendee::email_question_id;
+                            $id_to_use = $question_id;
+                        }
+                        
 
 			if ( $current_user instanceof WP_User ) {
-				switch ( $question_id ) {
+				switch ( $id_to_use ) {
 
 					case $firstname :
 						$value = $current_user->get( 'first_name' );

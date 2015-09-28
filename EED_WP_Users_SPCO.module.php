@@ -232,7 +232,9 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * Added to filter that processes the return to the registration form of whether and answer to the question exists for that
 	 * @param type $value
 	 * @param EE_Registration $registration
-	 * @param type $question_id
+	 * @param int|string $question_id in 4.8.10 and 4.8.12 it is numeric (eg 23) 
+         * but in 4.8.11 it is a system ID like "email"
+         * @param string $system_id passed in 4.8.12+ of EE core
 	 * @return type
 	 */
 	public static function filter_answer_for_wpuser($value, EE_Registration $registration, $question_id, $system_id = null ) {

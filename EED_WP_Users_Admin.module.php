@@ -54,6 +54,7 @@ class EED_WP_Users_Admin  extends EED_Module {
 		add_action('AHEE__event_tickets_datetime_ticket_row_template__advanced_details_end', array('EED_WP_Users_Admin', 'insert_ticket_meta_interface'), 10, 2);
 		add_action( 'AHEE__espresso_events_Pricing_Hooks___update_tkts_new_ticket', array( 'EED_WP_Users_Admin', 'update_capability_on_ticket') , 10, 4 );
 		add_action( 'AHEE__espresso_events_Pricing_Hooks___update_tkts_update_ticket', array( 'EED_WP_Users_Admin', 'update_capability_on_ticket' ), 10, 4 );
+		add_action( 'AHEE__espresso_events_Pricing_Hooks___update_tkts_new_default_ticket', array( 'EED_WP_Users_Admin', 'update_capability_on_ticket' ), 10, 4 );
 	}
 
 
@@ -812,14 +813,16 @@ class EED_WP_Users_Admin  extends EED_Module {
 	 * @param EE_Ticket $tkt
 	 * @param int         $tkt_row       The ticket row this ticket corresponds with (used for knowing
 	 *                                   	   what form element to retrieve from).
-	 * @param array    $tkt_form_data The original incoming ticket form data.
+	 * @param array | EE_Ticket   $tkt_form_data The original incoming ticket form data OR the original created EE_Ticket from that form data
+	 *                                           depending on which hook this callback is called on.
 	 * @param array    $all_form_data All incoming form data for ticket editor (includes datetime data)
 	 *
 	 * @return void      This is an action callback so returns are ignored.
 	 */
 	public static function update_capability_on_ticket( EE_Ticket $tkt, $tkt_row, $tkt_form_data, $all_form_data ) {
 		try {
-			$form = self::_get_ticket_capability_required_form($tkt_row, $tkt->ID());
+			$ticket_id = $tkt_form_data instanceof EE_Ticket ? $tkt_form_data->ID() : $tkt->ID();
+			$form = self::_get_ticket_capability_required_form( $tkt_row, $ticket_id );
 			if ( $form->was_submitted() ) {
 				$form->receive_form_submission();
 				if ( $form->is_valid() ) {

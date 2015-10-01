@@ -244,19 +244,24 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		if ( empty($value) ) {
 			$current_user = wp_get_current_user();
 
-			if ($current_user instanceof WP_User) {
-				switch ($question_id) {
+			//backward compat handling for different constants that may be available
+			$firstname = defined( 'EEM_Attendee::system_question_fname' ) ? EEM_Attendee::system_question_fname : EEM_Attendee::fname_question_id;
+			$lastname = defined( 'EEM_Attendee::system_question_lname' ) ? EEM_Attendee::system_question_lname : EEM_Attendee::lname_question_id;
+			$email = defined( 'EEM_Attendee::system_question_email' ) ? EEM_Attendee::system_question_email : EEM_Attendee::email_question_id;
 
-					case EEM_Attendee::system_question_fname:
-						$value = $current_user->get('first_name');
+			if ( $current_user instanceof WP_User ) {
+				switch ( $question_id ) {
+
+					case $firstname :
+						$value = $current_user->get( 'first_name' );
 						break;
 
-					case EEM_Attendee::system_question_lname:
-						$value = $current_user->get('last_name');
+					case $lastname :
+						$value = $current_user->get( 'last_name' );
 						break;
 
-					case EEM_Attendee::system_question_email:
-						$value = $current_user->get('user_email');
+					case $email :
+						$value = $current_user->get( 'user_email' );
 						break;
 
 					default:

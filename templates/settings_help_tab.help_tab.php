@@ -22,10 +22,7 @@
 		<?php esc_html_e( 'When false:', 'event_espresso' ); ?>
 		<ul>
 			<li>
-				<?php esc_html_e( 'If the logged in user has never had a relationship set between the user and the contact record, the relationship will be created on the initial registration between the contact for the primary registration and this user.', 'event_espresso' ); ?>
-			</li>
-			<li>
-				<?php esc_html_e( 'On subsequent registrations by this user, if the contact details for the primary registrant are changed (personal question group), then a NEW contact record is created and there is NO relationship setup between this user and this new contact. The existing contact relationship is preserved.', 'event_espresso' ); ?>
+				<?php esc_html_e( 'The only time the contact and related registration will be attached to the logged in user is if the user does not change the first name, last name, or email address in the pre-populated fields for the first registration in the registration form.', 'event_espresso' ); ?>
 			</li>
 		</ul>
 	</p>

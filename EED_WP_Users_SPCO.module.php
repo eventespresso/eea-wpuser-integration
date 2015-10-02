@@ -565,12 +565,37 @@ class EED_WP_Users_SPCO  extends EED_Module {
 				do_action( 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_updated', $user, $attendee, $registration );
 			}
 
-			//failsafe just in case this is a logged in user not created by this system that has never had an attendee record attached.
+			//failsafe just in case this is a logged in user not created by this system that has never had an attendee record.
 			$att_id = empty( $att_id ) ? get_user_option( 'EE_Attendee_ID', $user->ID ) : $att_id;
-			if ( empty( $att_id ) ) {
+			if ( empty( $att_id ) && EED_WP_Users_SPCO::_can_attach_user_to_attendee( $attendee, $user ) ) {
 				update_user_option( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
 			}
 		} //end registrations loop
+	}
+
+
+
+
+	/**
+	 * This is used to verify whether its okay to attach an attendee to a user.
+	 * It compares the firstname, lastname and email address of the attendee with the first name, last name, and email address
+	 * of the given WP_User profile.  If there is a mismatch, then no attachment can happen.  If there is a match, then
+	 * we will attach.
+	 *
+	 * A pre check is done for EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact and if that's
+	 * true, then we return true.
+	 * @param EE_Attendee $attendee
+	 * @param WP_User     $user
+	 * @return bool       True means the user can be attached to the attendee, false means it cannot be attached.
+	 */
+	protected function _can_attach_user_to_attendee( EE_Attendee $attendee, WP_User $user ) {
+		return
+			EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact
+			|| (
+				$attendee->fname() === $user->first_name
+				&& $attendee->lname() === $user->last_name
+				&& $attendee->email() === $user->user_email
+			);
 	}
 
 

@@ -47,6 +47,12 @@ $ticket = $registration->ticket();
 			                      . '<span class="dashicons dashicons-media-default ee-icon-size-18"></span></a>';
 		}
 
+		//invoice link?
+		if ( $registration->is_primary_registrant() && $registration->invoice_url() ) {
+			$actions['invoice'] = '<a aria-label="' . __( 'Link to view invoice', 'event_espresso' ) . '" href="' . $registration->invoice_url() . '">'
+			                      . '<span class="dashicons dashicons-media-spreadsheet TEST ee-icon-size-18"></span></a>';
+		}
+
 		//filter actions
 		$actions = apply_filters( 'FHEE__EES_Espresso_My_Events__actions',
 			$actions,

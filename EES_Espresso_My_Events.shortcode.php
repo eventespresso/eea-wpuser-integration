@@ -135,7 +135,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			return apply_filters(
 				'FHEE__Espresso_My_Events__process_shortcode__redirect_to_login_instructions',
 				'<a class="ee-wpui-login-link" href="' . add_query_arg( array( 'redirect_to' => $redirect_url ), site_url( '/wp-login.php') ) . '">'
-				. esc_html__( 'Login to see your events.', 'event_espresso' ) . '</a>'
+				. esc_html__( 'Login to see your registrations.', 'event_espresso' ) . '</a>'
 			);
 		}
 
@@ -189,7 +189,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			'FHEE__EES_Espresso_My_Events__process_shortcode__default_shortcode_atts',
 			array(
 				'template' => 'event_section',
-				'your_events_title' => esc_html__( 'Your Events', 'event_espresso' ),
+				'your_events_title' => esc_html__( 'Your Registrations', 'event_espresso' ),
 				'your_tickets_title' => esc_html__( 'Your Tickets', 'event_espresso' ),
 				'per_page' => 100,
 				'with_wrapper' => $with_wrapper

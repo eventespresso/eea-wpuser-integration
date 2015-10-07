@@ -55,7 +55,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 		add_filter( 'FHEE__EEH_Form_Fields__generate_question_groups_html__after_question_group_questions', array( 'EED_WP_Users_SPCO', 'primary_reg_sync_messages' ), 10, 4 );
 
-		add_filter('FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value', array('EED_WP_Users_SPCO', 'filter_answer_for_wpuser'), 10, 3);
+		add_filter('FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value', array('EED_WP_Users_SPCO', 'filter_answer_for_wpuser'), 10, 4);
 		add_filter( 'FHEE_EE_Single_Page_Checkout__save_registration_items__find_existing_attendee', array( 'EED_WP_Users_SPCO', 'maybe_sync_existing_attendee' ), 10, 3 );
 
 		add_filter( 'FHEE__EE_SPCO_Reg_Step_Attendee_Information___process_registrations__pre_registration_process', array( 'EED_WP_Users_SPCO', 'verify_user_access' ), 10, 6 );
@@ -84,7 +84,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		//hook into filters/actions done on ajax but ONLY EE_FRONT_AJAX requests
 		if (  EE_FRONT_AJAX ) {
 			add_filter( 'FHEE__EEH_Form_Fields__generate_question_groups_html__after_question_group_questions', array( 'EED_WP_Users_SPCO', 'primary_reg_sync_messages' ), 10, 4 );
-			add_filter('FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value', array('EED_WP_Users_SPCO', 'filter_answer_for_wpuser'), 10, 3);
+			add_filter('FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value', array('EED_WP_Users_SPCO', 'filter_answer_for_wpuser'), 10, 4);
 			add_filter( 'FHEE_EE_Single_Page_Checkout__save_registration_items__find_existing_attendee', array( 'EED_WP_Users_SPCO', 'maybe_sync_existing_attendee' ), 10, 3 );
 
 			add_filter( 'FHEE__EE_SPCO_Reg_Step_Attendee_Information___process_registrations__pre_registration_process', array( 'EED_WP_Users_SPCO', 'verify_user_access' ), 10, 6 );
@@ -154,7 +154,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * @return string                                content to retun
 	 */
 	public static function primary_reg_sync_messages( $content, EE_Registration $registration, EE_Question_Group $question_group, EE_SPCO_Reg_Step_Attendee_Information $spco ) {
-		if ( ! is_user_logged_in() || ( is_user_logged_in() && ! $registration->is_primary_registrant() ) || $question_group->ID() != EEM_Question_Group::system_personal ) {
+		if ( ( ! is_user_logged_in() || ( is_user_logged_in() && ! $registration->is_primary_registrant() ) || $question_group->ID() != EEM_Question_Group::system_personal ) || ! EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact ) {
 			return $content;
 		}
 
@@ -232,10 +232,12 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * Added to filter that processes the return to the registration form of whether and answer to the question exists for that
 	 * @param type $value
 	 * @param EE_Registration $registration
-	 * @param type $question_id
+	 * @param int|string $question_id in 4.8.10 and 4.8.12 it is numeric (eg 23) 
+         * but in 4.8.11 it is a system ID like "email"
+         * @param string $system_id passed in 4.8.12+ of EE core
 	 * @return type
 	 */
-	public static function filter_answer_for_wpuser($value, EE_Registration $registration, $question_id) {
+	public static function filter_answer_for_wpuser($value, EE_Registration $registration, $question_id, $system_id = null ) {
 		//only fill for primary registrant
 		if ( ! $registration->is_primary_registrant() ) {
 			return $value;
@@ -243,14 +245,45 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 		if ( empty($value) ) {
 			$current_user = wp_get_current_user();
-
-			//backward compat handling for different constants that may be available
-			$firstname = defined( 'EEM_Attendee::system_question_fname' ) ? EEM_Attendee::system_question_fname : EEM_Attendee::fname_question_id;
-			$lastname = defined( 'EEM_Attendee::system_question_lname' ) ? EEM_Attendee::system_question_lname : EEM_Attendee::lname_question_id;
-			$email = defined( 'EEM_Attendee::system_question_email' ) ? EEM_Attendee::system_question_email : EEM_Attendee::email_question_id;
+                        
+                        /*there was a temporary bug in EE core relating to $question_id being passed
+                         * in 4.8.10 it was a question's ID (eg 23)
+                         * but in 4.8.11 it was changed to a SYSTEM ID (eg 'email') 
+                         * (and the new constants, like EEM_Attendee::system_question_fname, were introduced)
+                         * but soon thereafter in order to fix that bug it was changed 
+                         * BACK to a proper question ID (eg 23) and a new parameter was passed,
+                         * $system_id
+                         */
+                        if( is_numeric( $question_id ) && ! defined( 'EEM_Attendee::system_question_fname' ) ) {
+                            //4.8.10-style. Use the old constants
+                            $firstname = EEM_Attendee::fname_question_id;
+                            $lastname = EEM_Attendee::lname_question_id;
+                            $email = EEM_Attendee::email_question_id;
+                            $id_to_use = $question_id;
+                        } elseif( ! is_numeric( $question_id ) && defined( 'EEM_Attendee::system_question_fname' ) ) {
+                            //4.8.11-style. Use the new constants
+                            $firstname = EEM_Attendee::system_question_fname;
+                            $lastname = EEM_Attendee::system_question_lname;
+                            $email = EEM_Attendee::system_question_email;
+                            $id_to_use = $question_id;
+                        } elseif( is_numeric( $question_id ) && defined( 'EEM_Attendee::system_question_fname' ) ) {
+                            //4.8.12-style. Use the new constants and the $system_id
+                            $firstname = EEM_Attendee::system_question_fname;
+                            $lastname = EEM_Attendee::system_question_lname;
+                            $email = EEM_Attendee::system_question_email;
+                            $id_to_use = $system_id;
+                        } else {
+                            // ! is_numeric( $question_id ) && defined( 'EEM_Attendee::system_question_fname' )
+                            //weird shouldn't ever happen. Just use the old default
+                            $firstname = EEM_Attendee::fname_question_id;
+                            $lastname = EEM_Attendee::lname_question_id;
+                            $email = EEM_Attendee::email_question_id;
+                            $id_to_use = $question_id;
+                        }
+                        
 
 			if ( $current_user instanceof WP_User ) {
-				switch ( $question_id ) {
+				switch ( $id_to_use ) {
 
 					case $firstname :
 						$value = $current_user->get( 'first_name' );
@@ -387,6 +420,9 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * registration, then we will make sure we're always updating the existing attendee record
 	 * attached to the wp_user regardless of what might have been detected by spco.
 	 *
+	 * However, behaviour is controlled by EE_Config->addons->user_integration->sync_user_with_contact and no syncing will
+	 * happen if this is set to false and there is no existing relationship between a contact and a wpuser.
+	 *
 	 * @param mixed null|EE_Attendee          $existing_attendee Possibly an existing attendee
 	 *                                        					  already detected by SPCO
 	 * @param EE_Registration $registration
@@ -415,12 +451,14 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		 * what is attached to the user, then we'll change the firstname and lastname but not the
 		 * email address.  Otherwise we could end up with two wpusers in the system with the
 		 * same email address.
+		 *
+		 * Here we also skip the user sync if the EE_WPUsers_Config->sync_user_with_contact option is false
 		 */
-		if ( ! $att instanceof EE_Attendee ) {
+		if ( ! $att instanceof EE_Attendee || ! EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact ) {
 			return $existing_attendee;
 		}
 
-		if ( $existing_attendee instanceof EE_Attendee && $att->ID() != $existing_attendee->ID() ) {
+		if ( $existing_attendee instanceof EE_Attendee && $att->ID() !== $existing_attendee->ID() ) {
 			//only change first and last name for att, we'll leave the email address alone regardless of what its at.
 			if ( ! empty( $attendee_data['ATT_fname'] ) ) {
 				$att->set_fname( $attendee_data['ATT_fname'] );
@@ -516,18 +554,18 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 				$password = wp_generate_password( 12, false );
 				//remove our action for creating contacts on creating user because we don't want to loop!
-				remove_action( 'user_register', array( 'EED_WP_Users_Admin', 'sync_with_contact') );
+				remove_action( 'user_register', array( 'EED_WP_Users_Admin', 'sync_with_contact' ) );
 				$user_id = wp_create_user(
 					apply_filters(
 						'FHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__username',
-						 $attendee->email(),
-						 $password,
-						 $registration
+						$attendee->email(),
+						$password,
+						$registration
 					),
 					$password,
 					$attendee->email()
 				);
-				$user_created = TRUE;
+				$user_created = true;
 				if ( $user_id instanceof WP_Error ) {
 					return; //get out because something went wrong with creating the user.
 				}
@@ -535,36 +573,62 @@ class EED_WP_Users_SPCO  extends EED_Module {
 				update_user_option( $user->ID, 'description', apply_filters( 'FHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_description_field', __( 'Registered via event registration form', 'event_espresso' ), $user, $attendee, $registration ) );
 			}
 
-			//remove our existing action for updating users via saves in the admin to prevent recursion
-			remove_action( 'profile_update', array( 'EED_WP_Users_Admin', 'sync_with_contact' ) );
-			wp_update_user(
-				array(
-					'ID' => $user->ID,
-					'nickname' => $attendee->fname(),
-					'display_name' => $attendee->full_name(),
-					'first_name' => $attendee->fname(),
-					'last_name' => $attendee->lname()
+			// only do the below if syncing is enabled.
+			if ( $user_created || EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact ) {
+				//remove our existing action for updating users via saves in the admin to prevent recursion
+				remove_action( 'profile_update', array( 'EED_WP_Users_Admin', 'sync_with_contact' ) );
+				wp_update_user(
+					array(
+						'ID'           => $user->ID,
+						'nickname'     => $attendee->fname(),
+						'display_name' => $attendee->full_name(),
+						'first_name'   => $attendee->fname(),
+						'last_name'    => $attendee->lname()
 					)
 				);
-
+			}
 
 			//if user created then send notification and attach attendee to user
 			if ( $user_created ) {
 				do_action( 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_created', $user, $attendee, $registration, $password );
 				//set user role
-				$user->set_role( EE_WPUsers::default_user_create_role($event) );
+				$user->set_role( EE_WPUsers::default_user_create_role( $event ) );
 				update_user_option( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
 			} else {
 				do_action( 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_updated', $user, $attendee, $registration );
 			}
 
-			//failsafe just in case this is a logged in user not created by this system that has never had an attendee record attached.
+			//failsafe just in case this is a logged in user not created by this system that has never had an attendee record.
 			$att_id = empty( $att_id ) ? get_user_option( 'EE_Attendee_ID', $user->ID ) : $att_id;
-			if ( empty( $att_id ) ) {
+			if ( empty( $att_id ) && EED_WP_Users_SPCO::_can_attach_user_to_attendee( $attendee, $user ) ) {
 				update_user_option( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
 			}
-
 		} //end registrations loop
+	}
+
+
+
+
+	/**
+	 * This is used to verify whether its okay to attach an attendee to a user.
+	 * It compares the firstname, lastname and email address of the attendee with the first name, last name, and email address
+	 * of the given WP_User profile.  If there is a mismatch, then no attachment can happen.  If there is a match, then
+	 * we will attach.
+	 *
+	 * A pre check is done for EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact and if that's
+	 * true, then we return true.
+	 * @param EE_Attendee $attendee
+	 * @param WP_User     $user
+	 * @return bool       True means the user can be attached to the attendee, false means it cannot be attached.
+	 */
+	protected function _can_attach_user_to_attendee( EE_Attendee $attendee, WP_User $user ) {
+		return
+			EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact
+			|| (
+				$attendee->fname() === $user->first_name
+				&& $attendee->lname() === $user->last_name
+				&& $attendee->email() === $user->user_email
+			);
 	}
 
 
@@ -606,7 +670,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	public static function _get_registrations( EE_SPCO_Reg_Step_Attendee_Information $spco ) {
 		$registrations = array();
 		if ( $spco->checkout instanceof EE_Checkout && $spco->checkout->transaction instanceof EE_Transaction ) {
-			$registrations = $spco->checkout->transaction->registrations( $spco->checkout->reg_cache_where_params, TRUE );
+			$registrations = $spco->checkout->transaction->registrations( $spco->checkout->reg_cache_where_params, true );
 		}
 		return $registrations;
 	}

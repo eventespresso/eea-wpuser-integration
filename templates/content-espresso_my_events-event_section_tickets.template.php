@@ -42,7 +42,7 @@ $ticket = $registration->ticket();
 		}
 
 		//receipt link?
-		if ( $registration->is_primary_registrant() ) {
+		if ( $registration->is_primary_registrant() && $registration->receipt_url() ) {
 			$actions['receipt'] = '<a aria-label="' . __( 'Link to view receipt', 'event_espresso' ) . '" href="' . $registration->receipt_url() . '">'
 			                      . '<span class="dashicons dashicons-media-default ee-icon-size-18"></span></a>';
 		}

@@ -154,7 +154,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * @return string                                content to retun
 	 */
 	public static function primary_reg_sync_messages( $content, EE_Registration $registration, EE_Question_Group $question_group, EE_SPCO_Reg_Step_Attendee_Information $spco ) {
-		if ( ! is_user_logged_in() || ( is_user_logged_in() && ! $registration->is_primary_registrant() ) || $question_group->ID() != EEM_Question_Group::system_personal ) {
+		if ( ( ! is_user_logged_in() || ( is_user_logged_in() && ! $registration->is_primary_registrant() ) || $question_group->ID() != EEM_Question_Group::system_personal ) || ! EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact ) {
 			return $content;
 		}
 
@@ -418,6 +418,9 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * registration, then we will make sure we're always updating the existing attendee record
 	 * attached to the wp_user regardless of what might have been detected by spco.
 	 *
+	 * However, behaviour is controlled by EE_Config->addons->user_integration->sync_user_with_contact and no syncing will
+	 * happen if this is set to false and there is no existing relationship between a contact and a wpuser.
+	 *
 	 * @param mixed null|EE_Attendee          $existing_attendee Possibly an existing attendee
 	 *                                        					  already detected by SPCO
 	 * @param EE_Registration $registration
@@ -446,12 +449,14 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		 * what is attached to the user, then we'll change the firstname and lastname but not the
 		 * email address.  Otherwise we could end up with two wpusers in the system with the
 		 * same email address.
+		 *
+		 * Here we also skip the user sync if the EE_WPUsers_Config->sync_user_with_contact option is false
 		 */
-		if ( ! $att instanceof EE_Attendee ) {
+		if ( ! $att instanceof EE_Attendee || ! EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact ) {
 			return $existing_attendee;
 		}
 
-		if ( $existing_attendee instanceof EE_Attendee && $att->ID() != $existing_attendee->ID() ) {
+		if ( $existing_attendee instanceof EE_Attendee && $att->ID() !== $existing_attendee->ID() ) {
 			//only change first and last name for att, we'll leave the email address alone regardless of what its at.
 			if ( ! empty( $attendee_data['ATT_fname'] ) ) {
 				$att->set_fname( $attendee_data['ATT_fname'] );
@@ -547,18 +552,18 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 				$password = wp_generate_password( 12, false );
 				//remove our action for creating contacts on creating user because we don't want to loop!
-				remove_action( 'user_register', array( 'EED_WP_Users_Admin', 'sync_with_contact') );
+				remove_action( 'user_register', array( 'EED_WP_Users_Admin', 'sync_with_contact' ) );
 				$user_id = wp_create_user(
 					apply_filters(
 						'FHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__username',
-						 $attendee->email(),
-						 $password,
-						 $registration
+						$attendee->email(),
+						$password,
+						$registration
 					),
 					$password,
 					$attendee->email()
 				);
-				$user_created = TRUE;
+				$user_created = true;
 				if ( $user_id instanceof WP_Error ) {
 					return; //get out because something went wrong with creating the user.
 				}
@@ -566,36 +571,62 @@ class EED_WP_Users_SPCO  extends EED_Module {
 				update_user_option( $user->ID, 'description', apply_filters( 'FHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_description_field', __( 'Registered via event registration form', 'event_espresso' ), $user, $attendee, $registration ) );
 			}
 
-			//remove our existing action for updating users via saves in the admin to prevent recursion
-			remove_action( 'profile_update', array( 'EED_WP_Users_Admin', 'sync_with_contact' ) );
-			wp_update_user(
-				array(
-					'ID' => $user->ID,
-					'nickname' => $attendee->fname(),
-					'display_name' => $attendee->full_name(),
-					'first_name' => $attendee->fname(),
-					'last_name' => $attendee->lname()
+			// only do the below if syncing is enabled.
+			if ( $user_created || EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact ) {
+				//remove our existing action for updating users via saves in the admin to prevent recursion
+				remove_action( 'profile_update', array( 'EED_WP_Users_Admin', 'sync_with_contact' ) );
+				wp_update_user(
+					array(
+						'ID'           => $user->ID,
+						'nickname'     => $attendee->fname(),
+						'display_name' => $attendee->full_name(),
+						'first_name'   => $attendee->fname(),
+						'last_name'    => $attendee->lname()
 					)
 				);
-
+			}
 
 			//if user created then send notification and attach attendee to user
 			if ( $user_created ) {
 				do_action( 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_created', $user, $attendee, $registration, $password );
 				//set user role
-				$user->set_role( EE_WPUsers::default_user_create_role($event) );
+				$user->set_role( EE_WPUsers::default_user_create_role( $event ) );
 				update_user_option( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
 			} else {
 				do_action( 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_updated', $user, $attendee, $registration );
 			}
 
-			//failsafe just in case this is a logged in user not created by this system that has never had an attendee record attached.
+			//failsafe just in case this is a logged in user not created by this system that has never had an attendee record.
 			$att_id = empty( $att_id ) ? get_user_option( 'EE_Attendee_ID', $user->ID ) : $att_id;
-			if ( empty( $att_id ) ) {
+			if ( empty( $att_id ) && EED_WP_Users_SPCO::_can_attach_user_to_attendee( $attendee, $user ) ) {
 				update_user_option( $user->ID, 'EE_Attendee_ID', $attendee->ID() );
 			}
-
 		} //end registrations loop
+	}
+
+
+
+
+	/**
+	 * This is used to verify whether its okay to attach an attendee to a user.
+	 * It compares the firstname, lastname and email address of the attendee with the first name, last name, and email address
+	 * of the given WP_User profile.  If there is a mismatch, then no attachment can happen.  If there is a match, then
+	 * we will attach.
+	 *
+	 * A pre check is done for EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact and if that's
+	 * true, then we return true.
+	 * @param EE_Attendee $attendee
+	 * @param WP_User     $user
+	 * @return bool       True means the user can be attached to the attendee, false means it cannot be attached.
+	 */
+	protected function _can_attach_user_to_attendee( EE_Attendee $attendee, WP_User $user ) {
+		return
+			EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact
+			|| (
+				$attendee->fname() === $user->first_name
+				&& $attendee->lname() === $user->last_name
+				&& $attendee->email() === $user->user_email
+			);
 	}
 
 
@@ -637,7 +668,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	public static function _get_registrations( EE_SPCO_Reg_Step_Attendee_Information $spco ) {
 		$registrations = array();
 		if ( $spco->checkout instanceof EE_Checkout && $spco->checkout->transaction instanceof EE_Transaction ) {
-			$registrations = $spco->checkout->transaction->registrations( $spco->checkout->reg_cache_where_params, TRUE );
+			$registrations = $spco->checkout->transaction->registrations( $spco->checkout->reg_cache_where_params, true );
 		}
 		return $registrations;
 	}

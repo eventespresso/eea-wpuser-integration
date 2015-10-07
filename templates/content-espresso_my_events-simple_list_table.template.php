@@ -56,9 +56,15 @@
 		}
 
 		//receipt link?
-		if ( $registration->is_primary_registrant() ) {
+		if ( $registration->is_primary_registrant() && $registration->receipt_url() ) {
 			$actions['receipt'] = '<a aria-label="' . __( 'Link to view receipt', 'event_espresso' ) . '" href="' . $registration->receipt_url() . '">'
 				. '<span class="dashicons dashicons-media-default ee-icon-size-18"></span></a>';
+		}
+
+		//invoice link?
+		if ( $registration->is_primary_registrant() && $registration->invoice_url() ) {
+			$actions['invoice'] = '<a aria-label="' . __( 'Link to view invoice', 'event_espresso' ) . '" href="' . $registration->invoice_url() . '">'
+			                      . '<span class="dashicons dashicons-media-spreadsheet ee-icon-size-18"></span></a>';
 		}
 
 		//filter actions

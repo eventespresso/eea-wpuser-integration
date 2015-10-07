@@ -44,7 +44,7 @@ $pagination_html = EEH_Template::get_paging_html(
 					<th scope="col" class="espresso-my-events-event-th">
 						<?php echo apply_filters(
 							'FHEE__loop-espresso_my_events__table_header_event',
-							esc_html__( 'Event', 'event_espresso' ),
+							esc_html__( '', 'event_espresso' ),
 							$object_type,
 							$objects,
 							$template_slug,
@@ -107,7 +107,7 @@ $pagination_html = EEH_Template::get_paging_html(
 			<div class="no-events-container">
 				<p><?php echo apply_filters(
 					         'FHEE__loop-espresso_my_events__no_events_message',
-							 esc_html__( 'You have no events yet', 'event_espresso' ),
+							 esc_html__( 'You have no registrations yet', 'event_espresso' ),
 				             $object_type,
 				             $objects,
 				             $template_slug,

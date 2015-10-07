@@ -50,7 +50,7 @@ $ticket = $registration->ticket();
 		//invoice link?
 		if ( $registration->is_primary_registrant() && $registration->invoice_url() ) {
 			$actions['invoice'] = '<a aria-label="' . __( 'Link to view invoice', 'event_espresso' ) . '" href="' . $registration->invoice_url() . '">'
-			                      . '<span class="dashicons dashicons-media-spreadsheet TEST ee-icon-size-18"></span></a>';
+			                      . '<span class="dashicons dashicons-media-spreadsheet ee-icon-size-18"></span></a>';
 		}
 
 		//filter actions

@@ -151,7 +151,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * @param EE_Question_Group        $question_group
 	 * @param EE_SPCO_Reg_Step_Attendee_Information $spco
 	 *
-	 * @return string                                content to retun
+	 * @return string                                content to return
 	 */
 	public static function primary_reg_sync_messages( $content, EE_Registration $registration, EE_Question_Group $question_group, EE_SPCO_Reg_Step_Attendee_Information $spco ) {
 		if ( ( ! is_user_logged_in() || ( is_user_logged_in() && ! $registration->is_primary_registrant() ) || $question_group->ID() != EEM_Question_Group::system_personal ) || ! EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact ) {
@@ -232,7 +232,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * Added to filter that processes the return to the registration form of whether and answer to the question exists for that
 	 * @param type $value
 	 * @param EE_Registration $registration
-	 * @param int|string $question_id in 4.8.10 and 4.8.12 it is numeric (eg 23) 
+	 * @param int|string $question_id in 4.8.10 and 4.8.12 it is numeric (eg 23)
          * but in 4.8.11 it is a system ID like "email"
          * @param string $system_id passed in 4.8.12+ of EE core
 	 * @return type
@@ -245,12 +245,12 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 		if ( empty($value) ) {
 			$current_user = wp_get_current_user();
-                        
+
                         /*there was a temporary bug in EE core relating to $question_id being passed
                          * in 4.8.10 it was a question's ID (eg 23)
-                         * but in 4.8.11 it was changed to a SYSTEM ID (eg 'email') 
+                         * but in 4.8.11 it was changed to a SYSTEM ID (eg 'email')
                          * (and the new constants, like EEM_Attendee::system_question_fname, were introduced)
-                         * but soon thereafter in order to fix that bug it was changed 
+                         * but soon thereafter in order to fix that bug it was changed
                          * BACK to a proper question ID (eg 23) and a new parameter was passed,
                          * $system_id
                          */
@@ -280,7 +280,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
                             $email = EEM_Attendee::email_question_id;
                             $id_to_use = $question_id;
                         }
-                        
+
 
 			if ( $current_user instanceof WP_User ) {
 				switch ( $id_to_use ) {
@@ -827,12 +827,15 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * @return array an array of reg step configuration
 	 */
 	public static function register_login_reg_step( $reg_steps ) {
-		$reg_steps[5] = array(
-			'file_path' => EE_WPUSERS_PATH,
-			'class_name' => 'EE_SPCO_Reg_Step_WP_User_Login',
-			'slug' => 'wpuser_login',
-			'has_hooks' => false
-			);
+		array_unshift(
+			$reg_steps,
+			array(
+				'file_path'  => EE_WPUSERS_PATH,
+				'class_name' => 'EE_SPCO_Reg_Step_WP_User_Login',
+				'slug'       => 'wpuser_login',
+				'has_hooks'  => false
+			)
+		);
 		return $reg_steps;
 	}
 

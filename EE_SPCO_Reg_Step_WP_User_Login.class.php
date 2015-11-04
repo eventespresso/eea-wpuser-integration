@@ -42,7 +42,7 @@ class EE_SPCO_Reg_Step_WP_User_Login extends EE_SPCO_Reg_Step {
 	/**
 	 * Initialize the reg step
 	 *
-	 * @return void
+	 * @return boolean
 	 */
 	public function initialize_reg_step() {
 		//check if the any selected event in the checkout has forced login on.  If it doesn't then we remove this step.
@@ -53,12 +53,11 @@ class EE_SPCO_Reg_Step_WP_User_Login extends EE_SPCO_Reg_Step {
 				break;
 			}
 		}
-
 		if ( ! $require_login || ( $require_login && is_user_logged_in() ) ) {
-			$this->checkout->remove_reg_step( $this->_slug );
-			$this->checkout->reset_reg_steps();
-			return;
+			$this->checkout->skip_reg_step( $this->_slug );
+			return false;
 		}
+		return true;
 	}
 
 
@@ -141,7 +140,7 @@ class EE_SPCO_Reg_Step_WP_User_Login extends EE_SPCO_Reg_Step {
 			$this->checkout->json_response->set_return_data( $return_data );
 			return false;
 		}  else {
-			$this->checkout->current_step->set_completed();
+			$this->set_completed();
 			return true;
 		}
 

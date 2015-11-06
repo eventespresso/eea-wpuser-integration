@@ -24,7 +24,7 @@ class EE_WPUsers extends EE_Addon {
 		EE_Register_Addon::register(
 				'EE_WPUsers', array(
 				'version' => EE_WPUSERS_VERSION,
-				'min_core_version' => '4.6.0.alpha',
+				'min_core_version' => EE_WPUSERS_MIN_CORE_VERSION_REQUIRED,
 				'main_file_path' => EE_WPUSERS_PLUGIN_FILE,
 				'config_class' => 'EE_WPUsers_Config',
 				'config_name' => 'user_integration',

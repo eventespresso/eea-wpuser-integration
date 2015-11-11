@@ -360,7 +360,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 							 * responses, then they will need to also filter the stop_processing param at the end of this
 							 * method to return true;
 							 */
-							if ( apply_filters( 'EED_WP_Users_SPCO__verify_user_access__perform_email_user_match_check', true, $spco ) ) {
+							if ( apply_filters( 'EED_WP_Users_SPCO__verify_user_access__perform_email_user_match_check', true, $spco, $registration ) ) {
 
 								//we have a user for that email address.  If the person doing the transaction is logged in, let's verify that this email address matches theirs.
 								if ( is_user_logged_in() ) {

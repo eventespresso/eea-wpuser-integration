@@ -355,35 +355,43 @@ class EED_WP_Users_SPCO  extends EED_Module {
 								continue;
 							}
 
-							//we have a user for that email address.  If the person doing the transaction is logged in, let's verify that this email address matches theirs.
-							if ( is_user_logged_in() ) {
-								$current_user = get_userdata( get_current_user_id() );
-								if ( $current_user->user_email == $user->user_email ) {
-									continue;
+							/**
+							 * Allow plugin authors to skip this check.  If plugin authors want to return their own error
+							 * responses, then they will need to also filter the stop_processing param at the end of this
+							 * method to return true;
+							 */
+							if ( apply_filters( 'EED_WP_Users_SPCO__verify_user_access__perform_email_user_match_check', true, $spco, $registration ) ) {
+
+								//we have a user for that email address.  If the person doing the transaction is logged in, let's verify that this email address matches theirs.
+								if ( is_user_logged_in() ) {
+									$current_user = get_userdata( get_current_user_id() );
+									if ( $current_user->user_email == $user->user_email ) {
+										continue;
+									} else {
+										$error_message       = '<p>' . __( 'You have entered an email address that matches an existing user account in our system.  You can only submit registrations for your own account or for a person that does not exist in the system.  Please use a different email address.', 'event_espresso' ) . '</p>';
+										$stop_processing     = true;
+										$field_input_error[] = 'ee_reg_qstn-' . $registration->ID() . '-email';
+									}
 								} else {
-									$error_message = '<p>' . __('You have entered an email address that matches an existing user account in our system.  You can only submit registrations for your own account or for a person that does not exist in the system.  Please use a different email address.', 'event_espresso' ) . '</p>';
-									$stop_processing = TRUE;
+									//user is NOT logged in, so let's prompt them to log in.
+									$error_message = '<p>' . __( 'You have entered an email address that matches an existing user account in our system.  If this is your email address, please log in before continuing your registration. Otherwise, register with a different email address.', 'event_espresso' ) . '</p>';
+
+									/**
+									 * @todo ideally the redirect url would come
+									 * back to the same page after login.  For
+									 * now we're just utilizing js/ajax for login
+									 * processing so users with js supported
+									 * browsers will just stay on the loaded page.
+									 */
+									$error_message .= '<a class="ee-roundish ee-orange ee-button float-right ee-wpuser-login-button" href="' . wp_login_url( $spco->checkout->redirect_url ) . '">' . __( 'Login', 'event_espresso' ) . '</a>';
+									if ( get_option( 'users_can_register' ) ) {
+										$registration_url = ! EE_Registry::instance()->CFG->addons->user_integration->registration_page ? wp_registration_url() : EE_Registry::instance()->CFG->addons->user_integration->registration_page;
+										$error_message .= '<a class="ee-wpuser-register-link float-right" href="' . $registration_url . '">' . __( 'Register', 'event_espresso' ) . '</a>';
+									}
+									$error_message .= '<div style="clear:both"></div>';
+									$stop_processing     = true;
 									$field_input_error[] = 'ee_reg_qstn-' . $registration->ID() . '-email';
 								}
-							} else {
-								//user is NOT logged in, so let's prompt them to log in.
-								$error_message = '<p>' . __('You have entered an email address that matches an existing user account in our system.  If this is your email address, please log in before continuing your registration. Otherwise, register with a different email address.', 'event_espresso' ) .'</p>';
-
-								/**
-								 * @todo ideally the redirect url would come
-								 * back to the same page after login.  For
-								 * now we're just utilizing js/ajax for login
-								 * processing so users with js supported
-								 * browsers will just stay on the loaded page.
-								 */
-								$error_message .= '<a class="ee-roundish ee-orange ee-button float-right ee-wpuser-login-button" href="' . wp_login_url( $spco->checkout->redirect_url ) . '">' . __('Login', 'event_espresso') . '</a>';
-								if ( get_option( 'users_can_register' ) ) {
-									$registration_url = ! EE_Registry::instance()->CFG->addons->user_integration->registration_page ? wp_registration_url() : EE_Registry::instance()->CFG->addons->user_integration->registration_page;
-									$error_message .= '<a class="ee-wpuser-register-link float-right" href="' . $registration_url . '">' . __( 'Register', 'event_espresso' ) . '</a>';
-								}
-								$error_message .= '<div style="clear:both"></div>';
-								$stop_processing = TRUE;
-								$field_input_error[] = 'ee_reg_qstn-' . $registration->ID() . '-email';
 							}
 						}
 					}
@@ -391,6 +399,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 			}
 
 		}
+
 
 		if ( $stop_processing ) {
 			EE_Error::add_error( $error_message, __FILE__, __FUNCTION__, __LINE__ );
@@ -407,7 +416,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 			return $stop_processing;
 		}
 
-		return $stop_processing;
+		return apply_filters( 'EED_WP_Users_SPCO__verify_user_access__stop_processing', $stop_processing, $spco );
 	}
 
 

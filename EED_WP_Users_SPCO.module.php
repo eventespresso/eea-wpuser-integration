@@ -1,5 +1,5 @@
 <?php
-if ( ! defined('EVENT_ESPRESSO_VERSION')) exit('No direct script access allowed');
+if ( ! defined( 'EVENT_ESPRESSO_VERSION' ) ) exit( 'No direct script access allowed' );
 /**
  * This file contains the module for the EE WP Users addon
  *
@@ -55,20 +55,18 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 		add_filter( 'FHEE__EEH_Form_Fields__generate_question_groups_html__after_question_group_questions', array( 'EED_WP_Users_SPCO', 'primary_reg_sync_messages' ), 10, 4 );
 
-		add_filter('FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value', array('EED_WP_Users_SPCO', 'filter_answer_for_wpuser'), 10, 4);
+		add_filter( 'FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value', array( 'EED_WP_Users_SPCO', 'filter_answer_for_wpuser' ), 10, 4 );
 		add_filter( 'FHEE_EE_Single_Page_Checkout__save_registration_items__find_existing_attendee', array( 'EED_WP_Users_SPCO', 'maybe_sync_existing_attendee' ), 10, 3 );
 
 		add_filter( 'FHEE__EE_SPCO_Reg_Step_Attendee_Information___process_registrations__pre_registration_process', array( 'EED_WP_Users_SPCO', 'verify_user_access' ), 10, 6 );
 
-		add_action('AHEE__EE_Single_Page_Checkout__process_attendee_information__end', array('EED_WP_Users_SPCO', 'process_wpuser_for_attendee'), 10, 2);
+		add_action( 'AHEE__EE_Single_Page_Checkout__process_attendee_information__end', array( 'EED_WP_Users_SPCO', 'process_wpuser_for_attendee' ), 10, 2 );
 
 		//notifications
-		add_action( 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_created', array( 'EED_WP_Users_SPCO', 'new_user_notifications'), 10, 4 );
-
+		add_action( 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_created', array( 'EED_WP_Users_SPCO', 'new_user_notifications' ), 10, 4 );
 
 		//hook into spco for styles and scripts.
 		add_action( 'AHEE__EED_Single_Page_Checkout__enqueue_styles_and_scripts__attendee_information', array( 'EED_WP_Users_SPCO', 'enqueue_scripts_styles' ) );
-
 
 		//hook into spco for adding additional reg step
 		add_filter( 'AHEE__SPCO__load_reg_steps__reg_steps_to_load', array( 'EED_WP_Users_SPCO', 'register_login_reg_step' ) );
@@ -84,15 +82,15 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		//hook into filters/actions done on ajax but ONLY EE_FRONT_AJAX requests
 		if (  EE_FRONT_AJAX ) {
 			add_filter( 'FHEE__EEH_Form_Fields__generate_question_groups_html__after_question_group_questions', array( 'EED_WP_Users_SPCO', 'primary_reg_sync_messages' ), 10, 4 );
-			add_filter('FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value', array('EED_WP_Users_SPCO', 'filter_answer_for_wpuser'), 10, 4);
+			add_filter( 'FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value', array( 'EED_WP_Users_SPCO', 'filter_answer_for_wpuser' ), 10, 4 );
 			add_filter( 'FHEE_EE_Single_Page_Checkout__save_registration_items__find_existing_attendee', array( 'EED_WP_Users_SPCO', 'maybe_sync_existing_attendee' ), 10, 3 );
 
 			add_filter( 'FHEE__EE_SPCO_Reg_Step_Attendee_Information___process_registrations__pre_registration_process', array( 'EED_WP_Users_SPCO', 'verify_user_access' ), 10, 6 );
 
-			add_action('AHEE__EE_Single_Page_Checkout__process_attendee_information__end', array('EED_WP_Users_SPCO', 'process_wpuser_for_attendee'), 10, 2);
+			add_action( 'AHEE__EE_Single_Page_Checkout__process_attendee_information__end', array( 'EED_WP_Users_SPCO', 'process_wpuser_for_attendee' ), 10, 2 );
 
 			//notifications
-			add_action( 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_created', array( 'EED_WP_Users_SPCO', 'new_user_notifications'), 10, 4 );
+			add_action( 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_created', array( 'EED_WP_Users_SPCO', 'new_user_notifications' ), 10, 4 );
 		}
 
 		//ajax calls
@@ -113,11 +111,11 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * @return void
 	 */
 	public static function enqueue_scripts_styles( EED_Single_Page_Checkout $spco ) {
-		wp_register_script('ee-dialog', EE_PLUGIN_DIR_URL .  'core/admin/assets/ee-dialog-helper.js', array('jquery', 'jquery-ui-draggable'), EVENT_ESPRESSO_VERSION, TRUE );
-		wp_register_script( 'eea-wp-users-integration-spco', EE_WPUSERS_URL . 'assets/js/eea-wp-users-integration-spco.js', array( 'single_page_checkout', 'ee-dialog' ), EE_WPUSERS_VERSION, TRUE );
+		wp_register_script( 'ee-dialog', EE_PLUGIN_DIR_URL .  'core/admin/assets/ee-dialog-helper.js', array( 'jquery', 'jquery-ui-draggable' ), EVENT_ESPRESSO_VERSION, true );
+		wp_register_script( 'eea-wp-users-integration-spco', EE_WPUSERS_URL . 'assets/js/eea-wp-users-integration-spco.js', array( 'single_page_checkout', 'ee-dialog' ), EE_WPUSERS_VERSION, true );
 		wp_register_style( 'eea-wp-users-integration-spco-style', EE_WPUSERS_URL . 'assets/css/eea-wp-users-integration-spco.css', array(), EE_WPUSERS_VERSION );
 		wp_enqueue_script( 'eea-wp-users-integration-spco' );
-		wp_enqueue_style( 'eea-wp-users-integration-spco-style');
+		wp_enqueue_style( 'eea-wp-users-integration-spco-style' );
 
 		//add hidden login form in footer if user is not logged in that will get called if user needs to log in.
 		if ( ! is_user_logged_in() ) {
@@ -154,11 +152,22 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * @return string                                content to return
 	 */
 	public static function primary_reg_sync_messages( $content, EE_Registration $registration, EE_Question_Group $question_group, EE_SPCO_Reg_Step_Attendee_Information $spco ) {
-		if ( ( ! is_user_logged_in() || ( is_user_logged_in() && ! $registration->is_primary_registrant() ) || $question_group->ID() != EEM_Question_Group::system_personal ) || ! EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact ) {
+		if (
+			(
+				! is_user_logged_in()
+					||
+					(
+						is_user_logged_in()
+						&& ! $registration->is_primary_registrant()
+					)
+					|| $question_group->ID() !== EEM_Question_Group::system_personal
+			)
+			|| ! EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact
+		) {
 			return $content;
 		}
 
-		return '<br><div class="highlight-bg">' . sprintf( __('%1$sNote%2$s: Changes made in your Personal Information details will be synced with your user profile.', 'event_espresso' ), '<strong>', '</strong>' ) . '</div>' . $content;
+		return '<br><div class="highlight-bg">' . sprintf( __( '%1$sNote%2$s: Changes made in your Personal Information details will be synced with your user profile.', 'event_espresso' ), '<strong>', '</strong>' ) . '</div>' . $content;
 	}
 
 
@@ -188,14 +197,14 @@ class EED_WP_Users_SPCO  extends EED_Module {
 			'html_name' => 'ee_reg_qstn[' . $registration->ID() . '][' . $identifier .']',
 			'html_id' => 'ee_reg_qstn-' . $registration->ID() . '-' . $identifier,
 			'html_class' => 'ee-reg-qstn',
-			'required' => TRUE,
+			'required' => true,
 			'html_label_id' => 'ee_reg_qstn-' . $registration->ID() . '-' . $identifier,
 			'html_label_class' => 'ee-reg-qstn',
 			'html_label_text' => __( 'Sync changes with your user profile?', 'event_espresso' ),
-			'default' => TRUE
+			'default' => true,
 			);
 
-		$form_subsections[$identifier] = new EE_Yes_No_Input( $input_constructor_args );/**/
+		$form_subsections[ $identifier ] = new EE_Yes_No_Input( $input_constructor_args );/**/
 		return $form_subsections;
 	}
 
@@ -221,9 +230,9 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 */
 	public static function process_wp_user_inputs( $processed, EE_Registration $registration, $form_input, $input_value, EE_SPCO_Reg_Step_Attendee_Information $spco ) {
 		if ( $form_input == 'sync_with_user_profile' ) {
-			return TRUE;
+			return true;
 		}
-		return FALSE;
+		return false;
 	}
 
 
@@ -232,9 +241,8 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * Added to filter that processes the return to the registration form of whether and answer to the question exists for that
 	 * @param type $value
 	 * @param EE_Registration $registration
-	 * @param int|string $question_id in 4.8.10 and 4.8.12 it is numeric (eg 23)
-         * but in 4.8.11 it is a system ID like "email"
-         * @param string $system_id passed in 4.8.12+ of EE core
+	 * @param int|string $question_id in 4.8.10 and 4.8.12 it is numeric (eg 23) but in 4.8.11 it is a system ID like "email"
+	 * @param string $system_id passed in 4.8.12+ of EE core
 	 * @return type
 	 */
 	public static function filter_answer_for_wpuser($value, EE_Registration $registration, $question_id, $system_id = null ) {
@@ -246,41 +254,41 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		if ( empty($value) ) {
 			$current_user = wp_get_current_user();
 
-                        /*there was a temporary bug in EE core relating to $question_id being passed
-                         * in 4.8.10 it was a question's ID (eg 23)
-                         * but in 4.8.11 it was changed to a SYSTEM ID (eg 'email')
-                         * (and the new constants, like EEM_Attendee::system_question_fname, were introduced)
-                         * but soon thereafter in order to fix that bug it was changed
-                         * BACK to a proper question ID (eg 23) and a new parameter was passed,
-                         * $system_id
-                         */
-                        if( is_numeric( $question_id ) && ! defined( 'EEM_Attendee::system_question_fname' ) ) {
-                            //4.8.10-style. Use the old constants
-                            $firstname = EEM_Attendee::fname_question_id;
-                            $lastname = EEM_Attendee::lname_question_id;
-                            $email = EEM_Attendee::email_question_id;
-                            $id_to_use = $question_id;
-                        } elseif( ! is_numeric( $question_id ) && defined( 'EEM_Attendee::system_question_fname' ) ) {
-                            //4.8.11-style. Use the new constants
-                            $firstname = EEM_Attendee::system_question_fname;
-                            $lastname = EEM_Attendee::system_question_lname;
-                            $email = EEM_Attendee::system_question_email;
-                            $id_to_use = $question_id;
-                        } elseif( is_numeric( $question_id ) && defined( 'EEM_Attendee::system_question_fname' ) ) {
-                            //4.8.12-style. Use the new constants and the $system_id
-                            $firstname = EEM_Attendee::system_question_fname;
-                            $lastname = EEM_Attendee::system_question_lname;
-                            $email = EEM_Attendee::system_question_email;
-                            $id_to_use = $system_id;
-                        } else {
-                            // ! is_numeric( $question_id ) && defined( 'EEM_Attendee::system_question_fname' )
-                            //weird shouldn't ever happen. Just use the old default
-                            $firstname = EEM_Attendee::fname_question_id;
-                            $lastname = EEM_Attendee::lname_question_id;
-                            $email = EEM_Attendee::email_question_id;
-                            $id_to_use = $question_id;
-                        }
-
+			/**
+			 * there was a temporary bug in EE core relating to $question_id being passed
+			 * in 4.8.10 it was a question's ID (eg 23)
+			 * but in 4.8.11 it was changed to a SYSTEM ID (eg 'email')
+			 * (and the new constants, like EEM_Attendee::system_question_fname, were introduced)
+			 * but soon thereafter in order to fix that bug it was changed
+			 * BACK to a proper question ID (eg 23) and a new parameter was passed,
+			 * $system_id
+			 */
+			if ( is_numeric( $question_id ) && ! defined( 'EEM_Attendee::system_question_fname' ) ) {
+			    //4.8.10-style. Use the old constants
+			    $firstname = EEM_Attendee::fname_question_id;
+			    $lastname = EEM_Attendee::lname_question_id;
+			    $email = EEM_Attendee::email_question_id;
+			    $id_to_use = $question_id;
+			} elseif ( ! is_numeric( $question_id ) && defined( 'EEM_Attendee::system_question_fname' ) ) {
+			    //4.8.11-style. Use the new constants
+			    $firstname = EEM_Attendee::system_question_fname;
+			    $lastname = EEM_Attendee::system_question_lname;
+			    $email = EEM_Attendee::system_question_email;
+			    $id_to_use = $question_id;
+			} elseif ( is_numeric( $question_id ) && defined( 'EEM_Attendee::system_question_fname' ) ) {
+			    //4.8.12-style. Use the new constants and the $system_id
+			    $firstname = EEM_Attendee::system_question_fname;
+			    $lastname = EEM_Attendee::system_question_lname;
+			    $email = EEM_Attendee::system_question_email;
+			    $id_to_use = $system_id;
+			} else {
+			    // ! is_numeric( $question_id ) && defined( 'EEM_Attendee::system_question_fname' )
+			    //weird shouldn't ever happen. Just use the old default
+			    $firstname = EEM_Attendee::fname_question_id;
+			    $lastname = EEM_Attendee::lname_question_id;
+			    $email = EEM_Attendee::email_question_id;
+			    $id_to_use = $question_id;
+			}
 
 			if ( $current_user instanceof WP_User ) {
 				switch ( $id_to_use ) {
@@ -317,7 +325,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 *
 	 *
 	 * @param bool                                $stop_processing This is what the current process is set at. If
-	 *                                                             		  TRUE, then we should just return because
+	 *                                                             		  true, then we should just return because
 	 *                                                             		  it means another plugin already failed the
 	 *                                                             		  processing.
 	 * @param EE_Registration                       $registration
@@ -325,7 +333,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * @param array                                	       $valid_data      incoming post data.
 	 * @param EE_SPCO_Reg_Step_Attendee_Information $spco
 	 *
-	 * @return bool                                false to NOT stop the process, TRUE to stop the process.
+	 * @return bool                                false to NOT stop the process, true to stop the process.
 	 */
 	public static function verify_user_access( $stop_processing, $att_nmbr, EE_Registration $registration, $registrations, $valid_data, EE_SPCO_Reg_Step_Attendee_Information $spco ) {
 		$field_input_error = array();
@@ -343,8 +351,8 @@ class EED_WP_Users_SPCO  extends EED_Module {
 			}
 
 			$reg_url_link = $registration->reg_url_link();
-			if ( isset( $valid_data[$reg_url_link] ) ) {
-				foreach ( $valid_data[$reg_url_link]  as $form_section => $form_inputs ) {
+			if ( isset( $valid_data[ $reg_url_link ] ) ) {
+				foreach ( $valid_data[ $reg_url_link ]  as $form_section => $form_inputs ) {
 					if ( ! is_array( $form_inputs ) ) {
 						continue;
 					}
@@ -365,7 +373,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 								//we have a user for that email address.  If the person doing the transaction is logged in, let's verify that this email address matches theirs.
 								if ( is_user_logged_in() ) {
 									$current_user = get_userdata( get_current_user_id() );
-									if ( $current_user->user_email == $user->user_email ) {
+									if ( $current_user->user_email === $user->user_email ) {
 										continue;
 									} else {
 										$error_message       = '<p>' . __( 'You have entered an email address that matches an existing user account in our system.  You can only submit registrations for your own account or for a person that does not exist in the system.  Please use a different email address.', 'event_espresso' ) . '</p>';
@@ -397,9 +405,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 					}
 				}
 			}
-
 		}
-
 
 		if ( $stop_processing ) {
 			EE_Error::add_error( $error_message, __FILE__, __FUNCTION__, __LINE__ );
@@ -409,7 +415,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 					'show_login_form' => false,
 					'show_errors_in_context' => true,
 					'validation_error' => array(
-						'field' => $field_input_error
+						'field' => $field_input_error,
 						)
 					)
 				));
@@ -432,7 +438,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * However, behaviour is controlled by EE_Config->addons->user_integration->sync_user_with_contact and no syncing will
 	 * happen if this is set to false and there is no existing relationship between a contact and a wpuser.
 	 *
-	 * @param mixed null|EE_Attendee          $existing_attendee Possibly an existing attendee
+	 * @param null|EE_Attendee          $existing_attendee Possibly an existing attendee
 	 *                                        					  already detected by SPCO
 	 * @param EE_Registration $registration
 	 * @param array $attendee_data array of core personal data used to verify if existing attendee
@@ -452,7 +458,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		}
 
 		//existing attendee on user?
-		$att =  self::get_attendee_for_user( $user );
+		$att = self::get_attendee_for_user( $user );
 
 		/**
 		 * if there already IS an existing attendee then that means the system found one matching
@@ -518,12 +524,12 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * @return void
 	 */
 	public static function process_wpuser_for_attendee( EE_SPCO_Reg_Step_Attendee_Information $spco, $valid_data) {
-		$user_created = FALSE;
+		$user_created = false;
 		$att_id = '';
 
 		//use spco to get registrations from the
 		$registrations = self::_get_registrations( $spco );
-		foreach ($registrations as $registration) {
+		foreach ( $registrations as $registration ) {
 
 			//is this the primary registrant?  If not, continue
 			if ( ! $registration->is_primary_registrant() ) {
@@ -547,7 +553,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 				//does this user have the same att_id as the given att?  If NOT, then we do NOT update because it's possible there was a family member or something sharing the same email address but is a different attendee record.
 				$att_id = $user instanceof WP_User ? get_user_option( 'EE_Attendee_ID', $user->ID ) : $att_id;
-				if ( ! empty( $att_id ) && $att_id != $attendee->ID() ) {
+				if ( ! empty( $att_id ) && $att_id !== $attendee->ID() ) {
 					return;
 				}
 			}
@@ -758,15 +764,14 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		$user_pass = isset( $login_args['login_pass'] ) ? $login_args['login_pass'] : EE_Registry::instance()->REQ->get( 'login_pass' );
 		$rememberme = isset( $login_args['rememberme'] ) ? $login_args['rememberme'] :EE_Registry::instance()->REQ->get( 'rememberme' );
 
-
 		if ( empty( $user_login ) ) {
-			EE_Error::add_error( __('Missing a username.', 'even_espresso'), __FILE__, __FUNCTION__, __LINE__ );
+			EE_Error::add_error( __( 'Missing a username.', 'even_espresso' ), __FILE__, __FUNCTION__, __LINE__ );
 			$field_input[] = 'user_login';
 			$success = false;
 		}
 
 		if ( empty( $user_pass ) ) {
-			EE_Error::add_error( __('Missing a password.', 'even_espresso'), __FILE__, __FUNCTION__, __LINE__ );
+			EE_Error::add_error( __( 'Missing a password.', 'even_espresso' ), __FILE__, __FUNCTION__, __LINE__ );
 			$field_input[] = 'user_pass';
 			$success = false;
 		}
@@ -777,9 +782,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 					'require_login' => true,
 					'show_login_form' => true,
 					'show_errors_in_context' => true,
-					'validation_error' => array(
-						'field' => $field_input
-						)
+					'validation_error' => array( 'field' => $field_input ),
 				)
 			);
 			if ( $handle_return ) {
@@ -793,10 +796,10 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		$user = wp_signon( array(
 			'user_login' => $user_login,
 			'user_password' => $user_pass,
-			'remember' => $rememberme
+			'remember' => $rememberme,
 			));
 		if ( is_wp_error( $user ) ) {
-			EE_Error::add_error( __('Invalid username or incorrect password', 'event_espresso' ), __FILE__, __FUNCTION__, __LINE__ );
+			EE_Error::add_error( __( 'Invalid username or incorrect password', 'event_espresso' ), __FILE__, __FUNCTION__, __LINE__ );
 			$return_data = array(
 				'wp_user_response' => array(
 					'require_login' => true,
@@ -813,7 +816,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 				'wp_user_response' => array(
 					'require_login' => false,
 					'show_login_form' => false,
-					'show_errors_in_context' => false
+					'show_errors_in_context' => false,
 					)
 				);
 		}
@@ -842,7 +845,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 				'file_path'  => EE_WPUSERS_PATH,
 				'class_name' => 'EE_SPCO_Reg_Step_WP_User_Login',
 				'slug'       => 'wpuser_login',
-				'has_hooks'  => false
+				'has_hooks'  => false,
 			)
 		);
 		return $reg_steps;

@@ -70,6 +70,9 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 		//hook into spco for adding additional reg step
 		add_filter( 'AHEE__SPCO__load_reg_steps__reg_steps_to_load', array( 'EED_WP_Users_SPCO', 'register_login_reg_step' ) );
+
+		//hook into spco reg form for additional information
+		add_action( 'AHEE__attendee_information__reg_step_start', array( 'EED_WP_Users_SPCO', 'maybe_login_notice' ), 10 );
 	}
 
 
@@ -96,6 +99,10 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		//ajax calls
 		add_action( 'wp_ajax_ee_process_login_form', array( 'EED_WP_Users_SPCO', 'process_login_form' ), 10 );
 		add_action( 'wp_ajax_nopriv_ee_process_login_form', array( 'EED_WP_Users_SPCO', 'process_login_form' ), 10 );
+
+		//send admin notification about user having trouble.
+		add_action( 'wp_ajax_ee_process_user_trouble_notification', array( 'EED_WP_Users_SPCO', 'send_notification_to_admin' ) );
+		add_action( 'wp_ajax_nopriv_ee_process_user_trouble_notification', array( 'EED_WP_Users_SPCO', 'send_notification_to_admin' ) );
 	}
 
 
@@ -425,6 +432,53 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		return apply_filters( 'EED_WP_Users_SPCO__verify_user_access__stop_processing', $stop_processing, $spco );
 	}
 
+
+
+
+	/**
+	 * Callback for AHEE__SPCO__before_registration_steps action hook to display a login required notice if revisiting
+	 * to edit attendee information.
+	 *
+	 *
+	 * @param EE_SPCO_Reg_Step_Attendee_Information $reg_step
+	 * @return string  HTML content to show before the reg form.
+	 */
+	public static function maybe_login_notice( EE_SPCO_Reg_Step_Attendee_Information $reg_step ) {
+		$content = '';
+
+		//first if this isn't a revisit OR $reg_step is invalid then get out nothing to see here.
+		if ( ! $reg_step->checkout->revisit ) {
+			return $content;
+		}
+
+		//keeping the message simple for now.  If user is not logged in, and event for the displayed registration automatically
+		//creates registrations, then they must log in before editing registration.
+		$registrations = $reg_step->checkout->transaction->registrations( $reg_step->checkout->reg_cache_where_params );
+		$event_creates_user = false;
+		if ( $registrations ) {
+			foreach ( $registrations as $registration ) {
+				if ( $reg_step->checkout->visit_allows_processing_of_this_registration( $registration ) ) {
+					if ( EE_WPUsers::is_auto_user_create_on( $registration->event_ID() ) ) {
+						$event_creates_user = true;
+					}
+				}
+			}
+		}
+
+		if ( ! is_user_logged_in() && $event_creates_user ) {
+			$content = '<div class="ee-attention">';
+			$inner_content = '<p>' . sprintf( esc_html__( 'You are only able to edit your information once you have %slogged%s in.  If you recently registered, please check your email for your account information which will allow you to log in.', 'event_espresso' ), '<a href="' . wp_login_url() . '">', '</a>' ) . '</p>';
+			//provide link to notify the admin about unreceived emails.
+			$inner_content .= '<p><span class="ee-send-email-info-text">' . sprintf( esc_html__( 'If you did not receive any emails, please %sclick here%s to notify us and we will followup with you to get you setup.' ), '<a href="#" class="js-toggle-followup-notification">', '</a>' ) . '</span></p>';
+			$inner_content = apply_filters( 'FHEE__EED_WP_Users_SPCO__maybe_login_notice__inner_content', $inner_content, $reg_step );
+			$email_input_and_button = '<div class="ee-attention-notification-form hidden">';
+			$email_input_and_button .= '<label for="notification-email-contact">' . esc_html__( 'Email to contact you with:', 'event_espresso' ) . '</label><input type="text" id="notification-email-contact"><a class="ee-roundish ee-orange ee-button js-submit-notification-followup">' . esc_html__( 'Notify Us!', 'event_espresso' ) . '</a>';
+			$email_input_and_button .= '</div>';
+			$content .= $inner_content . $email_input_and_button . '</div>';
+		}
+
+		echo $content;
+	}
 
 
 
@@ -849,6 +903,90 @@ class EED_WP_Users_SPCO  extends EED_Module {
 			)
 		);
 		return $reg_steps;
+	}
+
+
+
+
+	/**
+	 * Callback for the 'ee_process_user_trouble_notification' ajax action.
+	 * We use this to send a notification to the event author that a registration is having trouble not receiving emails.
+	 *
+	 * @return object (json object returned in a response).
+	 */
+	public static function send_notification_to_admin() {
+		//first check if there is required params in the request.
+		$email = isset( $_POST['contact_email'] ) ? sanitize_email( $_POST['contact_email'] ) : '';
+		$reg_url_link = isset( $_POST['reg_url_link'] ) ? esc_attr( $_POST['reg_url_link'] ) : '';
+
+		$default_return_data = $return_data = array(
+			'wp_user_response' => array(
+				'require_login' => false,
+				'show_login_form' => false,
+				'show_errors_in_context' => false
+			)
+		);
+
+		if ( ! $email || ! $reg_url_link ) {
+			EE_Error::add_error( esc_html__( 'Invalid email or registration.  Unable to process', 'event_espresso' ), __FILE__, __FUNCTION__, __LINE__ );
+			$return_data = $default_return_data;
+			self::_return_json( $return_data );
+		}
+
+		//try to get registration matching reg_url_link so we can fill out the dynamic data for the email.
+		$registration = EEM_Registration::instance()->get_registration_for_reg_url_link( $reg_url_link );
+		//k we have what we need to send the notification
+		$event = $registration instanceof EE_Registration ? $registration->event() : null;
+		$event_author = $event instanceof EE_Event ? $event->wp_user() : 0;
+		$event_author = $event_author ? new WP_User( $event_author ) : null;
+		$contact = $registration instanceof EE_Registration ? $registration->attendee() : null;
+
+		if (
+			! $registration instanceof EE_Registration
+			|| ! $event_author instanceof WP_User
+			|| ! $contact instanceof EE_Attendee
+		) {
+			EE_Error::add_error( esc_html__( 'Unable to process because valid registration could not be retrieved.', 'event_espresso' ), __FILE__, __FUNCTION__, __LINE__ );
+			$return_data = $default_return_data;
+			self::_return_json( $return_data );
+		}
+
+		$to = apply_filters( 'FHEE__EED_WP_Users_SPCO__send_notification_to_admin__to', $event_author->user_email, $registration );
+		$subject = apply_filters( 'FHEE__EED_WP_Users_SPCO__send_notification_to_admin__subject', __( 'User having trouble receiving emails', 'event_espresso' ), $registration );
+
+		$content = sprintf( esc_html__( 'Hi %s,', 'event_espresso' ), $event_author->display_name );
+		$content .= "\n\n";
+		$content .= esc_html__( 'There is a user having trouble with receiving emails for their recent regsitration.  You can follow up with them using the following information:', 'event_espresso' );
+		$content .= "\n\n";
+		$content .= sprintf( esc_html__( 'Attendee Name: %s', 'event_espresso' ), $contact->full_name() ) . "\n";
+		$content .= sprintf( esc_html__( 'Event Registered for: %s %s', 'event_espresso' ), $event->name(), $event->get_admin_edit_link() ) . "\n";
+		$content .= sprintf( esc_html__( 'Registration Details: %s', 'event_espresso' ), $registration->get_admin_edit_url() ) . "\n";
+		$content .= sprintf( esc_html__( 'Email provided to contact them with (this was also set as the reply-to for this email): %s', 'event_espresso' ), $email ) . "\n";
+		$content .= sprintf( esc_html__( 'Sincerely, Event Espresso', 'event_espresso' ) );
+
+		$message = apply_filters( 'FHEE__EED_WP_Users_SPCO__send_notification_to_admin__message', $content, $registration );
+		$headers = array( 'Reply-To:' . $email );
+		$success = wp_mail( $to, $subject, $message, $headers );
+
+		if ( $success ) {
+			EE_Error::add_success(
+				apply_filters(
+					'FHEE__EED_WP_Users_SPCO__send_notification_to_admin__success_message',
+					esc_html__( 'Email successfully sent. You will hear from us as soon as possible.', 'event_espresso' ),
+					$registration
+				)
+			);
+		} else {
+			EE_Error::add_error(
+				apply_filters(
+					'FHEE__EED_WP_Users_SPCO__send_notification_to_admin__fail_message',
+					esc_html__( 'Email was not sent successfully.  There could be something wrong with our server. Please refresh the page and try again.', 'event_espresso' ),
+					$registration
+				)
+			);
+		}
+		$return_data = $default_return_data;
+		self::_return_json( $return_data );
 	}
 
 

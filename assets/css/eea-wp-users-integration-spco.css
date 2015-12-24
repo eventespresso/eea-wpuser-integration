@@ -107,3 +107,8 @@
     margin-right: 10px;
     margin-top: -3px;
 }
+
+#ee-single-page-checkout-dv .ee-attention-notification-form input#notification-email-contact {
+    width: 70%;
+    margin-right: 10px;
+}

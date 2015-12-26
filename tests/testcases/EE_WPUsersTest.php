@@ -15,23 +15,10 @@
 class EE_WPUsersTest extends EE_UnitTestCase {
 
 
-
-
-
-	public function testFilterAnswerForWPUser() {
-		$this->assertTrue( 'some answer' === EE_WPUsers::filterAnswerForWPUser( 'some answer', EE_Registration::new_instance(), 1 ) );
-
+	public function test_loading_ee_wpusers() {
+		$this->assertEquals( has_action( 'AHEE__EE_System__load_espresso_addons', 'load_ee_core_wpusers' ), 10 );
+		$this->assertTrue( class_exists( 'EE_WPUsers' ) );
 	}
-
-
-
-
-
-	public function testactionAddAttendeeAsWPUser() {
-		$spco = EED_Single_Page_Checkout::instance();
-
-	}
-
 
 
 }

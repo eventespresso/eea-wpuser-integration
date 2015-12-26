@@ -8,4 +8,4 @@
  * @subpackage 	Tests
  */
 // Bootstrap EE WPUsers
-require EE_WPUSERS_PLUGIN_DIR . 'ee4-addon-wpusers.php';
+require EE_WPUSERS_PLUGIN_DIR . 'eea-wpuser-integration.php';

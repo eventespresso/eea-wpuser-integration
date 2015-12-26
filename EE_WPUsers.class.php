@@ -7,6 +7,7 @@ if (!defined('ABSPATH'))
 define( 'EE_WPUSERS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'EE_WPUSERS_URL', plugin_dir_url( __FILE__ ) );
 define( 'EE_WPUSERS_TEMPLATE_PATH', EE_WPUSERS_PATH . 'templates/' );
+define( 'EE_WPUSERS_BASENAME', plugin_basename( EE_WPUSERS_PLUGIN_FILE ) );
 
 /**
  * Class definition for the EE_WPUsers object
@@ -28,6 +29,7 @@ class EE_WPUsers extends EE_Addon {
 				'main_file_path' => EE_WPUSERS_PLUGIN_FILE,
 				'config_class' => 'EE_WPUsers_Config',
 				'config_name' => 'user_integration',
+				'admin_callback' => 'additional_admin_hooks',
 				'module_paths' => array(
 					EE_WPUSERS_PATH . 'EED_WP_Users_SPCO.module.php',
 					EE_WPUSERS_PATH . 'EED_WP_Users_Admin.module.php',
@@ -51,6 +53,37 @@ class EE_WPUsers extends EE_Addon {
 			)
 		);
 	}
+
+
+
+	/**
+	 *  additional admin hooks
+	 */
+	public function additional_admin_hooks() {
+		if ( is_admin() && ! EE_Maintenance_Mode::instance()->level() ) {
+			add_filter( 'plugin_action_links', array( $this, 'plugin_actions' ), 10, 2 );
+		}
+	}
+
+
+
+
+	/**
+	 * plugin_actions
+	 *
+	 * Add a settings link to the Plugins page, so people can go straight from the plugin page to the settings page.
+	 * @param $links
+	 * @param $file
+	 * @return array
+	 */
+	public function plugin_actions( $links, $file ) {
+		if ( $file === EE_WPUSERS_BASENAME ) {
+			array_unshift( $links, '<a href="admin.php?page=espresso_registration_form&action=wp_user_settings">' . __('Settings') . '</a>' );
+		}
+		return $links;
+	}
+
+
 
 
 	/**

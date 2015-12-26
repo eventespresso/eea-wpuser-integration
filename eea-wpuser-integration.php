@@ -48,8 +48,6 @@ function load_ee_core_wpusers() {
 
 }
 
-
-
 add_action( 'AHEE__EE_System__load_espresso_addons', 'load_ee_core_wpusers' );
 
 // End of file ee-addon-wpusers.php

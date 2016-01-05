@@ -222,4 +222,34 @@ jQuery(document).ready( function($) {
 		e.stopPropagation();
 		WPUSPCO.showLoginForm();
 	});
+
+
+	SPCO.main_container.on( 'click', '.js-toggle-followup-notification', function(e) {
+		e.preventDefault();
+		var $attentionContainer = $('.ee-attention-notification-form');
+		if ( $attentionContainer.hasClass( 'hidden' ) ) {
+			$attentionContainer.slideToggle().removeClass('hidden');
+		} else {
+			$attentionContainer.slideToggle().addClass('hidden');
+		}
+	});
+
+	SPCO.main_container.on( 'click', '.js-submit-notification-followup', function(e){
+		e.preventDefault();
+		e.stopPropagation();
+
+		$('.js-toggle-followup-notification').trigger('click');
+
+		WPUSPCO.params.ajaxData = {
+			action : 'ee_process_user_trouble_notification',
+			ee_front_ajax : true,
+			contact_email : $('#notification-email-contact').val(),
+			reg_url_link : eei18n.e_reg_url_link
+		};
+
+		$('.ee-attention-notification-form').remove();
+		$('.ee-send-email-info-text').remove();
+
+		WPUSPCO.doAjax();
+	});
 });

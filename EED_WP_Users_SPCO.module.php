@@ -467,7 +467,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 		if ( ! is_user_logged_in() && $event_creates_user ) {
 			$content = '<div class="ee-attention">';
-			$inner_content = '<p>' . sprintf( esc_html__( 'You are only able to edit your information once you have %slogged%s in.  If you recently registered, please check your email for your account information which will allow you to log in.', 'event_espresso' ), '<a href="' . wp_login_url() . '">', '</a>' ) . '</p>';
+			$inner_content = '<p>' . sprintf( esc_html__( 'You are only able to edit your information once you have %slogged in%s.  If you recently registered, please check your email for your account information which will allow you to log in.', 'event_espresso' ), '<a href="' . wp_login_url() . '">', '</a>' ) . '</p>';
 			//provide link to notify the admin about unreceived emails.
 			$inner_content .= '<p><span class="ee-send-email-info-text">' . sprintf( esc_html__( 'If you did not receive any emails, please %sclick here%s to notify us and we will followup with you to get you setup.' ), '<a href="#" class="js-toggle-followup-notification">', '</a>' ) . '</span></p>';
 			$inner_content = apply_filters( 'FHEE__EED_WP_Users_SPCO__maybe_login_notice__inner_content', $inner_content, $reg_step );

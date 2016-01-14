@@ -58,7 +58,7 @@ class EED_WP_Users_Admin  extends EED_Module {
 
 
 		//hook into model deletes that may affect relations set on WP_User.
-		add_action( 'AHEE__EE_Base_Class__delete__before', array( 'EED_WP_Users_Admin', 'remove_relations_on_delete' ) );
+		add_action( 'AHEE__EE_Base_Class__delete_permanently__before', array( 'EED_WP_Users_Admin', 'remove_relations_on_delete' ) );
 	}
 
 

@@ -323,10 +323,8 @@ class EED_WP_Users_Admin  extends EED_Module {
 	protected static function _connect_wp_user_with_contact( WP_User $user ) {
 		//no attached EE_Attendee. Is there an existing attendee that matches this user's details?
 		$att = self::_find_existing_attendee_from_wpuser( $user );
-		if ( $att instanceof EE_Attendee ) {
+		if ( $att instanceof EE_Attendee && ! EE_WPUsers::get_attendee_user( $att->ID() ) ) {
 			update_user_option( $user->ID, 'EE_Attendee_ID', $att->ID() );
-		} else {
-			$att = self::_create_attendee_and_attach_wpuser( $user );
 		}
 		return $att;
 	}

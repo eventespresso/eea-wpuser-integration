@@ -1,9 +1,9 @@
-<h2><?php esc_attr_e( 'WP User Settings', 'event_espresso'); ?></h2>
+<p><strong><?php esc_attr_e( 'WP User Settings', 'event_espresso'); ?></strong></p>
 <p>
 	<?php esc_attr_e( 'This page shows options for the WP User integration add-on', 'event_espresso' ); ?>
 </p>
 <div id="user_sync_info">
-	<h3><?php esc_html_e( 'Always sync contact information with WP user profile?', 'event_espresso' ); ?></h3>
+	<p><strong><?php esc_html_e( 'Always sync contact information with WP user profile?', 'event_espresso' ); ?></strong></p>
 	<p>
 		<?php esc_html_e( 'This global option is used to indicate behaviour when a logged in user registers for an event, and what happens to that user\'s related contact, which in turn is related to the primary registration.', 'event_espresso' ); ?>
 	</p>

@@ -55,6 +55,10 @@ class EED_WP_Users_Admin  extends EED_Module {
 		add_action( 'AHEE__espresso_events_Pricing_Hooks___update_tkts_new_ticket', array( 'EED_WP_Users_Admin', 'update_capability_on_ticket') , 10, 4 );
 		add_action( 'AHEE__espresso_events_Pricing_Hooks___update_tkts_update_ticket', array( 'EED_WP_Users_Admin', 'update_capability_on_ticket' ), 10, 4 );
 		add_action( 'AHEE__espresso_events_Pricing_Hooks___update_tkts_new_default_ticket', array( 'EED_WP_Users_Admin', 'update_capability_on_ticket' ), 10, 4 );
+
+
+		//hook into model deletes that may affect relations set on WP_User.
+		add_action( 'AHEE__EE_Base_Class__delete_permanently__before', array( 'EED_WP_Users_Admin', 'remove_relations_on_delete' ) );
 	}
 
 
@@ -865,5 +869,21 @@ class EED_WP_Users_Admin  extends EED_Module {
 		}
 	}
 
+
+	/**
+	 * Callback for AHEE__EE_Base__delete__before to handle ensuring any relations WP_UserIntegration has set up with the
+	 * EE_Base_Class child object is handled when the object is permanently deleted.
+	 *
+	 * @param EE_Base_Class $model_object
+	 */
+	public static function remove_relations_on_delete( EE_Base_Class $model_object ) {
+		if ( $model_object instanceof EE_Event ) {
+			delete_post_meta( $model_object->ID(), 'ee_wpuser_integration_settings' );
+		}
+
+		if ( $model_object instanceof EE_Ticket ) {
+			$model_object->delete_extra_meta( 'ee_ticket_cap_required' );
+		}
+	}
 
 } //end EED_WP_Users_Admin

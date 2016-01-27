@@ -44,7 +44,7 @@ $pagination_html = EEH_Template::get_paging_html(
 					<th scope="col" class="espresso-my-events-event-th">
 						<?php echo apply_filters(
 							'FHEE__loop-espresso_my_events__table_header_event',
-							esc_html__( '', 'event_espresso' ),
+							esc_html__( 'Title', 'event_espresso' ),
 							$object_type,
 							$objects,
 							$template_slug,

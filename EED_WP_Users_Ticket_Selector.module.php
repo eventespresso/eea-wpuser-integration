@@ -76,6 +76,7 @@ class EED_WP_Users_Ticket_Selector  extends EED_Module {
 			$tkt_status
 			);
 		$msg .= '</td>';
+		$msg = apply_filters( 'FHEE__EED_WP_Users_Ticket_Selector__maybe_restrict_ticket_option_by_cap__no_access_msg_html', $msg, $tkt, $ticket_price, $tkt_status );
 		return $msg;
 	}
 

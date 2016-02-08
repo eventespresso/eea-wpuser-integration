@@ -63,21 +63,21 @@ class EED_WP_Users_Ticket_Selector  extends EED_Module {
 
 		//still here?
 		if ( ( is_admin() && ! EE_FRONT_AJAX ) || ! empty( $cap_required ) && is_user_logged_in() &&  EE_Registry::instance()->CAP->current_user_can( $cap_required, 'wp_user_ticket_selector_check' ) ) {
-			return false; //cap required but user has access so continu on please.
+			return false; //cap required but user has access so continue on please.
 		}
 
 		//made it here?  That means user does not have access to this ticket, so let's return a filterable message for them.
 		$ticket_price = empty( $ticket_price ) ? '' : ' (' . EEH_Template::format_currency( $ticket_price ) . ')';
-		$msg = '<td class="tckt-slctr-tbl-td-name" colspan="3">';
-		$msg .= apply_filters( 'FHEE__EED_WP_Users_Ticket_Selector__maybe_restrict_ticket_option_by_cap__no_access_msg',
+		$full_html_content = '<td class="tckt-slctr-tbl-td-name" colspan="3">';
+		$inner_message = apply_filters( 'FHEE__EED_WP_Users_Ticket_Selector__maybe_restrict_ticket_option_by_cap__no_access_msg',
 			sprintf( __( 'The %1$s%2$s%3$s%4$s  is available to members only. %5$s', 'event_espresso' ), '<strong>', $tkt->name(), $ticket_price, '</strong>', $tkt_status ),
 			$tkt,
 			$ticket_price,
 			$tkt_status
 			);
-		$msg .= '</td>';
-		$msg = apply_filters( 'FHEE__EED_WP_Users_Ticket_Selector__maybe_restrict_ticket_option_by_cap__no_access_msg_html', $msg, $tkt, $ticket_price, $tkt_status );
-		return $msg;
+		$full_html_content .= $inner_message . '</td>';
+		$full_html_content = apply_filters( 'FHEE__EED_WP_Users_Ticket_Selector__maybe_restrict_ticket_option_by_cap__no_access_msg_html', $full_html_content, $inner_message, $tkt, $ticket_price, $tkt_status );
+		return $full_html_content;
 	}
 
 } //end class EED_WP_Users_Ticket_Selector

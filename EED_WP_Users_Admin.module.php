@@ -49,6 +49,7 @@ class EED_WP_Users_Admin  extends EED_Module {
 		//hooking into event editor
 		add_action( 'add_meta_boxes', array( 'EED_WP_Users_Admin', 'add_metaboxes' ) );
 		add_filter( 'FHEE__Events_Admin_Page___insert_update_cpt_item__event_update_callbacks', array( 'EED_WP_Users_Admin', 'set_callback_save_wp_user_event_setting' ), 10, 2 );
+		add_filter( 'FHEE__EED_WP_Users_Admin__event_editor_metabox__wp_user_form_content', array( 'EED_WP_Users_Admin', 'set_capability_default_user_create_role_event_editor' ), 10 );
 
 		//hook into ticket editor in event editor.
 		add_action('AHEE__event_tickets_datetime_ticket_row_template__advanced_details_end', array('EED_WP_Users_Admin', 'insert_ticket_meta_interface'), 10, 2);
@@ -701,6 +702,20 @@ class EED_WP_Users_Admin  extends EED_Module {
 		);
 	}
 
+	/**
+	 * Callback for FHEE__EED_WP_Users_Admin__event_editor_metabox__wp_user_form_content.
+	 * Limit the Default role for auto-created users option to roles with manage_options cap.
+	 *
+	 * @param array $array of meta_box subsections.
+	 *
+	 * @return array
+	 */
+	public static function set_capability_default_user_create_role_event_editor( $array ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			unset( $array['default_user_create_role'] );
+		}
+		return $array;
+	}
 
 	/**
 	 * callback for FHEE__Events_Admin_Page___insert_update_cpt_item__event_update_callbacks

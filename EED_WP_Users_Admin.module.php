@@ -708,7 +708,7 @@ class EED_WP_Users_Admin  extends EED_Module {
 	 *
 	 * @param array $array of meta_box subsections.
 	 *
-	 * @return $array
+	 * @return array
 	 */
 	public static function set_capability_default_user_create_role_event_editor( $array ) {
 		if ( ! current_user_can( 'manage_options' ) ) {

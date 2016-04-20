@@ -69,7 +69,7 @@ $items['transaction'] = array(
 	'class' => 'dashicons dashicons-cart',
 	'desc' => esc_html__( 'Make a payment', 'event_espresso' )
 );
-$items['invoice'] = array(
+$items['receipt'] = array(
 	'class' => 'dashicons dashicons-media-default',
 	'desc' => esc_html__( 'View Receipt', 'event_espresso' )
 );

@@ -73,6 +73,10 @@ $items['receipt'] = array(
 	'class' => 'dashicons dashicons-media-default',
 	'desc' => esc_html__( 'View Receipt', 'event_espresso' )
 );
+$items['invoice'] = array(
+	'class' => 'dashicons dashicons-media-spreadsheet',
+	'desc' => esc_html__( 'View Invoice', 'event_espresso' )
+);
 
 //filter the legend items
 $items = apply_filters( 'FHEE__status-legend-espresso_my_events__legend_items', $items );

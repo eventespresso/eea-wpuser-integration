@@ -845,6 +845,9 @@ class EED_WP_Users_SPCO  extends EED_Module {
 				return $return_data;
 			}
 		}
+		
+		//prevent other plugins from doing anything when users are logging in via the registration process
+		remove_all_actions( 'wp_login' );
 
 		//validate user creds and login if successful
 		$user = wp_signon( array(

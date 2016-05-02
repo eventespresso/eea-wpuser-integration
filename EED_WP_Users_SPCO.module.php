@@ -74,11 +74,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		//hook into spco reg form for additional information
 		add_action( 'AHEE__attendee_information__reg_step_start', array( 'EED_WP_Users_SPCO', 'maybe_login_notice' ), 10 );
 
-		//do auto login after registration of new user
-		if ( ! has_action( 'register_new_user', array( 'EED_WP_Users_SPCO', 'auto_login_registered_user' ) ) ) {
-			add_action( 'register_new_user', array( 'EED_WP_Users_SPCO', 'auto_login_registered_user' ) );
-			add_action( 'register_form', array( 'EED_WP_Users_SPCO', 'add_auto_login_parameter' ) );
-		}
+		EED_WP_Users_SPCO::_add_user_registration_route_hooks();
 	}
 
 
@@ -110,6 +106,15 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		add_action( 'wp_ajax_ee_process_user_trouble_notification', array( 'EED_WP_Users_SPCO', 'send_notification_to_admin' ) );
 		add_action( 'wp_ajax_nopriv_ee_process_user_trouble_notification', array( 'EED_WP_Users_SPCO', 'send_notification_to_admin' ) );
 
+		EED_WP_Users_SPCO::_add_user_registration_route_hooks();
+	}
+
+
+	/**
+	 * Adds hook points that are used for handling actions on the wp user registration process.
+	 *
+	 */
+	protected static function _add_user_registration_route_hooks() {
 		//do auto login after registration of new user
 		if ( ! has_action( 'register_new_user', array( 'EED_WP_Users_SPCO', 'auto_login_registered_user' ) ) ) {
 			add_action( 'register_new_user', array( 'EED_WP_Users_SPCO', 'auto_login_registered_user' ) );

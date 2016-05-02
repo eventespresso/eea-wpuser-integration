@@ -422,7 +422,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 												array(
 													'ee_do_auto_login' => 1,
 													'ee_load_on_login' => 1,
-													'redirect_to' => $spco->checkout->redirect_url,
+													'redirect_to' => $spco->reg_step_url(),
 												),
 												wp_registration_url()
 											)

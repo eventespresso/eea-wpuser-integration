@@ -21,12 +21,35 @@ class EE_SPCO_Reg_Step_WP_User_Login extends EE_SPCO_Reg_Step {
 	 */
 	public function __construct( EE_Checkout $checkout ) {
 		$this->_slug = 'wpuser_login';
-		$this->_name = __('Login', 'event_espresso');
+		$this->_name = __( 'Login', 'event_espresso' );
 		$this->_template = '';
 		$this->checkout = $checkout;
-		$registration_url = ! EE_Registry::instance()->CFG->addons->user_integration->registration_page ? wp_registration_url() : EE_Registry::instance()->CFG->addons->user_integration->registration_page;
 		$this->_reset_success_message();
-		$instructions = get_option( 'users_can_register' ) ? sprintf( __('The event you have selected requires logging in before you can register. You can %sregister for an account here%s if you don\'t have a login.', 'event_espresso' ), '<a href="' . $registration_url . '">', '</a>' ) : __('The event you have selected requires logging in before you can register.', 'event_espresso' );
+		add_action( 'AHEE__Single_Page_Checkout___initialize_reg_step__wpuser_login', array( $this, 'this_step_initialized' ) );
+	}
+
+
+	/**
+	 * Callback on 'AHEE__Single_Page_Checkout___initialize_reg_step__wpuser_login'.
+	 * This is implemented to delay setting the instructions text (_instructions property) because we need a redirect url
+	 * that is ONLY available after the reg step has been initialized.
+	 *
+	 * @param EE_SPCO_Reg_Step_WP_User_Login $spco_step
+	 */
+	public function this_step_initialized( EE_SPCO_Reg_Step_WP_User_Login $spco_step ) {
+		$registration_url = ! EE_Registry::instance()->CFG->addons->user_integration->registration_page
+			? esc_url(
+				add_query_arg(
+					array(
+						'ee_do_auto_login' => 1,
+						'redirect_to' => $this->checkout->next_step->reg_step_url(),
+					),  wp_registration_url()
+				)
+			)
+			: EE_Registry::instance()->CFG->addons->user_integration->registration_page;
+		$instructions = get_option( 'users_can_register' )
+			? sprintf( __( 'The event you have selected requires logging in before you can register. You can %sregister for an account here%s if you don\'t have a login.', 'event_espresso' ), '<a href="' . $registration_url . '">', '</a>' )
+			: __( 'The event you have selected requires logging in before you can register.', 'event_espresso' );
 		$this->set_instructions( $instructions );
 	}
 

@@ -42,6 +42,7 @@ class EE_SPCO_Reg_Step_WP_User_Login extends EE_SPCO_Reg_Step {
 				add_query_arg(
 					array(
 						'ee_do_auto_login' => 1,
+						'ee_load_on_login' => 1,
 						'redirect_to' => $this->checkout->next_step->reg_step_url(),
 					),  wp_registration_url()
 				)

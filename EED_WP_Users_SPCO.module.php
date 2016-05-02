@@ -416,6 +416,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 											? add_query_arg(
 												array(
 													'ee_do_auto_login' => 1,
+													'ee_load_on_login' => 1,
 													'redirect_to' => $spco->checkout->redirect_url,
 												),
 												wp_registration_url()
@@ -1032,6 +1033,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	public static function add_auto_login_parameter() {
 		if ( EE_Registry::instance()->REQ->get( 'ee_do_auto_login' ) ) {
 			echo '<input type="hidden" name="ee_do_auto_login" value="1">';
+			echo '<input type="hidden" name="ee_load_on_login" value="1">';
 		}
 	}
 

@@ -32,8 +32,8 @@
 	<td>
 		<?php
 		$actions = array();
-		$has_question_groups = $registration->count_question_groups();
-		$actions['edit_registration'] = ! empty( $has_question_groups )
+		//only show the edit registration link if the registration has question groups
+		$actions['edit_registration'] = $registration->count_question_groups()
 			? '<a aria-label="' . __( 'Link to edit attendee information', 'event_espresso' ) . '" href="' . $registration->edit_attendee_information_url() . '">'
 			. '<span class="ee-icon ee-icon-user-edit ee-icon-size-16"></span></a>'
 			: '';

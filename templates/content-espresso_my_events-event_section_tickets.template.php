@@ -18,8 +18,12 @@ $ticket = $registration->ticket();
 	<td>
 		<?php
 		$actions = array();
-		$actions['edit_registration'] = '<a aria-label="' . __( 'Link to edit registration', 'event_espresso' ) . '" href="' . $registration->edit_attendee_information_url() . '">'
-		                                . '<span class="ee-icon ee-icon-user-edit ee-icon-size-16"></span></a>';
+		$has_question_groups = $registration->count_question_groups();
+		//only show the edit registration link IF the registration has question groups.
+		$actions['edit_registration'] = ! empty( $question_groups )
+			? '<a aria-label="' . __( 'Link to edit registration', 'event_espresso' ) . '" href="' . $registration->edit_attendee_information_url() . '">'
+		                                . '<span class="ee-icon ee-icon-user-edit ee-icon-size-16"></span></a>'
+			: '';
 		//resend confirmation email.
 		$resend_registration_link = add_query_arg(
 			array( 'token' => $registration->reg_url_link(), 'resend' => true ),

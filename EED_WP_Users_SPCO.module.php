@@ -73,6 +73,8 @@ class EED_WP_Users_SPCO  extends EED_Module {
 
 		//hook into spco reg form for additional information
 		add_action( 'AHEE__attendee_information__reg_step_start', array( 'EED_WP_Users_SPCO', 'maybe_login_notice' ), 10 );
+
+		EED_WP_Users_SPCO::_add_user_registration_route_hooks();
 	}
 
 
@@ -103,6 +105,21 @@ class EED_WP_Users_SPCO  extends EED_Module {
 		//send admin notification about user having trouble.
 		add_action( 'wp_ajax_ee_process_user_trouble_notification', array( 'EED_WP_Users_SPCO', 'send_notification_to_admin' ) );
 		add_action( 'wp_ajax_nopriv_ee_process_user_trouble_notification', array( 'EED_WP_Users_SPCO', 'send_notification_to_admin' ) );
+
+		EED_WP_Users_SPCO::_add_user_registration_route_hooks();
+	}
+
+
+	/**
+	 * Adds hook points that are used for handling actions on the wp user registration process.
+	 *
+	 */
+	protected static function _add_user_registration_route_hooks() {
+		//do auto login after registration of new user
+		if ( ! has_action( 'register_new_user', array( 'EED_WP_Users_SPCO', 'auto_login_registered_user' ) ) ) {
+			add_action( 'register_new_user', array( 'EED_WP_Users_SPCO', 'auto_login_registered_user' ) );
+			add_action( 'register_form', array( 'EED_WP_Users_SPCO', 'add_auto_login_parameter' ) );
+		}
 	}
 
 
@@ -400,7 +417,16 @@ class EED_WP_Users_SPCO  extends EED_Module {
 									 */
 									$error_message .= '<a class="ee-roundish ee-orange ee-button float-right ee-wpuser-login-button" href="' . wp_login_url( $spco->checkout->redirect_url ) . '">' . __( 'Login', 'event_espresso' ) . '</a>';
 									if ( get_option( 'users_can_register' ) ) {
-										$registration_url = ! EE_Registry::instance()->CFG->addons->user_integration->registration_page ? wp_registration_url() : EE_Registry::instance()->CFG->addons->user_integration->registration_page;
+										$registration_url = ! EE_Registry::instance()->CFG->addons->user_integration->registration_page
+											? add_query_arg(
+												array(
+													'ee_do_auto_login' => 1,
+													'ee_load_on_login' => 1,
+													'redirect_to' => $spco->reg_step_url(),
+												),
+												wp_registration_url()
+											)
+											: EE_Registry::instance()->CFG->addons->user_integration->registration_page;
 										$error_message .= '<a class="ee-wpuser-register-link float-right" href="' . $registration_url . '">' . __( 'Register', 'event_espresso' ) . '</a>';
 									}
 									$error_message .= '<div style="clear:both"></div>';
@@ -993,6 +1019,28 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	}
 
 
+	/**
+	 * This will auto login the registered user if the key for auto-login is in the request after a successful user registration.
+	 *
+	 * @param int $user_id  The user_id for the WP_User being logged in automatically.
+	 */
+	public static function auto_login_registered_user( $user_id ) {
+		if ( EE_Registry::instance()->REQ->get( 'ee_do_auto_login' ) ) {
+			wp_set_auth_cookie( $user_id, false, false );
+		}
+	}
+
+
+	/**
+	 * Callback for `register_form` WordPress hook.
+	 * If `ee_do_auto_login` is in the request then we add that as a hidden field in the registration form.
+	 */
+	public static function add_auto_login_parameter() {
+		if ( EE_Registry::instance()->REQ->get( 'ee_do_auto_login' ) ) {
+			echo '<input type="hidden" name="ee_do_auto_login" value="1">';
+			echo '<input type="hidden" name="ee_load_on_login" value="1">';
+		}
+	}
 
 
 

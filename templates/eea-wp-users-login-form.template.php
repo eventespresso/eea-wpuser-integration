@@ -24,5 +24,6 @@ $registration_url = ! EE_Registry::instance()->CFG->addons->user_integration->re
 			<input type="submit" name="wp-submit" class="button button-primary button-large wp-submit" value="<?php esc_attr_e('Log In'); ?>" />
 		</p>
 	</form>
+	<p><a href="<?php echo esc_url( wp_lostpassword_url() ); ?>" title="<?php esc_attr_e( 'Password Lost and Found' ); ?>"><?php _e( 'Lost your password?' ); ?></a></p>
 	<div class="login_error_notice"></div>
 </div>

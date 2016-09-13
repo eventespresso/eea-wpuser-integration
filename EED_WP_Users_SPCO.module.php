@@ -882,7 +882,14 @@ class EED_WP_Users_SPCO  extends EED_Module {
 			'remember' => $rememberme,
 			));
 		if ( is_wp_error( $user ) ) {
-			EE_Error::add_error( __( 'Invalid username or incorrect password', 'event_espresso' ), __FILE__, __FUNCTION__, __LINE__ );
+			$lost_password_link = EEH_HTML::link(
+				esc_url( wp_lostpassword_url() ),
+				__( "Lost your password?", 'event_espresso' ),
+				esc_attr__( "Password Lost and Found", 'event_espresso' ),
+				'',
+				'ee_user-lost-password'
+			);
+			EE_Error::add_error( sprintf( __( 'Invalid username or incorrect password. %s', 'event_espresso' ), $lost_password_link ), __FILE__, __FUNCTION__, __LINE__ );
 			$return_data = array(
 				'wp_user_response' => array(
 					'require_login' => true,

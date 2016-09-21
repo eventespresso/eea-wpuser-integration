@@ -49,7 +49,9 @@ class EE_DMS_EE_WPUsers_2_0_0 extends EE_Data_Migration_Script_Base{
 
 		if ( ! $version_string || ! $has_records ) {
 			return false;
-		} else if ( $version_string <= '2.0.0' && $version_string >= '1.0.0' ) {
+		} else if ( version_compare( $version_string, '2.0.0', '<=' ) 
+			&& version_compare( $version_string, '1.0.0', '>=' )
+		) {
 				return true;
 		} else {
 

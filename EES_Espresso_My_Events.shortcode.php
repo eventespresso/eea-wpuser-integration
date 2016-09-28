@@ -464,6 +464,7 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			wp_safe_redirect(
 					EES_Espresso_My_Events::get_current_page( null, true )
 				);
+			exit;
 		}
 	}
 

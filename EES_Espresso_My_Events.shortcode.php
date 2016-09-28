@@ -78,10 +78,13 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 
 	/**
 	 * Just a helper method for getting the url for the displayed page.
-	 * @param  WP $WP
+	 *
+	 * @param  WP  $WP
+	 * @param bool $purge_ee_request_params  Set to true if all EE Request params should be purged from any generated URL.
+	 *
 	 * @return bool|string|void
 	 */
-	public static function get_current_page( $WP = null ) {
+	public static function get_current_page( $WP = null, $purge_ee_request_params = false ) {
 		$post_id = EE_Registry::instance()->REQ->get_post_id_from_request( $WP );
 		if  ( $post_id ) {
 			$current_page = get_permalink( $post_id );
@@ -95,6 +98,10 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			} else {
 				$current_page = esc_url( site_url( $_SERVER['REQUEST_URI'] ) );
 			}
+		}
+
+		if ( $purge_ee_request_params ) {
+			$current_page = remove_query_arg( array( 'resend', 'token' ), $current_page );
 		}
 		return $current_page;
 	}
@@ -455,8 +462,9 @@ class EES_Espresso_My_Events extends EES_Shortcode {
 			// save errors so that they get picked up on the next request
 			EE_Error::get_notices( TRUE, TRUE );
 			wp_safe_redirect(
-					EES_Espresso_My_Events::get_current_page()
+					EES_Espresso_My_Events::get_current_page( null, true )
 				);
+			exit;
 		}
 	}
 

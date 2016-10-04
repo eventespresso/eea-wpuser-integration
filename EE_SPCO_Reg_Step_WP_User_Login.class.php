@@ -88,7 +88,7 @@ class EE_SPCO_Reg_Step_WP_User_Login extends EE_SPCO_Reg_Step {
 
 
 	public function generate_reg_form() {
-		EE_Registry::instance()->load_helper('HTML');
+		EE_Registry::instance()->load_helper( 'HTML' );
 		return new EE_Form_Section_Proper(
 			array(
 				'name' => $this->reg_form_name(),
@@ -102,27 +102,29 @@ class EE_SPCO_Reg_Step_WP_User_Login extends EE_SPCO_Reg_Step {
 							'html_id' => 'ee_user-login',
 							'html_class' => 'ee-reg-qstn',
 							'required' => true,
-							'html_label_id' => 'ee_user-login',
+							'html_label_id' => 'ee_user-login-label',
 							'html_label_class' => 'ee-reg-qstn',
-							'html_label_text' => __('Username')
+							//deliberately no text_domain because this is a wp core translated string
+							'html_label_text' => __( 'Username' ),
 							)
-						),
+					),
 					'eea_wp_user_password' => new EE_Password_Input(
 						array(
 							'html_name' => 'ee_user[password]',
 							'html_id' => 'ee_user-password',
 							'html_class' => 'ee-reg-qstn',
 							'required' => true,
-							'html_label_id' => 'ee_user-password',
+							'html_label_id' => 'ee_user-password-label',
 							'html_label_class' => 'ee-reg-qstn',
-							'html_label_text' => __('Password')
+							//deliberately no text_domain because this is a wp core translated string
+							'html_label_text' => __( 'Password' ),
 							)
-						),
+					),
 					'eea_wp_user_login_error_notice' => new EE_Form_Section_HTML( EEH_HTML::div( '', 'login_error_notice' ) . EEH_HTML::divx() )
 					),
 				'layout_strategy' => new EE_Div_Per_Section_Layout()
 				)
-			);
+		);
 	}
 
 
@@ -133,6 +135,8 @@ class EE_SPCO_Reg_Step_WP_User_Login extends EE_SPCO_Reg_Step {
 			EE_Error::add_error( __( 'No valid question responses were received.', 'event_espresso' ), __FILE__, __FUNCTION__, __LINE__ );
 			return false;
 		}
+
+
 
 		$login_data = array(
 			'user_login' => $valid_data['eea_wp_user_login_name'],

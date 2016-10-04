@@ -102,9 +102,10 @@ class EE_SPCO_Reg_Step_WP_User_Login extends EE_SPCO_Reg_Step {
 							'html_id' => 'ee_user-login',
 							'html_class' => 'ee-reg-qstn',
 							'required' => true,
-							'html_label_id' => 'ee_user-login',
+							'html_label_id' => 'ee_user-login-label',
 							'html_label_class' => 'ee-reg-qstn',
-							'html_label_text' => __('Username')
+							//deliberately no text_domain because this is a wp core translated string
+							'html_label_text' => __( 'Username' ),
 							)
 						),
 					'eea_wp_user_password' => new EE_Password_Input(

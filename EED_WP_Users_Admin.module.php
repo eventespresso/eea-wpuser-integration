@@ -804,7 +804,9 @@ class EED_WP_Users_Admin extends EED_Module
                     $valid_data = $form->valid_data();
                     EE_WPUsers::update_event_force_login($event, $valid_data['force_login']);
                     EE_WPUsers::update_auto_create_user($event, $valid_data['auto_user_create']);
-                    EE_WPUsers::update_default_wp_user_role($event, $valid_data['default_user_create_role']);
+                    if ( current_user_can( 'manage_options' ) ) {
+                        EE_WPUsers::update_default_wp_user_role($event, $valid_data['default_user_create_role']);
+                    }
                 }
             } else {
                 if ($form->submission_error_message() != '') {

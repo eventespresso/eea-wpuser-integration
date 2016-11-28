@@ -804,7 +804,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 */
 	public static function login_form_skeleton() {
 		//dialog container for dialog helper
-		$d_cont = '<div class="ee-admin-dialog-container auto-hide hidden">' . "\n";
+		$d_cont = '<div class="ee-admin-dialog-container auto-hide">' . "\n";
 		$d_cont .= '<div class="ee-notices"></div>';
 		$d_cont .= '<div class="ee-admin-dialog-container-inner-content"></div>';
 		$d_cont .= '</div>';

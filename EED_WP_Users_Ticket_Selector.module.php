@@ -62,7 +62,15 @@ class EED_WP_Users_Ticket_Selector  extends EED_Module {
 		}
 
 		//still here?
-		if ( ( is_admin() && ! EE_FRONT_AJAX ) || ! empty( $cap_required ) && is_user_logged_in() &&  EE_Registry::instance()->CAP->current_user_can( $cap_required, 'wp_user_ticket_selector_check' ) ) {
+		if (
+		    (
+		        is_admin() && ! EE_FRONT_AJAX
+            ) || (
+                ! empty( $cap_required )
+                && is_user_logged_in()
+                &&  EE_Registry::instance()->CAP->current_user_can( $cap_required, 'wp_user_ticket_selector_check' )
+            )
+        ) {
 			return false; //cap required but user has access so continue on please.
 		}
 

@@ -16,6 +16,6 @@ define('EE_WPUSERS_TESTS_DIR', EE_WPUSERS_PLUGIN_DIR . 'tests/');
 $addon_loader = new AddonLoader(
     EE_WPUSERS_TESTS_DIR,
     EE_WPUSERS_PLUGIN_DIR,
-    'eea-people-addon.php'
+    'eea-wpuser-integration.php'
 );
 $addon_loader->init();

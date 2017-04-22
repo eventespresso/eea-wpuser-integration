@@ -5,7 +5,7 @@ EE WP User Integration Add-on
 [![Travis](https://travis-ci.org/eventespresso/eea-wpuser-integration.svg?branch=master)](https://travis-ci.org/eventespresso/eea-wpuser-integration)
 [![License](https://img.shields.io/badge/License-GPLv2-blue.svg?style=flat)](https://www.gnu.org/licenses/gpl-2.0.html)
 [![Event Espresso Addon](https://img.shields.io/badge/Addon%20For-Event%20Espresso-blue.svg)](https://github.com/eventespresso/event-espresso-core)
-[![Minimum EE Core Version:](https://img.shields.io/badge/Minimum%20EE%20core%20ver-4.9.37.p-red.svg)](https://github.com/eventespresso/event-espresso-core/releases/tag/4.9.37.p)
+[![Minimum EE Core Version:](https://img.shields.io/badge/Minimum%20EE%20core%20ver-4.8.21.p-red.svg)](https://github.com/eventespresso/event-espresso-core/releases/tag/4.8.21.p)
 
 The “EE4 WP User Integration” add-on allows you to take full advantage of the WordPress user system. Create member only events and tickets, set the minimum WP User Capability for ticket purchase, create new users on registration, and more!
 

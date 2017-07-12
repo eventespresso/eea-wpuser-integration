@@ -15,7 +15,7 @@ defined('EVENT_ESPRESSO_VERSION') || exit('No direct access allowed.');
  */
 class EED_WP_Users_Admin extends EED_Module
 {
-    
+
     public static function set_hooks()
     {
     }
@@ -155,7 +155,7 @@ class EED_WP_Users_Admin extends EED_Module
         if ($page == 'espresso_events' && ($route == 'edit' || $route == 'create_new')) {
             add_meta_box(
                 'eea_wp_user_integration',
-                __('User Integration Settings', 'event_espresso'),
+                esc_html__('User Integration Settings', 'event_espresso'),
                 array('EED_WP_Users_Admin', 'event_editor_metabox'),
                 null,
                 'side',
@@ -206,7 +206,7 @@ class EED_WP_Users_Admin extends EED_Module
         ?>
         <div class="misc-pub-section">
             <span class="dashicons dashicons-universal-access ee-icon-color-grey ee-icon-size-20"></span>
-            <a href="<?php echo $url; ?>" title="<?php _e('Click to view WordPress user profile', 'event_espresso'); ?>"><?php _e('WordPress User Profile', 'event_espresso'); ?></a>
+            <a href="<?php echo $url; ?>" title="<?php  esc_html_e('Click to view WordPress user profile', 'event_espresso'); ?>"><?php  esc_html_e('WordPress User Profile', 'event_espresso'); ?></a>
         </div>
         <?php
     }
@@ -289,10 +289,10 @@ class EED_WP_Users_Admin extends EED_Module
                 <th></th>
                 <td>
                     <p>
-                        <?php _e('When you save this user profile, the details will be synced with the attached Event Espresso Contact', 'event_espresso'); ?>
+                        <?php  esc_html_e('When you save this user profile, the details will be synced with the attached Event Espresso Contact', 'event_espresso'); ?>
                     </p>
                     <p>
-                        <a class="button button-secondary" href="<?php echo $url; ?>" title="<?php _e('Click to go to Attendee Details', 'event_espresso'); ?>"><?php _e('View Linked Contact', 'event_espresso'); ?></a>
+                        <a class="button button-secondary" href="<?php echo $url; ?>" title="<?php  esc_html_e('Click to go to Attendee Details', 'event_espresso'); ?>"><?php  esc_html_e('View Linked Contact', 'event_espresso'); ?></a>
                     </p>
                 </td>
             </tr>
@@ -527,7 +527,7 @@ class EED_WP_Users_Admin extends EED_Module
                     array(
                         'main_settings_hdr' => new EE_Form_Section_HTML(
                             EEH_HTML::h3(
-                                __('WP User Integration Defaults', 'event_espresso')
+                                esc_html__('WP User Integration Defaults', 'event_espresso')
                             )
                         ),
                         'main_settings'     => EED_WP_Users_Admin::_main_settings()
@@ -550,7 +550,7 @@ class EED_WP_Users_Admin extends EED_Module
             ? ''
             : '<br><div class="error inline"><p></p>'
               . sprintf(
-                  __(
+                  esc_html__(
                       'Registration is currently turned off for your site, so the registration link will not show.  If you want the registration link to show please %sgo here%s to turn it on.',
                       'event_espresso'
                   ),
@@ -570,11 +570,11 @@ class EED_WP_Users_Admin extends EED_Module
                     array(
                         'force_login'            => new EE_Yes_No_Input(
                             array(
-                                'html_label_text'         => __(
+                                'html_label_text'         => esc_html__(
                                     'Default setting for Login Required on Registration',
                                     'event_espresso'
                                 ),
-                                'html_help_text'          => __(
+                                'html_help_text'          => esc_html__(
                                     'When this is set to "Yes", that means when you create an event the default for the "Login Required" setting on that event will be set to "Yes".  When Login Required is set to "Yes" on an event it means that before users can register they MUST be logged in.  You can still override this on each event.',
                                     'event_espresso'
                                 ),
@@ -588,11 +588,11 @@ class EED_WP_Users_Admin extends EED_Module
                         ),
                         'registration_page'      => new EE_Text_Input(
                             array(
-                                'html_label_text'         => __(
+                                'html_label_text'         => esc_html__(
                                     'Registration Page URL (if different from default WordPress Registration)',
                                     'event_espresso'
                                 ),
-                                'html_help_text'          => __(
+                                'html_help_text'          => esc_html__(
                                     'When login is required on an event, this will be the url used for the registration link on the login form',
                                     'event_espresso'
                                 ) . $registration_turned_off_msg,
@@ -606,11 +606,11 @@ class EED_WP_Users_Admin extends EED_Module
                         ),
                         'auto_create_user'       => new EE_Yes_No_Input(
                             array(
-                                'html_label_text'         => __(
+                                'html_label_text'         => esc_html__(
                                     'Default setting for User Creation on Registration.',
                                     'event_espresso'
                                 ),
-                                'html_help_text'          => __(
+                                'html_help_text'          => esc_html__(
                                     'When this is set to "Yes", that means when you create an event the default for the "Create User On Registration" setting on that event will be set to "Yes".  When this setting is set to "Yes" on an event it means that when new non-logged in users register for an event, a new WP_User is created for them.  You can still override this on each event.',
                                     'event_espresso'
                                 ),
@@ -625,11 +625,11 @@ class EED_WP_Users_Admin extends EED_Module
                         'default_wp_user_role'   => new EE_Select_Input(
                             $wp_roles->get_names(),
                             array(
-                                'html_label_text'         => __(
+                                'html_label_text'         => esc_html__(
                                     'Default role for User Creation on Registration.',
                                     'event_espresso'
                                 ),
-                                'html_help_text'          => __(
+                                'html_help_text'          => esc_html__(
                                     'On new events, when User creation is set to yes, this setting indicates what the default role for new users will be on creation. You can still override this on each event.',
                                     'event_espresso'
                                 ),
@@ -643,11 +643,11 @@ class EED_WP_Users_Admin extends EED_Module
                         ),
                         'sync_user_with_contact' => new EE_Yes_No_Input(
                             array(
-                                'html_label_text'         => __(
+                                'html_label_text'         => esc_html__(
                                     'Always sync contact information with WP user profile?',
                                     'event_espresso'
                                 ) . EEH_Template::get_help_tab_link('user_sync_info'),
-                                'html_help_text'          => __(
+                                'html_help_text'          => esc_html__(
                                     'This global option is used to indicate behaviour when a logged in user registers for an event, and what happens to that user’s related contact, which in turn is related to the primary registration.',
                                     'event_espresso'
                                 ),
@@ -728,13 +728,13 @@ class EED_WP_Users_Admin extends EED_Module
     {
         $page_config['wp_user_settings'] = array(
             'nav'           => array(
-                'label' => __('User Integration Settings', 'event_espresso'),
+                'label' => esc_html__('User Integration Settings', 'event_espresso'),
                 'order' => 50
             ),
             'require_nonce' => false,
             'help_tabs'     => array(
                 'wp_user_settings_help_tab' => array(
-                    'title'   => __('WP User Settings', 'event_espresso'),
+                    'title'   => esc_html__('WP User Settings', 'event_espresso'),
                     'content' => self::_settings_help_tab_content()
                 )
             ),
@@ -778,11 +778,11 @@ class EED_WP_Users_Admin extends EED_Module
         EE_Registry::instance()->load_helper('Template');
         $file = EE_WPUSERS_TEMPLATE_PATH . 'ticket_capability_help_content.template.php';
         $page_config['create_new']['help_tabs']['ticket_capability_info'] = array(
-            'title'   => __('Ticket Capability Restrictions', 'event_espresso'),
+            'title'   => esc_html__('Ticket Capability Restrictions', 'event_espresso'),
             'content' => EEH_Template::display_template($file, array(), true)
         );
         $page_config['edit']['help_tabs']['ticket_capability_info']       = array(
-            'title'   => __('Ticket Capability Restrictions', 'event_espresso'),
+            'title'   => esc_html__('Ticket Capability Restrictions', 'event_espresso'),
             'content' => EEH_Template::display_template($file, array(), true)
         );
         
@@ -829,8 +829,8 @@ class EED_WP_Users_Admin extends EED_Module
                     array(
                         'force_login'              => new EE_Yes_No_Input(
                             array(
-                                'html_label_text'         => __('Force Login for registrations?', 'event_espresso'),
-                                'html_help_text'          => __(
+                                'html_label_text'         => esc_html__('Force Login for registrations?', 'event_espresso'),
+                                'html_help_text'          => esc_html__(
                                     'If yes, then all people registering for this event must login before they can register',
                                     'event_espresso'
                                 ),
@@ -841,11 +841,11 @@ class EED_WP_Users_Admin extends EED_Module
                         'spacing1'                 => new EE_Form_Section_HTML('<br>'),
                         'auto_user_create'         => new EE_Yes_No_Input(
                             array(
-                                'html_label_text'         => __(
+                                'html_label_text'         => esc_html__(
                                     'Auto Create users with registrations?',
                                     'event_espresso'
                                 ),
-                                'html_help_text'          => __(
+                                'html_help_text'          => esc_html__(
                                     'If yes, then when non-logged in users register for this event, a user will automatically be created.',
                                     'event_espresso'
                                 ),
@@ -857,11 +857,11 @@ class EED_WP_Users_Admin extends EED_Module
                         'default_user_create_role' => new EE_Select_Input(
                             $wp_roles->get_names(),
                             array(
-                                'html_label_text'         => __(
+                                'html_label_text'         => esc_html__(
                                     'Default role for auto-created users:',
                                     'event_espresso'
                                 ),
-                                'html_help_text'          => __(
+                                'html_help_text'          => esc_html__(
                                     'When users are auto-created, what default role do you want them to have?',
                                     'event_espresso'
                                 ),
@@ -962,7 +962,7 @@ class EED_WP_Users_Admin extends EED_Module
     public static function modify_settings_publish_box_label($box_label, $route, EE_Admin_Page $admin_page)
     {
         if ($route == 'wp_user_settings') {
-            $box_label = __('Update Settings', 'event_espresso');
+            $box_label = esc_html__('Update Settings', 'event_espresso');
         }
         
         return $box_label;
@@ -1014,7 +1014,7 @@ class EED_WP_Users_Admin extends EED_Module
                     array(
                         'ticket_capability_hdr-' . $tkt_row => new EE_Form_Section_HTML(
                             EEH_HTML::h5(
-                                __('Ticket Capability Requirement', 'event_espresso')
+                                esc_html__('Ticket Capability Requirement', 'event_espresso')
                                 . EEH_Template::get_help_tab_link('ticket_capability_info'),
                                 '',
                                 'tickets-heading'
@@ -1026,7 +1026,7 @@ class EED_WP_Users_Admin extends EED_Module
                                 'html_name'               => 'wp_user_ticket_capability_input['
                                                              . $tkt_row
                                                              . '][TKT_capability]',
-                                'html_label_text'         => __(
+                                'html_label_text'         => esc_html__(
                                     'WP User Capability required for purchasing this ticket:',
                                     'event_espresso'
                                 ),

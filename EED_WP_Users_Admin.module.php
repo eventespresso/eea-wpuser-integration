@@ -81,6 +81,18 @@ class EED_WP_Users_Admin extends EED_Module
             array('EED_WP_Users_Admin', 'set_capability_default_user_create_role_event_editor'),
             10
         );
+        add_action(
+            'AHEE__Extend_Events_Admin_Page___duplicate_event__after',
+            array('EED_WP_Users_Admin', 'duplicate_user_settings_for_event'),
+            10,
+            2
+        );
+        add_action(
+            'AHEE__Extend_Events_Admin_Page___duplicate_event__duplicate_ticket__after',
+            array('EED_WP_Users_Admin', 'set_capability_on_new_duplicated_ticket'),
+            10,
+            2
+        );
 
         
         //hook into ticket editor in event editor.
@@ -1089,6 +1101,42 @@ class EED_WP_Users_Admin extends EED_Module
         
         if ($model_object instanceof EE_Ticket) {
             $model_object->delete_extra_meta('ee_ticket_cap_required');
+        }
+    }
+
+
+    /**
+     * Callback for AHEE__Extend_Events_Admin_Page___duplicate_event__after to include any WP_User settings in meta
+     * for duplicated event.
+     *
+     * @param EE_Event $new_event
+     * @param EE_Event $old_event
+     * @throws EE_Error
+     */
+    public static function duplicate_user_settings_for_event(EE_Event $new_event, EE_Event $old_event)
+    {
+        EE_WPUsers::update_auto_create_user($new_event, EE_WPUsers::is_auto_user_create_on($old_event));
+        EE_WPUsers::update_default_wp_user_role($new_event, EE_WPUsers::default_user_create_role($old_event));
+        EE_WPUsers::update_event_force_login($new_event, EE_WPUsers::is_event_force_login($old_event));
+    }
+
+
+    /**
+     * Callback for AHEE__Extend_Events_Admin_Page___duplicate_event__duplicate_ticket__after.
+     * Using this to ensure that any capability restrictions on old tickets are copied to the new tickets.
+     *
+     * @param EE_Ticket $original_ticket
+     * @param EE_Ticket $new_ticket
+     * @throws EE_Error
+     */
+    public static function set_capability_on_new_duplicated_ticket(EE_Ticket $original_ticket, EE_Ticket $new_ticket)
+    {
+        if ($custom_capability = $original_ticket->get_extra_meta(
+            'ee_ticket_cap_required',
+            true,
+            ''
+        )) {
+            $new_ticket->update_extra_meta('ee_ticket_cap_required', $custom_capability);
         }
     }
 }

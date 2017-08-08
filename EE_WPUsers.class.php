@@ -22,37 +22,74 @@ class EE_WPUsers extends EE_Addon
      */
     public static function register_addon()
     {
+        $registration_array = array(
+            'version'          => EE_WPUSERS_VERSION,
+            'min_core_version' => EE_WPUSERS_MIN_CORE_VERSION_REQUIRED,
+            'main_file_path'   => EE_WPUSERS_PLUGIN_FILE,
+            'config_class'     => 'EE_WPUsers_Config',
+            'config_name'      => 'user_integration',
+            'admin_callback'   => 'additional_admin_hooks',
+            'module_paths'     => array(
+                EE_WPUSERS_PATH . 'EED_WP_Users_SPCO.module.php',
+                EE_WPUSERS_PATH . 'EED_WP_Users_Admin.module.php',
+                EE_WPUSERS_PATH . 'EED_WP_Users_Ticket_Selector.module.php',
+            ),
+            'dms_paths'        => array(EE_WPUSERS_PATH . 'core/data_migration_scripts'),
+            'autoloader_paths' => array(
+                'EE_WPUsers_Config'              => EE_WPUSERS_PATH . 'EE_WPUsers_Config.php',
+                'EE_SPCO_Reg_Step_WP_User_Login' => EE_WPUSERS_PATH . 'EE_SPCO_Reg_Step_WP_User_Login.class.php',
+                'EE_DMS_2_0_0_user_option'       =>
+                    EE_WPUSERS_PATH
+                    . 'core/data_migration_scripts/2_0_0_stages/EE_DMS_2_0_0_user_option.dmsstage.php',
+            ),
+            // if plugin update engine is being used for auto-updates. not needed if PUE is not being used.
+            'pue_options'      => array(
+                'pue_plugin_slug' => 'eea-wp-user-integration',
+                'checkPeriod'     => '24',
+                'use_wp_update'   => false,
+            ),
+            'namespace' => array(
+                'FQNS' => 'EventEspresso\WpUser',
+                'DIR' => __DIR__,
+            ),
+        );
+        //the My Events Shortcode registration depends on EE version.
+        if (EE_Register_Addon::_meets_min_core_version_requirement('4.9.46.rc.024')) {
+            //register shortcode for new system.
+            $registration_array['shortcode_fqcns'] = array(
+                'EventEspresso\WpUser\domain\entities\shortcodes\EspressoMyEvents'
+            );
+        } else {
+            //register shortcode for old system.
+            $registration_array['shortcode_paths'] = array(
+                EE_WPUSERS_PATH . 'EES_Espresso_My_Events.shortcode.php',
+            );
+        }
         // register addon via Plugin API
-        EE_Register_Addon::register(
-            'EE_WPUsers', array(
-                'version'          => EE_WPUSERS_VERSION,
-                'min_core_version' => EE_WPUSERS_MIN_CORE_VERSION_REQUIRED,
-                'main_file_path'   => EE_WPUSERS_PLUGIN_FILE,
-                'config_class'     => 'EE_WPUsers_Config',
-                'config_name'      => 'user_integration',
-                'admin_callback'   => 'additional_admin_hooks',
-                'module_paths'     => array(
-                    EE_WPUSERS_PATH . 'EED_WP_Users_SPCO.module.php',
-                    EE_WPUSERS_PATH . 'EED_WP_Users_Admin.module.php',
-                    EE_WPUSERS_PATH . 'EED_WP_Users_Ticket_Selector.module.php',
-                ),
-                'shortcode_paths'  => array(
-                    EE_WPUSERS_PATH . 'EES_Espresso_My_Events.shortcode.php',
-                ),
-                'dms_paths'        => array(EE_WPUSERS_PATH . 'core/data_migration_scripts'),
-                'autoloader_paths' => array(
-                    'EE_WPUsers_Config'              => EE_WPUSERS_PATH . 'EE_WPUsers_Config.php',
-                    'EE_SPCO_Reg_Step_WP_User_Login' => EE_WPUSERS_PATH . 'EE_SPCO_Reg_Step_WP_User_Login.class.php',
-                    'EE_DMS_2_0_0_user_option'       =>
-                        EE_WPUSERS_PATH
-                        . 'core/data_migration_scripts/2_0_0_stages/EE_DMS_2_0_0_user_option.dmsstage.php',
-                ),
-                // if plugin update engine is being used for auto-updates. not needed if PUE is not being used.
-                'pue_options'      => array(
-                    'pue_plugin_slug' => 'eea-wp-user-integration',
-                    'checkPeriod'     => '24',
-                    'use_wp_update'   => false,
-                ),
+        EE_Register_Addon::register('EE_WPUsers', $registration_array);
+    }
+
+
+    /**
+     * Register things that have to happen early in loading.
+     */
+    public function after_registration()
+    {
+        $this->register_dependencies();
+    }
+
+
+
+
+    protected function register_dependencies()
+    {
+        EE_Dependency_Map::register_dependencies(
+            'EventEspresso\WpUser\domain\entities\shortcodes\EspressoMyEvents',
+            array(
+                'EventEspresso\core\services\cache\PostRelatedCacheManager' => EE_Dependency_Map::load_from_cache,
+                'EE_Request' => EE_Dependency_Map::load_from_cache,
+                'EEM_Event' => EE_Dependency_Map::load_from_cache,
+                'EEM_Registration' => EE_Dependency_Map::load_from_cache
             )
         );
     }

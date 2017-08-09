@@ -20,7 +20,7 @@ $ticket = $registration->ticket();
         $actions = array();
         //only show the edit registration link IF the registration has question groups.
         $actions['edit_registration'] = $registration->count_question_groups()
-            ? '<a aria-label="' . __('Link to edit registration', 'event_espresso')
+            ? '<a aria-label="' . esc_html__('Link to edit registration', 'event_espresso')
               . '" href="' . $registration->edit_attendee_information_url() . '">'
               . '<span class="ee-icon ee-icon-user-edit ee-icon-size-16"></span></a>'
             : '';
@@ -34,7 +34,7 @@ $ticket = $registration->ticket();
              && $registration->status_ID() == EEM_Registration::status_id_approved)
         ) {
             $actions['resend_registration'] = '<a aria-label="'
-                . __('Link to resend registration message', 'event_espresso')
+                . esc_html__('Link to resend registration message', 'event_espresso')
                 . '" href="' . $resend_registration_link . '">'
                 . '<span class="dashicons dashicons-email-alt"></span></a>';
         }
@@ -43,21 +43,21 @@ $ticket = $registration->ticket();
         if ($registration->is_primary_registrant()
             && $registration->transaction() instanceof EE_Transaction
             && $registration->transaction()->remaining()) {
-            $actions['make_payment'] = '<a aria-label="' . __('Link to make payment', 'event_espresso')
+            $actions['make_payment'] = '<a aria-label="' . esc_html__('Link to make payment', 'event_espresso')
                                        . '" href="' . $registration->payment_overview_url() . '">'
                                        . '<span class="dashicons dashicons-cart"></span></a>';
         }
 
         //receipt link?
         if ($registration->is_primary_registrant() && $registration->receipt_url()) {
-            $actions['receipt'] = '<a aria-label="' . __('Link to view receipt', 'event_espresso')
+            $actions['receipt'] = '<a aria-label="' . esc_html__('Link to view receipt', 'event_espresso')
                                   . '" href="' . $registration->receipt_url() . '">'
                                   . '<span class="dashicons dashicons-media-default ee-icon-size-18"></span></a>';
         }
 
         //invoice link?
         if ($registration->is_primary_registrant() && $registration->invoice_url()) {
-            $actions['invoice'] = '<a aria-label="' . __('Link to view invoice', 'event_espresso')
+            $actions['invoice'] = '<a aria-label="' . esc_html__('Link to view invoice', 'event_espresso')
                                   . '" href="' . $registration->invoice_url() . '">'
                                   . '<span class="dashicons dashicons-media-spreadsheet ee-icon-size-18"></span></a>';
         }

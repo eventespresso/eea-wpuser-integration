@@ -15,28 +15,33 @@ foreach ($reg_statuses as $status_code => $status_label) {
     if ($template_slug == 'event_section') {
         //include event statuses
         switch ($status_code) {
-            case EEM_Registration::status_id_pending_payment :
+            case EEM_Registration::status_id_pending_payment:
                 $event_status = EEH_Template::pretty_status(EE_Datetime::upcoming, false, 'sentence');
                 break;
-            case EEM_Registration::status_id_cancelled :
+            case EEM_Registration::status_id_cancelled:
                 $event_status = EEH_Template::pretty_status(EE_Datetime::expired, false, 'sentence');
                 break;
-            case EEM_Registration::status_id_declined :
+            case EEM_Registration::status_id_declined:
                 $event_status = EEH_Template::pretty_status(EE_Datetime::cancelled, false, 'sentence');
                 break;
-            case EEM_Registration::status_id_approved :
+            case EEM_Registration::status_id_approved:
                 $event_status = EEH_Template::pretty_status(EE_Datetime::active, false, 'sentence');
                 break;
-            case EEM_Registration::status_id_incomplete :
+            case EEM_Registration::status_id_incomplete:
                 $event_status = EEH_Template::pretty_status(EE_Datetime::sold_out, false, 'sentence');
                 break;
-            case EEM_Registration::status_id_not_approved :
+            case EEM_Registration::status_id_not_approved:
                 $event_status = '';
                 break;
         }
 
-        $status_label = $event_status ? sprintf(esc_html__('%s Registration, %s Event', 'event_espresso'),
-            $status_label, $event_status) : sprintf(esc_html__('%s Registration', 'event_espresso'), $status_label);
+        $status_label = $event_status
+            ? sprintf(
+                esc_html__('%s Registration, %s Event', 'event_espresso'),
+                $status_label,
+                $event_status
+            )
+            : sprintf(esc_html__('%s Registration', 'event_espresso'), $status_label);
     }
     $items[$status_code] = array(
         'class' => 'ee-status-legend-box ee-status-' . $status_code,
@@ -48,13 +53,17 @@ if ($template_slug == 'event_section') {
     //add additional event status labels
     $items[EE_Datetime::inactive]  = array(
         'class' => 'ee-status-legend-box ee-status-' . EE_Datetime::inactive,
-        'desc'  => sprintf(esc_html__('%s Event', 'event_espresso'),
-            EEH_Template::pretty_status(EE_Datetime::inactive, false, 'sentence')),
+        'desc'  => sprintf(
+            esc_html__('%s Event', 'event_espresso'),
+            EEH_Template::pretty_status(EE_Datetime::inactive, false, 'sentence')
+        ),
     );
     $items[EE_Datetime::postponed] = array(
         'class' => 'ee-status-legend-box ee-status-' . EE_Datetime::postponed,
-        'desc'  => sprintf(esc_html__('%s Event', 'event_espresso'),
-            EEH_Template::pretty_status(EE_Datetime::postponed, false, 'sentence')),
+        'desc'  => sprintf(
+            esc_html__('%s Event', 'event_espresso'),
+            EEH_Template::pretty_status(EE_Datetime::postponed, false, 'sentence')
+        ),
     );
 }
 
@@ -86,9 +95,7 @@ $items = apply_filters('FHEE__status-legend-espresso_my_events__legend_items', $
 ?>
 <div class="espresso-my-events-legend-container">
     <dl class="espresso-my-events-legend-list">
-        <?php foreach ($items
-
-        as $item => $details) : ?>
+        <?php foreach ($items as $item => $details) : ?>
         <?php if ($per_col < $count) : ?>
     </dl>
     <dl class="espresso-my-events-legend-list">

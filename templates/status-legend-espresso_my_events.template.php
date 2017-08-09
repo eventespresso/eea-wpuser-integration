@@ -89,6 +89,14 @@ $items['invoice']             = array(
     'desc'  => esc_html__('View Invoice', 'event_espresso'),
 );
 
+////ticket link legend item? Only if method is available (backwards compatibility check)
+if (method_exists('EED_Ticketing', 'getTicketUrl')) {
+    $items['ticket'] = array(
+        'class' => 'dashicons dashicons-tickets-alt',
+        'desc' => esc_html__('View Ticket', 'event_espresso')
+    );
+}
+
 //filter the legend items
 $items = apply_filters('FHEE__status-legend-espresso_my_events__legend_items', $items);
 

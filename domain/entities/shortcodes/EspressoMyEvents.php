@@ -478,7 +478,7 @@ class EspressoMyEvents extends EspressoShortcode
                 EED_Messages::process_resend(array('_REG_ID' => $registration->ID()));
             } else {
                 EE_Error::add_error(
-                    esc_html(
+                    esc_html__(
                         'The Registration Confirmation email could not be sent because a valid Registration could not be retrieved from the database.',
                         'event_espresso'
                     ),

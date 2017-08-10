@@ -503,18 +503,17 @@ class EspressoMyEvents extends EspressoShortcode
             echo wp_json_encode(EE_Error::get_notices(false));
             die();
             // or was JS disabled ?
-        } else {
-            // save errors so that they get picked up on the next request
-            EE_Error::get_notices(true, true);
-            wp_safe_redirect(
-                EEH_URL::current_url_without_query_paramaters(
-                    array(
-                        self::RESEND_QUERY_ARGUMENT_KEY,
-                        self::REGISTRATION_TOKEN_QUERY_ARGUMENT_KEY
-                    )
-                )
-            );
-            exit;
         }
+        // save errors so that they get picked up on the next request
+        EE_Error::get_notices(true, true);
+        wp_safe_redirect(
+            EEH_URL::current_url_without_query_paramaters(
+                array(
+                    self::RESEND_QUERY_ARGUMENT_KEY,
+                    self::REGISTRATION_TOKEN_QUERY_ARGUMENT_KEY
+                )
+            )
+        );
+        exit;
     }
 }

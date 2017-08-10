@@ -360,18 +360,14 @@ class EspressoMyEvents extends EspressoShortcode
             $template_info['template'] = $template_slug;
             //next verify that there is an object type and that it matches one of the EE models used for querying.
             $accepted_object_types = array('Event', 'Registration');
-            if (isset($template_object_map[$template_slug]['object_type']) &&
-                in_array($template_object_map[$template_slug]['object_type'], $accepted_object_types, true)
+            if (isset($template_object_map[$template_slug]['object_type'], $template_object_map[$template_slug]['path'])
+                && in_array($template_object_map[$template_slug]['object_type'], $accepted_object_types, true)
+                && EEH_File::is_readable(
+                    EE_WPUSERS_TEMPLATE_PATH . $template_object_map[$template_slug]['path']
+                )
             ) {
-                //next verify that the path for the template is valid
-                if (isset($template_object_map[$template_slug]['path'])
-                    && EEH_File::is_readable(
-                        EE_WPUSERS_TEMPLATE_PATH . $template_object_map[$template_slug]['path']
-                    )
-                ) {
-                    //yay made it here you awesome template object you.
-                    return $template_info;
-                }
+                //yay made it here you awesome template object you.
+                return $template_info;
             }
         }
         //oh noes, not setup properly, so let's just use a safe known default.

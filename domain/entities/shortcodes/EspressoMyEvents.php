@@ -434,14 +434,14 @@ class EspressoMyEvents extends EspressoShortcode
         $offset      = ($template_arguments['page'] - 1) * $template_arguments['per_page'];
         $attendee_id = (int)$attendee_id;
 
-        if ($template_arguments['object_type'] == 'Event') {
+        if ($template_arguments['object_type'] === 'Event') {
             $query_args = array(
                 0          => array('Registration.ATT_ID' => $attendee_id),
                 'limit'    => array($offset, $template_arguments['per_page']),
                 'group_by' => 'EVT_ID',
             );
             $model      = $this->event_model;
-        } elseif ($template_arguments['object_type'] == 'Registration') {
+        } elseif ($template_arguments['object_type'] === 'Registration') {
             $query_args = array(
                 0       => array('ATT_ID' => $attendee_id),
                 'limit' => array($offset, $template_arguments['per_page']),

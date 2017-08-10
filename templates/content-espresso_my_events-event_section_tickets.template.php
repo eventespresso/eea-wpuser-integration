@@ -62,13 +62,6 @@ $ticket = $registration->ticket();
                                   . '<span class="dashicons dashicons-media-spreadsheet ee-icon-size-18"></span></a>';
         }
 
-        //ticket link? Only if method is available (backwards compatibility check)
-        if (method_exists('EED_Ticketing', 'getTicketUrl')) {
-            $actions['ticket'] = '<a aria-label="' . esc_html__('Link to view ticket', 'event_espresso') . '"'
-                . ' href="' . EED_Ticketing::getTicketUrl($registration) . '">'
-                . '<span class="dashicons dashicons-tickets-alt ee-icon-size-18"></span></a>';
-        }
-
         //filter actions
         $actions = apply_filters(
             'FHEE__EES_Espresso_My_Events__actions',

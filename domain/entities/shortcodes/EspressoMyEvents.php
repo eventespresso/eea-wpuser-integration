@@ -361,7 +361,7 @@ class EspressoMyEvents extends EspressoShortcode
             //next verify that there is an object type and that it matches one of the EE models used for querying.
             $accepted_object_types = array('Event', 'Registration');
             if (isset($template_object_map[$template_slug]['object_type']) &&
-                in_array($template_object_map[$template_slug]['object_type'], $accepted_object_types)
+                in_array($template_object_map[$template_slug]['object_type'], $accepted_object_types, true)
             ) {
                 //next verify that the path for the template is valid
                 if (isset($template_object_map[$template_slug]['path'])

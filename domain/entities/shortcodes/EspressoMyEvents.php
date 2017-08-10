@@ -296,7 +296,7 @@ class EspressoMyEvents extends EspressoShortcode
         //the page value for its query.  So let's see if its in the query.
         if (! $page) {
             global $wp_query;
-            if ($wp_query instanceof WP_Query && isset($wp_query->query) && isset($wp_query->query['paged'])) {
+            if ($wp_query instanceof WP_Query && isset($wp_query->query, $wp_query->query['paged'])) {
                 $page = $wp_query->query['paged'];
             } else {
                 $page = 1;

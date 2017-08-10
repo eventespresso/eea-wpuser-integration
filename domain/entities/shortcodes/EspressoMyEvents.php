@@ -261,7 +261,7 @@ class EspressoMyEvents extends EspressoShortcode
             $this->enqueueLocalizedJavascriptObject($attributes);
         }
 
-        return EEH_Template::locate_template($template_args['path_to_template'], $template_args, true, true);
+        return EEH_Template::locate_template($template_args['path_to_template'], $template_args);
     }
 
 

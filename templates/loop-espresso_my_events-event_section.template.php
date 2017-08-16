@@ -16,7 +16,7 @@
  * @type    string     $with_wrapper       Whether to include the wrapper containers or not.
  * @type    int        $att_id             Attendee ID all the displayed data belongs to.
  */
-$url             = EES_Espresso_My_Events::get_current_page();
+$url             = EEH_URL::current_url();
 $pagination_html = EEH_Template::get_paging_html(
     $object_count,
     $page,

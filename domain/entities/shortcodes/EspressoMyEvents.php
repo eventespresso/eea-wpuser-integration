@@ -201,12 +201,15 @@ class EspressoMyEvents extends EspressoShortcode
      */
     public function loadPagedTemplateViaAjax()
     {
+        //template file sent with the request?
+        $attributes['template'] = $this->request->get('template', null);
+        
         //template tags file is not loaded apparently so need to load:
         if (EEH_File::is_readable(EE_PUBLIC . 'template_tags.php')) {
             require_once EE_PUBLIC . 'template_tags.php';
         }
 
-        $template_content = $this->loadTemplate(array(), false);
+        $template_content = $this->loadTemplate($attributes, false);
         $json_response    = wp_json_encode(
             array(
                 'content' => $template_content,

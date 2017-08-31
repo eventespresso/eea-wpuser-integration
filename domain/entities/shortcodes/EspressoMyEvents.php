@@ -203,7 +203,7 @@ class EspressoMyEvents extends EspressoShortcode
     {
         //template file sent with the request?
         $attributes['template'] = $this->request->get('template', null);
-        
+
         //template tags file is not loaded apparently so need to load:
         if (EEH_File::is_readable(EE_PUBLIC . 'template_tags.php')) {
             require_once EE_PUBLIC . 'template_tags.php';

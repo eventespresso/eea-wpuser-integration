@@ -168,8 +168,12 @@ class EES_Espresso_My_Events extends EES_Shortcode
      */
     public static function load_paged_template_via_ajax()
     {
+        //initialize attributes array
+        $attributes = array();
         //template file sent with the request?
-        $attributes['template'] = EE_Registry::instance()->REQ->get('template', null);
+        if ( EE_Registry::instance()->REQ->get('template', '') !== '' ) {
+            $attributes['template'] = EE_Registry::instance()->REQ->get('template');
+        }
 
         //template tags file is not loaded apparently so need to load:
         if (is_readable(EE_PUBLIC . 'template_tags.php')) {

@@ -201,9 +201,12 @@ class EspressoMyEvents extends EspressoShortcode
      */
     public function loadPagedTemplateViaAjax()
     {
+        //intialize attributes array
+        $attributes = array();
         //template file sent with the request?
-        $attributes['template'] = $this->request->get('template', null);
-
+        if ( $this->request->get('template', '') !== '') {
+            $attributes['template'] = $this->request->get('template');
+        }
         //template tags file is not loaded apparently so need to load:
         if (EEH_File::is_readable(EE_PUBLIC . 'template_tags.php')) {
             require_once EE_PUBLIC . 'template_tags.php';

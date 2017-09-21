@@ -716,7 +716,7 @@ class EED_WP_Users_SPCO  extends EED_Module {
 	 * @param WP_User     $user
 	 * @return bool       True means the user can be attached to the attendee, false means it cannot be attached.
 	 */
-	protected function _can_attach_user_to_attendee( EE_Attendee $attendee, WP_User $user ) {
+	protected static function _can_attach_user_to_attendee( EE_Attendee $attendee, WP_User $user ) {
 		return
 			EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact
 			|| (

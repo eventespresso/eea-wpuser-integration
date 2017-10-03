@@ -116,12 +116,12 @@
     background-color: #E76700;
 }
 
-/*postponed event*/
-.espresso-my-events-table tr td.event-status-DTP {
+/*waitlist registration, postponed event*/
+.espresso-my-events-table tr td.reg-status-RWL, .espresso-my-events-table tr td.event-status-DTP {
     color : #8A549A;
 }
 
-.ee-status-DTP {
+.ee-status-RWL, .ee-status-DTP {
     background-color: #8A549A;
 }
 
@@ -143,7 +143,6 @@
 .ee-status-RIC, .ee-status-DTS {
     background-color: #FCB93C;
 }
-
 
 /* legend container  - taken from ee-admin-page.css */
 /** LIST-TABLE-LEGEND **/

@@ -51,7 +51,7 @@
 		);
 		if ( $registration->is_primary_registrant() ||
 		     ( ! $registration->is_primary_registrant()
-		       && $registration->status_ID() == EEM_Registration::status_id_approved ) ) {
+		       && $registration->status_ID() === EEM_Registration::status_id_approved ) ) {
 
 			$actions['resend_registration'] = '<a aria-label="' . $link_to_resend_registration_message_text
                                               . '" title="' . $link_to_resend_registration_message_text

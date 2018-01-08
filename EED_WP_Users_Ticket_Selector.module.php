@@ -1,7 +1,18 @@
 <?php
-if ( ! defined('EVENT_ESPRESSO_VERSION')) {
-    exit('No direct script access allowed');
-}
+
+use EventEspresso\core\domain\services\factories\EmailAddressFactory;
+use EventEspresso\core\domain\services\validation\email\EmailValidationException;
+use EventEspresso\core\domain\values\Url;
+use EventEspresso\core\exceptions\InvalidDataTypeException;
+use EventEspresso\core\exceptions\InvalidInterfaceException;
+use EventEspresso\core\exceptions\UnexpectedEntityException;
+use EventEspresso\core\libraries\form_sections\form_handlers\FormHandler;
+use EventEspresso\WaitList\domain\services\forms\WaitListFormHandler;
+use EventEspresso\WpUser\domain\entities\exceptions\WpUserLogInRequiredException;
+
+defined('EVENT_ESPRESSO_VERSION') || exit('No direct script access allowed');
+
+
 /**
  * This file contains the module for the EE WP Users addon ticket selector integration
  *
@@ -32,6 +43,12 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
             10,
             9
         );
+        // hook into wait list form submission to check for users
+        add_filter(
+            'FHEE__EventEspresso_core_libraries_form_sections_form_handlers_FormHandler__process__valid_data',
+            array('EED_WP_Users_Ticket_Selector', 'verifyWaitListUserAccess'),
+            10, 2
+        );
     }
 
 
@@ -53,7 +70,6 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
     }
 
 
-
     /**
      * Callback for FHEE__ticket_selector_chart_template__do_ticket_inside_row filter.
      * We use this to possibly replace the generated row for the current ticket being displayed in the
@@ -72,7 +88,10 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
      * @param string      $tkt_status                          The status for the ticket.
      * @param string      $status_class                        The status class for the ticket.
      * @return bool|string    @see $return value.
-     * @throws \EE_Error
+     * @throws EE_Error
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
+     * @throws InvalidInterfaceException
      */
     public static function maybe_restrict_ticket_option_by_cap(
         $return_value,
@@ -131,4 +150,44 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
         return $full_html_content;
     }
 
-} //end class EED_WP_Users_Ticket_Selector
+
+    /**
+     * @param array       $form_data
+     * @param FormHandler $form
+     * @return array
+     * @throws WpUserLogInRequiredException
+     * @throws EmailValidationException
+     * @throws RuntimeException
+     * @throws EE_Error
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
+     * @throws InvalidInterfaceException
+     * @throws UnexpectedEntityException
+     */
+    public static function verifyWaitListUserAccess(array $form_data, FormHandler $form)
+    {
+        // only process the wait list form
+        if (! $form instanceof WaitListFormHandler) {
+            return $form_data;
+        }
+        $event_id = 0;
+        $ticket   = isset($form_data['hidden_inputs']['ticket']) ? $form_data['hidden_inputs']['ticket'] : 0;
+        if ($ticket instanceof EE_Ticket) {
+            $event = $ticket->get_related_event();
+            if ($event instanceof EE_Event) {
+                $event_id = $event->ID();
+            }
+        }
+        $redirect_to_url_after_login = $event_id === 0
+            ? filter_input(INPUT_SERVER, 'HTTP_REFERER')
+            : get_permalink($event_id);
+        $message = EED_WP_Users_SPCO::verifyWpUserEmailAddress(
+            EmailAddressFactory::create($form_data['hidden_inputs']['registrant_email']),
+            new Url($redirect_to_url_after_login)
+        );
+        if ($message !== '') {
+            throw new WpUserLogInRequiredException ($message);
+        }
+        return $form_data;
+    }
+}

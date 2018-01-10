@@ -59,7 +59,7 @@ class EE_SPCO_Reg_Step_WP_User_Login extends EE_SPCO_Reg_Step {
 
 
 	public function enqueue_styles_and_scripts() {
-		EED_WP_Users_SPCO::enqueue_scripts_styles();
+		EED_WP_Users_SPCO::enqueue_scripts_styles( EED_Single_Page_Checkout::instance() );
 	}
 
 

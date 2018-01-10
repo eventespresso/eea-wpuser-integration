@@ -474,8 +474,7 @@ class EED_WP_Users_SPCO extends EED_Module
                      * method to return true;
                      */
                     if (
-                        isset($form_inputs['email'])
-                        && ! empty($form_inputs['email'])
+                        ! empty($form_inputs['email'])
                         && apply_filters(
                             'EED_WP_Users_SPCO__verify_user_access__perform_email_user_match_check',
                             true,

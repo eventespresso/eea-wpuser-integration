@@ -269,7 +269,7 @@ class EED_WP_Users_SPCO extends EED_Module
         }
         return '<br><div class="highlight-bg">'
                . sprintf(
-                   __(
+                   esc_html__(
                        '%1$sNote%2$s: Changes made in your Personal Information details will be synced with your user profile.',
                        'event_espresso'
                    ),
@@ -311,7 +311,7 @@ class EED_WP_Users_SPCO extends EED_Module
             'required'         => true,
             'html_label_id'    => 'ee_reg_qstn-' . $registration->ID() . '-' . $identifier,
             'html_label_class' => 'ee-reg-qstn',
-            'html_label_text'  => __('Sync changes with your user profile?', 'event_espresso'),
+            'html_label_text'  => esc_html__('Sync changes with your user profile?', 'event_espresso'),
             'default'          => true,
         );
         $form_subsections[ $identifier ] = new EE_Yes_No_Input($input_constructor_args);/**/
@@ -805,7 +805,7 @@ class EED_WP_Users_SPCO extends EED_Module
                     'description',
                     apply_filters(
                         'FHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_description_field',
-                        __('Registered via event registration form', 'event_espresso'),
+                        esc_html__('Registered via event registration form', 'event_espresso'),
                         $user,
                         $attendee,
                         $registration
@@ -995,7 +995,7 @@ class EED_WP_Users_SPCO extends EED_Module
             : EE_Registry::instance()->REQ->get('rememberme');
         if (empty($user_login)) {
             EE_Error::add_error(
-                __('Missing a username.', 'even_espresso'),
+                esc_html__('Missing a username.', 'even_espresso'),
                 __FILE__, __FUNCTION__, __LINE__
             );
             $field_input[] = 'user_login';
@@ -1003,7 +1003,7 @@ class EED_WP_Users_SPCO extends EED_Module
         }
         if (empty($user_pass)) {
             EE_Error::add_error(
-                __('Missing a password.', 'even_espresso'),
+                esc_html__('Missing a password.', 'even_espresso'),
                 __FILE__, __FUNCTION__, __LINE__
             );
             $field_input[] = 'user_pass';
@@ -1035,13 +1035,18 @@ class EED_WP_Users_SPCO extends EED_Module
         if (is_wp_error($user)) {
             $lost_password_link = EEH_HTML::link(
                 esc_url(wp_lostpassword_url()),
-                __("Lost your password?", 'event_espresso'),
+                esc_html__("Lost your password?", 'event_espresso'),
                 esc_attr__("Password Lost and Found", 'event_espresso'),
                 '',
                 'ee_user-lost-password'
             );
-            EE_Error::add_error(sprintf(__('Invalid username or incorrect password. %s', 'event_espresso'),
-                $lost_password_link), __FILE__, __FUNCTION__, __LINE__);
+            EE_Error::add_error(
+                sprintf(
+                    esc_html__('Invalid username or incorrect password. %s', 'event_espresso'),
+                    $lost_password_link
+                ),
+                __FILE__, __FUNCTION__, __LINE__
+            );
             $return_data = array(
                 'wp_user_response' => array(
                     'require_login'          => true,
@@ -1055,7 +1060,7 @@ class EED_WP_Users_SPCO extends EED_Module
         } else {
             EE_Error::add_success(
                 sprintf(
-                    __('Logged in successfully as %s!', 'event_espresso'),
+                    esc_html__('Logged in successfully as %s!', 'event_espresso'),
                     $user->display_name
                 )
             );
@@ -1149,7 +1154,7 @@ class EED_WP_Users_SPCO extends EED_Module
         $to      = apply_filters('FHEE__EED_WP_Users_SPCO__send_notification_to_admin__to', $event_author->user_email,
             $registration);
         $subject = apply_filters('FHEE__EED_WP_Users_SPCO__send_notification_to_admin__subject',
-            __('User having trouble receiving emails', 'event_espresso'), $registration);
+            esc_html__('User having trouble receiving emails', 'event_espresso'), $registration);
         $content = sprintf(esc_html__('Hi %s,', 'event_espresso'), $event_author->display_name);
         $content .= "\n\n";
         $content .= esc_html__(

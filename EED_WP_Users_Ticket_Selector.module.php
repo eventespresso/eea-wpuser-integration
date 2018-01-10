@@ -135,7 +135,9 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
         }
         // made it here?  That means user does not have access to this ticket,
         // so let's return a filterable message for them.
-        $ticket_price = empty($ticket_price) ? '' : ' (' . EEH_Template::format_currency($ticket_price) . ')';
+        $ticket_price = empty($ticket_price)
+            ? ''
+            : ' (' . EEH_Template::format_currency($ticket_price) . ')';
         $full_html_content = '<td class="tckt-slctr-tbl-td-name" colspan="3">';
         $inner_message = apply_filters(
             'FHEE__EED_WP_Users_Ticket_Selector__maybe_restrict_ticket_option_by_cap__no_access_msg',
@@ -175,7 +177,9 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
     public static function displayWaitListFormUserNotices($wait_list_form, EE_Event $event)
     {
         if (isset($_REQUEST[ EED_WP_Users_Ticket_Selector::META_KEY_LOGIN_REQUIRED_NOTICE ])) {
-            $login_notice_id = $_REQUEST[ EED_WP_Users_Ticket_Selector::META_KEY_LOGIN_REQUIRED_NOTICE ];
+            $login_notice_id = sanitize_text_field(
+                $_REQUEST[ EED_WP_Users_Ticket_Selector::META_KEY_LOGIN_REQUIRED_NOTICE ]
+            );
             $login_notice    = $event->get_extra_meta($login_notice_id, true);
             if ($login_notice) {
                 $login_notice = EEH_HTML::div(
@@ -223,7 +227,7 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
             new Url(get_permalink($event_id))
         );
         if ($login_notice !== '') {
-            throw new WpUserLogInRequiredException ($login_notice);
+            throw new WpUserLogInRequiredException($login_notice);
         }
         return $form_data;
     }

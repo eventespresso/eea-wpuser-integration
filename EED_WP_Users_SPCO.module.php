@@ -4,6 +4,7 @@ use EventEspresso\core\domain\services\factories\EmailAddressFactory;
 use EventEspresso\core\domain\services\validation\email\EmailValidationException;
 use EventEspresso\core\domain\values\EmailAddress;
 use EventEspresso\core\domain\values\Url;
+use EventEspresso\core\exceptions\EntityNotFoundException;
 use EventEspresso\core\exceptions\InvalidDataTypeException;
 use EventEspresso\core\exceptions\InvalidInterfaceException;
 
@@ -247,6 +248,10 @@ class EED_WP_Users_SPCO extends EED_Module
      * @param EE_Question_Group                     $question_group
      * @param EE_SPCO_Reg_Step_Attendee_Information $spco
      * @return string                                content to return
+     * @throws EE_Error
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
+     * @throws InvalidInterfaceException
      */
     public static function primary_reg_sync_messages(
         $content,
@@ -292,7 +297,8 @@ class EED_WP_Users_SPCO extends EED_Module
      * @param EE_Registration                       $registration
      * @param EE_Question_Group                     $question_group
      * @param EE_SPCO_Reg_Step_Attendee_Information $spco
-     * @return string                                content
+     * @return array content
+     * @throws EE_Error
      */
     public static function reg_checkbox_for_sync_info(
         $form_subsections,
@@ -351,12 +357,12 @@ class EED_WP_Users_SPCO extends EED_Module
      * Added to filter that processes the return to the registration form of whether and answer to the question exists
      * for that
      *
-     * @param type            $value
+     * @param mixed            $value
      * @param EE_Registration $registration
      * @param int|string      $question_id in 4.8.10 and 4.8.12 it is numeric (eg 23) but in 4.8.11 it is a system ID
      *                                     like "email"
      * @param string          $system_id   passed in 4.8.12+ of EE core
-     * @return type
+     * @return mixed
      */
     public static function filter_answer_for_wpuser(
         $value,
@@ -600,15 +606,16 @@ class EED_WP_Users_SPCO extends EED_Module
      * to edit attendee information.
      *
      * @param EE_SPCO_Reg_Step_Attendee_Information $reg_step
-     * @return string  HTML content to show before the reg form.
+     * @return void  echoes HTML content to show before the reg form.
+     * @throws EE_Error
      */
     public static function maybe_login_notice(EE_SPCO_Reg_Step_Attendee_Information $reg_step)
     {
-        $content = '';
         //first if this isn't a revisit OR $reg_step is invalid then get out nothing to see here.
         if (! $reg_step->checkout->revisit) {
-            return $content;
+            return;
         }
+        $content = '';
         // keeping the message simple for now.
         // If user is not logged in, and event for the displayed registration automatically
         // creates registrations, then they must log in before editing registration.
@@ -676,6 +683,10 @@ class EED_WP_Users_SPCO extends EED_Module
      * @param array            $attendee_data                       array of core personal data used to verify if
      *                                                              existing attendee exists.
      * @return EE_Attendee|null
+     * @throws EE_Error
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
+     * @throws InvalidInterfaceException
      */
     public static function maybe_sync_existing_attendee(
         $existing_attendee,
@@ -694,8 +705,8 @@ class EED_WP_Users_SPCO extends EED_Module
         /**
          * if there already IS an existing attendee then that means the system found one matching
          * the first_name, last_name, and email address that is incoming.  If this attendee is NOT
-         * what is attached to the user, then we'll change the firstname and lastname but not the
-         * email address.  Otherwise we could end up with two wpusers in the system with the
+         * what is attached to the user, then we'll change the first name and last name but not the
+         * email address.  Otherwise we could end up with two WP users in the system with the
          * same email address.
          * Here we also skip the user sync if the EE_WPUsers_Config->sync_user_with_contact option is false
          */
@@ -743,6 +754,11 @@ class EED_WP_Users_SPCO extends EED_Module
      * @param array                                 $valid_data             The incoming form post data (that has
      *                                                                      already been validated)
      * @return void
+     * @throws EE_Error
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
+     * @throws InvalidInterfaceException
+     * @throws EntityNotFoundException
      */
     public static function process_wpuser_for_attendee(EE_SPCO_Reg_Step_Attendee_Information $spco, $valid_data)
     {
@@ -858,7 +874,7 @@ class EED_WP_Users_SPCO extends EED_Module
 
     /**
      * This is used to verify whether its okay to attach an attendee to a user.
-     * It compares the firstname, lastname and email address of the attendee with the first name, last name, and email
+     * It compares the first name, last name and email address of the attendee with the first name, last name, and email
      * address of the given WP_User profile.  If there is a mismatch, then no attachment can happen.  If there is a
      * match, then we will attach. A pre check is done for
      * EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact and if that's true, then we
@@ -867,6 +883,9 @@ class EED_WP_Users_SPCO extends EED_Module
      * @param EE_Attendee $attendee
      * @param WP_User     $user
      * @return bool       True means the user can be attached to the attendee, false means it cannot be attached.
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
+     * @throws InvalidInterfaceException
      */
     protected static function _can_attach_user_to_attendee(EE_Attendee $attendee, WP_User $user)
     {
@@ -912,6 +931,7 @@ class EED_WP_Users_SPCO extends EED_Module
      *
      * @param EE_SPCO_Reg_Step_Attendee_Information $spco
      * @return EE_Registration[]
+     * @throws EE_Error
      */
     public static function _get_registrations(EE_SPCO_Reg_Step_Attendee_Information $spco)
     {
@@ -931,6 +951,10 @@ class EED_WP_Users_SPCO extends EED_Module
      *
      * @param mixed WP_User | int $user_or_id can be WP_User or the user_id.
      * @return EE_Attendee|null
+     * @throws EE_Error
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
+     * @throws InvalidInterfaceException
      */
     public static function get_attendee_for_user($user_or_id)
     {
@@ -951,7 +975,13 @@ class EED_WP_Users_SPCO extends EED_Module
      * skeleton of a login form for usage when user needs to login.
      *
      * @since 1.0.0
-     * @return string
+     * @return void
+     * @throws DomainException
+     * @throws EE_Error
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
+     * @throws InvalidInterfaceException
+     * @throws ReflectionException
      */
     public static function login_form_skeleton()
     {
@@ -978,7 +1008,10 @@ class EED_WP_Users_SPCO extends EED_Module
      * @param array $login_args                 If included this is being called externally for processing.
      * @param bool  $handle_return              Used by external callers to indicate they'll take care of the
      *                                          return of data.
-     * @return json response.
+     * @return array response.
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
+     * @throws InvalidInterfaceException
      */
     public static function process_login_form($login_args = array(), $handle_return = true)
     {
@@ -1107,7 +1140,12 @@ class EED_WP_Users_SPCO extends EED_Module
      * We use this to send a notification to the event author that a registration is having trouble not receiving
      * emails.
      *
-     * @return object (json object returned in a response).
+     * @return void (json object returned in a response).
+     * @throws EE_Error
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
+     * @throws InvalidInterfaceException
+     * @throws EntityNotFoundException
      */
     public static function send_notification_to_admin()
     {
@@ -1220,6 +1258,9 @@ class EED_WP_Users_SPCO extends EED_Module
      * registration.
      *
      * @param int $user_id The user_id for the WP_User being logged in automatically.
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
+     * @throws InvalidInterfaceException
      */
     public static function auto_login_registered_user($user_id)
     {
@@ -1232,6 +1273,10 @@ class EED_WP_Users_SPCO extends EED_Module
     /**
      * Callback for `register_form` WordPress hook.
      * If `ee_do_auto_login` is in the request then we add that as a hidden field in the registration form.
+     *
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
+     * @throws InvalidInterfaceException
      */
     public static function add_auto_login_parameter()
     {

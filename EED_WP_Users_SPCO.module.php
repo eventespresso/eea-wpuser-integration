@@ -49,16 +49,16 @@ class EED_WP_Users_SPCO extends EED_Module
          */
         // add_filter(
         //    'FHEE__EE_SPCO_Reg_Step_Attendee_Information__question_group_reg_form__subsections_array',
-        //    array( 'EED_WP_Users_SPCO', 'reg_checkbox_for_sync_info' ), 10, 4
+        //    array( 'EED_WP_Users_SPCO', 'reg_checkbox_for_sync_info' ), 10, 2
         // );
         // add_filter(
         //     'FHEE__EE_SPCO_Reg_Step_Attendee_Information___save_registration_form_input',
-        //     array( 'EED_WP_Users_SPCO', 'process_wp_user_inputs' ), 10, 5
+        //     array( 'EED_WP_Users_SPCO', 'process_wp_user_inputs' ), 10, 3
         // );
         add_filter(
             'FHEE__EEH_Form_Fields__generate_question_groups_html__after_question_group_questions',
             array('EED_WP_Users_SPCO', 'primary_reg_sync_messages'),
-            10, 4
+            10, 3
         );
         add_filter(
             'FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value',
@@ -78,7 +78,7 @@ class EED_WP_Users_SPCO extends EED_Module
         add_action(
             'AHEE__EE_Single_Page_Checkout__process_attendee_information__end',
             array('EED_WP_Users_SPCO', 'process_wpuser_for_attendee'),
-            10, 2
+            10
         );
         //notifications
         add_action(
@@ -89,7 +89,8 @@ class EED_WP_Users_SPCO extends EED_Module
         //hook into spco for styles and scripts.
         add_action(
             'AHEE__EED_Single_Page_Checkout__enqueue_styles_and_scripts__attendee_information',
-            array('EED_WP_Users_SPCO', 'enqueue_scripts_styles')
+            array('EED_WP_Users_SPCO', 'enqueue_scripts_styles'),
+            10, 0
         );
         //hook into spco for adding additional reg step
         add_filter(
@@ -116,7 +117,7 @@ class EED_WP_Users_SPCO extends EED_Module
             add_filter(
                 'FHEE__EEH_Form_Fields__generate_question_groups_html__after_question_group_questions',
                 array('EED_WP_Users_SPCO', 'primary_reg_sync_messages'),
-                10, 4
+                10, 3
             );
             add_filter(
                 'FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value',
@@ -136,7 +137,7 @@ class EED_WP_Users_SPCO extends EED_Module
             add_action(
                 'AHEE__EE_Single_Page_Checkout__process_attendee_information__end',
                 array('EED_WP_Users_SPCO', 'process_wpuser_for_attendee'),
-                10, 2
+                10
             );
             //notifications
             add_action(
@@ -192,10 +193,9 @@ class EED_WP_Users_SPCO extends EED_Module
      * used to register and enqueue scripts for wp user integration with spco.
      *
      * @since 1.0.0
-     * @param EED_Single_Page_Checkout $spco
      * @return void
      */
-    public static function enqueue_scripts_styles(EED_Single_Page_Checkout $spco)
+    public static function enqueue_scripts_styles()
     {
         wp_register_script(
             'ee-dialog',
@@ -246,7 +246,6 @@ class EED_WP_Users_SPCO extends EED_Module
      * @param string                                $content Any content already added here.
      * @param EE_Registration                       $registration
      * @param EE_Question_Group                     $question_group
-     * @param EE_SPCO_Reg_Step_Attendee_Information $spco
      * @return string                                content to return
      * @throws EE_Error
      * @throws InvalidArgumentException
@@ -256,8 +255,7 @@ class EED_WP_Users_SPCO extends EED_Module
     public static function primary_reg_sync_messages(
         $content,
         EE_Registration $registration,
-        EE_Question_Group $question_group,
-        EE_SPCO_Reg_Step_Attendee_Information $spco
+        EE_Question_Group $question_group
     ) {
         if (
             (
@@ -295,16 +293,12 @@ class EED_WP_Users_SPCO extends EED_Module
      * @todo  THIS IS NOT IMPLEMENTED YET.
      * @param array                                 $form_subsections existing form subsections
      * @param EE_Registration                       $registration
-     * @param EE_Question_Group                     $question_group
-     * @param EE_SPCO_Reg_Step_Attendee_Information $spco
      * @return array content
      * @throws EE_Error
      */
     public static function reg_checkbox_for_sync_info(
         $form_subsections,
-        EE_Registration $registration,
-        EE_Question_Group $question_group,
-        EE_SPCO_Reg_Step_Attendee_Information $spco
+        EE_Registration $registration
     ) {
         if (! is_user_logged_in() || ! $registration->is_primary_registrant()) {
             return $form_subsections;
@@ -320,7 +314,7 @@ class EED_WP_Users_SPCO extends EED_Module
             'html_label_text'  => esc_html__('Sync changes with your user profile?', 'event_espresso'),
             'default'          => true,
         );
-        $form_subsections[ $identifier ] = new EE_Yes_No_Input($input_constructor_args);/**/
+        $form_subsections[ $identifier ] = new EE_Yes_No_Input($input_constructor_args);
         return $form_subsections;
     }
 
@@ -334,22 +328,15 @@ class EED_WP_Users_SPCO extends EED_Module
      * @param bool                                  $processed      return true to stop normal spco processing of input
      * @param EE_Registration                       $registration
      * @param string                                $form_input     The input.
-     * @param mixed                                 $input_value    The normalized input value.
-     * @param EE_SPCO_Reg_Step_Attendee_Information $spco
      * @return bool                                                 return true to stop normal spco processing
      *                                                              or false to keep it going.
      */
     public static function process_wp_user_inputs(
         $processed,
         EE_Registration $registration,
-        $form_input,
-        $input_value,
-        EE_SPCO_Reg_Step_Attendee_Information $spco
+        $form_input
     ) {
-        if ($form_input == 'sync_with_user_profile') {
-            return true;
-        }
-        return false;
+        return $form_input === 'sync_with_user_profile';
     }
 
 
@@ -623,14 +610,17 @@ class EED_WP_Users_SPCO extends EED_Module
         $event_creates_user = false;
         if ($registrations) {
             foreach ($registrations as $registration) {
-                if ($reg_step->checkout->visit_allows_processing_of_this_registration($registration)) {
-                    if (EE_WPUsers::is_auto_user_create_on($registration->event_ID())) {
-                        $event_creates_user = true;
-                    }
+                if (
+                    $reg_step->checkout->visit_allows_processing_of_this_registration($registration)
+                    &&  EE_WPUsers::is_auto_user_create_on($registration->event_ID())
+                ) {
+                    $event_creates_user = true;
+                    // once we've determined this we don't need to keep looping
+                    break;
                 }
             }
         }
-        if (! is_user_logged_in() && $event_creates_user) {
+        if ($event_creates_user && ! is_user_logged_in()) {
             $content       = '<div class="ee-attention">';
             $inner_content = '<p>'
                              . sprintf(
@@ -751,8 +741,6 @@ class EED_WP_Users_SPCO extends EED_Module
      *       user creation is turned on for this event.
      *
      * @param EE_SPCO_Reg_Step_Attendee_Information $spco
-     * @param array                                 $valid_data             The incoming form post data (that has
-     *                                                                      already been validated)
      * @return void
      * @throws EE_Error
      * @throws InvalidArgumentException
@@ -760,7 +748,7 @@ class EED_WP_Users_SPCO extends EED_Module
      * @throws InvalidInterfaceException
      * @throws EntityNotFoundException
      */
-    public static function process_wpuser_for_attendee(EE_SPCO_Reg_Step_Attendee_Information $spco, $valid_data)
+    public static function process_wpuser_for_attendee(EE_SPCO_Reg_Step_Attendee_Information $spco)
     {
         $user_created = false;
         $att_id       = '';
@@ -996,7 +984,7 @@ class EED_WP_Users_SPCO extends EED_Module
         echo $o_cont;
         EE_Registry::instance()->load_helper('Template');
         $template = EE_WPUSERS_TEMPLATE_PATH . 'eea-wp-users-login-form.template.php';
-        EEH_Template::display_template($template, array());
+        EEH_Template::display_template($template);
     }
 
 
@@ -1020,11 +1008,14 @@ class EED_WP_Users_SPCO extends EED_Module
         $login_args    = (array) $login_args;
         $handle_return = (bool) $handle_return;
         //first verify we have the necessary data.
-        $user_login = isset($login_args['user_login']) ? $login_args['user_login']
+        $user_login = isset($login_args['user_login'])
+            ? $login_args['user_login']
             : EE_Registry::instance()->REQ->get('login_name');
-        $user_pass  = isset($login_args['login_pass']) ? $login_args['login_pass']
+        $user_pass  = isset($login_args['login_pass'])
+            ? $login_args['login_pass']
             : EE_Registry::instance()->REQ->get('login_pass');
-        $rememberme = isset($login_args['rememberme']) ? $login_args['rememberme']
+        $rememberme = isset($login_args['rememberme'])
+            ? $login_args['rememberme']
             : EE_Registry::instance()->REQ->get('rememberme');
         if (empty($user_login)) {
             EE_Error::add_error(
@@ -1068,8 +1059,8 @@ class EED_WP_Users_SPCO extends EED_Module
         if (is_wp_error($user)) {
             $lost_password_link = EEH_HTML::link(
                 esc_url(wp_lostpassword_url()),
-                esc_html__("Lost your password?", 'event_espresso'),
-                esc_attr__("Password Lost and Found", 'event_espresso'),
+                esc_html__('Lost your password?', 'event_espresso'),
+                esc_attr__('Password Lost and Found', 'event_espresso'),
                 '',
                 'ee_user-lost-password'
             );
@@ -1107,9 +1098,9 @@ class EED_WP_Users_SPCO extends EED_Module
         }
         if ($handle_return) {
             self::_return_json($return_data);
-        } else {
-            return $return_data;
+            // the above exits after echoing JSON
         }
+        return $return_data;
     }
 
 

@@ -5,6 +5,8 @@ use EventEspresso\core\exceptions\InvalidInterfaceException;
 
 defined('EVENT_ESPRESSO_VERSION') || exit;
 
+
+
 /**
  * EED_WP_Users_Ticket_Selector module.  Takes care of WP Users integration with ticket selector.
  *
@@ -76,22 +78,8 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
         $tkt_status,
         $status_class
     ) {
-        $cap_required = $tkt->get_extra_meta('ee_ticket_cap_required', true);
-        if (empty($cap_required)) {
+        if (EED_WP_Users_Ticket_Selector::ticketAvailableToUser($tkt)) {
             return false;
-        }
-        //still here?
-        if (
-            (
-                is_admin() && ! EE_FRONT_AJAX
-            )
-            || (
-                ! empty($cap_required)
-                && is_user_logged_in()
-                && EE_Registry::instance()->CAP->current_user_can($cap_required, 'wp_user_ticket_selector_check')
-            )
-        ) {
-            return false; //cap required but user has access so continue on please.
         }
         // made it here?  That means user does not have access to this ticket,
         // so let's return a filterable message for them.
@@ -127,4 +115,34 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
         );
         return $full_html_content;
     }
-} //end class EED_WP_Users_Ticket_Selector
+
+
+    /**
+     * @param EE_Ticket $ticket
+     * @return bool
+     * @throws EE_Error
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
+     * @throws InvalidInterfaceException
+     */
+    public static function ticketAvailableToUser(EE_Ticket $ticket)
+    {
+        // don't check caps if adding registrants via the admin
+        if (! EE_FRONT_AJAX && is_admin()) {
+            return true;
+        }
+        // check if any caps are required to access this ticket
+        $cap_required = $ticket->get_extra_meta('ee_ticket_cap_required', true);
+        if (empty($cap_required)) {
+            // no cap required so user has access by default
+            return true;
+        }
+        // return true if user is logged in has the correct caps to access this ticket,
+        // otherwise return false because they are not logged in or don't have the required cap
+        return is_user_logged_in()
+               && EE_Registry::instance()->CAP->current_user_can(
+                $cap_required,
+                'wp_user_ticket_selector_check'
+            );
+    }
+}

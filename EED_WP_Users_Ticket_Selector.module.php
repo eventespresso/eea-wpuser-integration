@@ -1,16 +1,9 @@
 <?php
-if ( ! defined('EVENT_ESPRESSO_VERSION')) {
-    exit('No direct script access allowed');
-}
-/**
- * This file contains the module for the EE WP Users addon ticket selector integration
- *
- * @since      1.0.0
- * @package    EE WP Users
- * @subpackage modules
- */
 
+use EventEspresso\core\exceptions\InvalidDataTypeException;
+use EventEspresso\core\exceptions\InvalidInterfaceException;
 
+defined('EVENT_ESPRESSO_VERSION') || exit;
 
 /**
  * EED_WP_Users_Ticket_Selector module.  Takes care of WP Users integration with ticket selector.
@@ -19,7 +12,6 @@ if ( ! defined('EVENT_ESPRESSO_VERSION')) {
  * @package        EE WP Users
  * @subpackage     modules
  * @author         Darren Ethier
- *                 ------------------------------------------------------------------------
  */
 class EED_WP_Users_Ticket_Selector extends EED_Module
 {
@@ -35,11 +27,9 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
     }
 
 
-
     public static function set_hooks_admin()
     {
     }
-
 
 
     public static function enqueue_scripts_styles()
@@ -47,11 +37,9 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
     }
 
 
-
     public function run($WP)
     {
     }
-
 
 
     /**
@@ -72,7 +60,10 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
      * @param string      $tkt_status                          The status for the ticket.
      * @param string      $status_class                        The status class for the ticket.
      * @return bool|string    @see $return value.
-     * @throws \EE_Error
+     * @throws EE_Error
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
+     * @throws InvalidInterfaceException
      */
     public static function maybe_restrict_ticket_option_by_cap(
         $return_value,
@@ -93,7 +84,8 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
         if (
             (
                 is_admin() && ! EE_FRONT_AJAX
-            ) || (
+            )
+            || (
                 ! empty($cap_required)
                 && is_user_logged_in()
                 && EE_Registry::instance()->CAP->current_user_can($cap_required, 'wp_user_ticket_selector_check')
@@ -103,12 +95,17 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
         }
         // made it here?  That means user does not have access to this ticket,
         // so let's return a filterable message for them.
-        $ticket_price = empty($ticket_price) ? '' : ' (' . EEH_Template::format_currency($ticket_price) . ')';
+        $ticket_price      = empty($ticket_price)
+            ? ''
+            : ' (' . EEH_Template::format_currency($ticket_price) . ')';
         $full_html_content = '<td class="tckt-slctr-tbl-td-name" colspan="3">';
-        $inner_message = apply_filters(
+        $inner_message     = apply_filters(
             'FHEE__EED_WP_Users_Ticket_Selector__maybe_restrict_ticket_option_by_cap__no_access_msg',
             sprintf(
-                __('The %1$s%2$s%3$s%4$s  is available to members only. %5$s', 'event_espresso'),
+                esc_html__(
+                    'The %1$s%2$s%3$s%4$s  is available to members only. %5$s',
+                    'event_espresso'
+                ),
                 '<strong>',
                 $tkt->name(),
                 $ticket_price,
@@ -130,5 +127,4 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
         );
         return $full_html_content;
     }
-
 } //end class EED_WP_Users_Ticket_Selector

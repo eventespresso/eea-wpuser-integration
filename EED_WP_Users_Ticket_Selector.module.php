@@ -1,4 +1,5 @@
 <?php
+
 use EventEspresso\core\domain\services\factories\EmailAddressFactory;
 use EventEspresso\core\domain\services\validation\email\EmailValidationException;
 use EventEspresso\core\domain\values\Url;
@@ -6,7 +7,6 @@ use EventEspresso\core\exceptions\InvalidDataTypeException;
 use EventEspresso\core\exceptions\InvalidInterfaceException;
 use EventEspresso\core\exceptions\UnexpectedEntityException;
 use EventEspresso\core\libraries\form_sections\form_handlers\FormHandler;
-use EventEspresso\WaitList\domain\services\forms\WaitListForm;
 use EventEspresso\WaitList\domain\services\forms\WaitListFormHandler;
 use EventEspresso\WpUser\domain\entities\exceptions\WpUserLogInRequiredException;
 
@@ -24,7 +24,9 @@ defined('EVENT_ESPRESSO_VERSION') || exit;
  */
 class EED_WP_Users_Ticket_Selector extends EED_Module
 {
+
     const META_KEY_LOGIN_REQUIRED_NOTICE = 'login_required_notice';
+
 
     public static function set_hooks()
     {
@@ -144,6 +146,65 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
 
 
     /**
+     * @param EE_Ticket $ticket
+     * @return bool
+     * @throws EE_Error
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
+     * @throws InvalidInterfaceException
+     */
+    public static function ticketAvailableToUser(EE_Ticket $ticket)
+    {
+        // don't check caps if adding registrants via the admin
+        if (! EE_FRONT_AJAX && is_admin()) {
+            return true;
+        }
+        // check if any caps are required to access this ticket
+        $cap_required = $ticket->get_extra_meta('ee_ticket_cap_required', true);
+        if (empty($cap_required)) {
+            // no cap required so user has access by default
+            return true;
+        }
+        // return true if user is logged in has the correct caps to access this ticket,
+        // otherwise return false because they are not logged in or don't have the required cap
+        return is_user_logged_in()
+               && EE_Registry::instance()->CAP->current_user_can(
+                $cap_required,
+                'wp_user_ticket_selector_check'
+            );
+    }
+
+
+    /**
+     * @param EE_Ticket $ticket
+     * @param string    $ticket_price
+     * @param string    $ticket_status
+     * @return string
+     * @throws EE_Error
+     */
+    private static function getMembersOnlyTicketMessage(EE_Ticket $ticket, $ticket_price, $ticket_status)
+    {
+        return (string) apply_filters(
+            'FHEE__EED_WP_Users_Ticket_Selector__maybe_restrict_ticket_option_by_cap__no_access_msg',
+            sprintf(
+                esc_html__(
+                    'The %1$s%2$s%3$s%4$s  is available to members only. %5$s',
+                    'event_espresso'
+                ),
+                '<strong>',
+                $ticket->name(),
+                $ticket_price,
+                '</strong>',
+                $ticket_status
+            ),
+            $ticket,
+            $ticket_price,
+            $ticket_status
+        );
+    }
+
+
+    /**
      * maybe display WP User related notices on the wait list form
      *
      * @param string   $wait_list_form
@@ -159,7 +220,7 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
             );
             $login_notice    = $event->get_extra_meta($login_notice_id, true);
             if ($login_notice) {
-                $login_notice = EEH_HTML::div(
+                $login_notice   = EEH_HTML::div(
                     EEH_HTML::h4(
                         esc_html__('Login Required', 'event_espresso'),
                         'ee-login-notice-h4-' . $event->ID(),
@@ -231,63 +292,6 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
         }
         return $redirect_params;
     }
-    /**
-     * @param EE_Ticket $ticket
-     * @param string    $ticket_price
-     * @param string    $ticket_status
-     * @return string
-     * @throws EE_Error
-     */
-    private static function getMembersOnlyTicketMessage(EE_Ticket $ticket, $ticket_price, $ticket_status)
-    {
-        return (string) apply_filters(
-            'FHEE__EED_WP_Users_Ticket_Selector__maybe_restrict_ticket_option_by_cap__no_access_msg',
-            sprintf(
-                esc_html__(
-                    'The %1$s%2$s%3$s%4$s  is available to members only. %5$s',
-                    'event_espresso'
-                ),
-                '<strong>',
-                $ticket->name(),
-                $ticket_price,
-                '</strong>',
-                $ticket_status
-            ),
-            $ticket,
-            $ticket_price,
-            $ticket_status
-        );
-    }
-
-
-    /**
-     * @param EE_Ticket $ticket
-     * @return bool
-     * @throws EE_Error
-     * @throws InvalidArgumentException
-     * @throws InvalidDataTypeException
-     * @throws InvalidInterfaceException
-     */
-    public static function ticketAvailableToUser(EE_Ticket $ticket)
-    {
-        // don't check caps if adding registrants via the admin
-        if (! EE_FRONT_AJAX && is_admin()) {
-            return true;
-        }
-        // check if any caps are required to access this ticket
-        $cap_required = $ticket->get_extra_meta('ee_ticket_cap_required', true);
-        if (empty($cap_required)) {
-            // no cap required so user has access by default
-            return true;
-        }
-        // return true if user is logged in has the correct caps to access this ticket,
-        // otherwise return false because they are not logged in or don't have the required cap
-        return is_user_logged_in()
-               && EE_Registry::instance()->CAP->current_user_can(
-                $cap_required,
-                'wp_user_ticket_selector_check'
-            );
-    }
 
 
     /**
@@ -305,11 +309,11 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
         foreach ($active_tickets as $active_ticket) {
             if (! EED_WP_Users_Ticket_Selector::ticketAvailableToUser($active_ticket)) {
                 unset($tickets[ $active_ticket->ID() ]);
-                if(is_user_logged_in()) {
-                    $option_id = 'members_only';
+                if (is_user_logged_in()) {
+                    $option_id    = 'members_only';
                     $login_notice = '';
                 } else {
-                    $option_id = 'login_required';
+                    $option_id    = 'login_required';
                     $login_notice = esc_html__('Please login.', 'event_espresso');
                 }
                 $tickets[ $option_id ] = esc_html__('Members Only Ticket Option.', 'event_espresso');
@@ -322,13 +326,13 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
 
     public static function checkSubmittedWaitListTicketCaps(array $valid_form_data, FormHandler $form_handler)
     {
-        if(! $form_handler instanceof WaitListFormHandler) {
+        if (! $form_handler instanceof WaitListFormHandler) {
             return $valid_form_data;
         }
-        if(isset($valid_form_data['hidden_inputs']['ticket'])){
-            if($valid_form_data['hidden_inputs']['ticket'] === 'members_only'){
+        if (isset($valid_form_data['hidden_inputs']['ticket'])) {
+            if ($valid_form_data['hidden_inputs']['ticket'] === 'members_only') {
                 throw new RuntimeException('NO TICKET FOR YOU!!!');
-            } else if ($valid_form_data['hidden_inputs']['ticket'] === 'login_required') {
+            } elseif ($valid_form_data['hidden_inputs']['ticket'] === 'login_required') {
                 throw new RuntimeException('LOGIN BRUH!!!');
             }
         }

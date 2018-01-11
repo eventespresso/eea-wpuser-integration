@@ -2,6 +2,9 @@
 
 use EventEspresso\core\exceptions\InvalidDataTypeException;
 use EventEspresso\core\exceptions\InvalidInterfaceException;
+use EventEspresso\core\libraries\form_sections\form_handlers\FormHandler;
+use EventEspresso\WaitList\domain\services\forms\WaitListForm;
+use EventEspresso\WaitList\domain\services\forms\WaitListFormHandler;
 
 defined('EVENT_ESPRESSO_VERSION') || exit;
 
@@ -23,6 +26,18 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
         add_filter(
             'FHEE__ticket_selector_chart_template__do_ticket_inside_row',
             array('EED_WP_Users_Ticket_Selector', 'maybe_restrict_ticket_option_by_cap'),
+            10,
+            9
+        );
+        add_filter(
+            'FHEE__EventEspresso_WaitList_domain_services_forms__WaitListFormHandler__generate__tickets',
+            array('EED_WP_Users_Ticket_Selector', 'checkWaitListTicketCaps'),
+            10,
+            9
+        );
+        add_filter(
+            'FHEE__EventEspresso_core_libraries_form_sections_form_handlers_FormHandler__process__valid_data',
+            array('EED_WP_Users_Ticket_Selector', 'checkSubmittedWaitListTicketCaps'),
             10,
             9
         );
@@ -87,19 +102,7 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
             ? ''
             : ' (' . EEH_Template::format_currency($ticket_price) . ')';
         $full_html_content = '<td class="tckt-slctr-tbl-td-name" colspan="3">';
-        $inner_message     = apply_filters(
-            'FHEE__EED_WP_Users_Ticket_Selector__maybe_restrict_ticket_option_by_cap__no_access_msg',
-            sprintf(
-                esc_html__(
-                    'The %1$s%2$s%3$s%4$s  is available to members only. %5$s',
-                    'event_espresso'
-                ),
-                '<strong>',
-                $tkt->name(),
-                $ticket_price,
-                '</strong>',
-                $tkt_status
-            ),
+        $inner_message     = EED_WP_Users_Ticket_Selector::getMembersOnlyTicketMessage(
             $tkt,
             $ticket_price,
             $tkt_status
@@ -114,6 +117,35 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
             $tkt_status
         );
         return $full_html_content;
+    }
+
+
+    /**
+     * @param EE_Ticket $ticket
+     * @param string    $ticket_price
+     * @param string    $ticket_status
+     * @return string
+     * @throws EE_Error
+     */
+    private static function getMembersOnlyTicketMessage(EE_Ticket $ticket, $ticket_price, $ticket_status)
+    {
+        return (string) apply_filters(
+            'FHEE__EED_WP_Users_Ticket_Selector__maybe_restrict_ticket_option_by_cap__no_access_msg',
+            sprintf(
+                esc_html__(
+                    'The %1$s%2$s%3$s%4$s  is available to members only. %5$s',
+                    'event_espresso'
+                ),
+                '<strong>',
+                $ticket->name(),
+                $ticket_price,
+                '</strong>',
+                $ticket_status
+            ),
+            $ticket,
+            $ticket_price,
+            $ticket_status
+        );
     }
 
 
@@ -144,5 +176,51 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
                 $cap_required,
                 'wp_user_ticket_selector_check'
             );
+    }
+
+
+    /**
+     * @param array       $tickets
+     * @param EE_Ticket[] $active_tickets
+     * @param EE_Event    $event
+     * @return array
+     * @throws EE_Error
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
+     * @throws InvalidInterfaceException
+     */
+    public static function checkWaitListTicketCaps(array $tickets, array $active_tickets, EE_Event $event)
+    {
+        foreach ($active_tickets as $active_ticket) {
+            if (! EED_WP_Users_Ticket_Selector::ticketAvailableToUser($active_ticket)) {
+                unset($tickets[ $active_ticket->ID() ]);
+                if(is_user_logged_in()) {
+                    $option_id = 'members_only';
+                    $login_notice = '';
+                } else {
+                    $option_id = 'login_required';
+                    $login_notice = esc_html__('Please login.', 'event_espresso');
+                }
+                $tickets[ $option_id ] = esc_html__('Members Only Ticket Option.', 'event_espresso');
+                $tickets[ $option_id ] .= " {$login_notice}";
+            }
+        }
+        return $tickets;
+    }
+
+
+    public static function checkSubmittedWaitListTicketCaps(array $valid_form_data, FormHandler $form_handler)
+    {
+        if(! $form_handler instanceof WaitListFormHandler) {
+            return $valid_form_data;
+        }
+        if(isset($valid_form_data['hidden_inputs']['ticket'])){
+            if($valid_form_data['hidden_inputs']['ticket'] === 'members_only'){
+                throw new RuntimeException('NO TICKET FOR YOU!!!');
+            } else if ($valid_form_data['hidden_inputs']['ticket'] === 'login_required') {
+                throw new RuntimeException('LOGIN BRUH!!!');
+            }
+        }
+        return $valid_form_data;
     }
 }

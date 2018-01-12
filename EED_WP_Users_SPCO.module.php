@@ -7,6 +7,8 @@ use EventEspresso\core\domain\values\Url;
 use EventEspresso\core\exceptions\EntityNotFoundException;
 use EventEspresso\core\exceptions\InvalidDataTypeException;
 use EventEspresso\core\exceptions\InvalidInterfaceException;
+use EventEspresso\core\services\loaders\LoaderFactory;
+use EventEspresso\WpUser\domain\services\users\WpUserEmailVerification;
 
 defined('EVENT_ESPRESSO_VERSION') || exit('No direct script access allowed');
 
@@ -239,6 +241,21 @@ class EED_WP_Users_SPCO extends EED_Module
 
 
     /**
+     * @return WpUserEmailVerification
+     * @throws EE_Error
+     * @throws InvalidArgumentException
+     * @throws InvalidInterfaceException
+     * @throws InvalidDataTypeException
+     */
+    protected static function getWpUserEmailVerification()
+    {
+        return LoaderFactory::getLoader()->getShared(
+            'EventEspresso\WpUser\domain\services\users\WpUserEmailVerification'
+        );
+    }
+
+
+    /**
      * callback for FHEE__EEH_Form_Fields__generate_question_groups_html__after_question_group_questions.
      * Used to add a message in certain conditions for the logged in user about syncing of answers
      * given in the reg form with their user profile.
@@ -449,6 +466,7 @@ class EED_WP_Users_SPCO extends EED_Module
      * @throws InvalidDataTypeException
      * @throws InvalidInterfaceException
      * @throws EmailValidationException
+     * @throws DomainException
      */
     public static function verify_user_access(
         $stop_processing,
@@ -462,7 +480,7 @@ class EED_WP_Users_SPCO extends EED_Module
             //get out because we've already either verified things or another plugin is halting things.
             return $stop_processing;
         }
-        $error_message     = '';
+        $user_notice     = '';
         $field_input_error = array();
         // we need to loop through each valid_data[$registration->reg_url_link()] set of data
         // to see if there is a user existing for that email address.
@@ -492,11 +510,13 @@ class EED_WP_Users_SPCO extends EED_Module
                             $registration
                         )
                     ) {
-                        $error_message = EED_WP_Users_SPCO::verifyWpUserEmailAddress(
-                            EmailAddressFactory::create($form_inputs['email']),
-                            new Url($spco->reg_step_url())
+                        $user_notice = EED_WP_Users_SPCO::getUserLoginNotice(
+                            EmailAddressFactory::create($form_inputs['email'])
                         );
-                        if ($error_message !== '') {
+                        if ($user_notice !== '') {
+                            $user_notice .= EED_WP_Users_SPCO::loginAndRegisterButtonsHtml(
+                                new Url($spco->reg_step_url())
+                            );
                             $stop_processing     = true;
                             $field_input_error[] = 'ee_reg_qstn-' . $registration->ID() . '-email';
                         }
@@ -505,7 +525,7 @@ class EED_WP_Users_SPCO extends EED_Module
             }
         }
         if ($stop_processing) {
-            EE_Error::add_error($error_message, __FILE__, __FUNCTION__, __LINE__);
+            EE_Error::add_error($user_notice, __FILE__, __FUNCTION__, __LINE__);
             $spco->checkout->json_response->set_return_data(
                 array(
                     'wp_user_response' => array(
@@ -523,44 +543,50 @@ class EED_WP_Users_SPCO extends EED_Module
 
 
     /**
-     * @param EmailAddress $registrant_email
-     * @param Url          $redirect_to_url_after_login
+     * @param EmailAddress $wp_user_email_address
      * @return string
+     * @throws EmailValidationException
+     * @throws InvalidInterfaceException
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
      * @throws EE_Error
+     * @throws DomainException
+     * @throws InvalidArgumentException
+     */
+    private static function getUserLoginNotice(EmailAddress $wp_user_email_address)
+    {
+        $login_required_message  = '<p>'
+                                   . esc_html__(
+                                       'You have entered an email address that matches an existing user account in our system.  If this is your email address, please log in before continuing your registration. Otherwise, register with a different email address.',
+                                       'event_espresso'
+                                   )
+                                   . '</p>';
+        $user_mismatch_message = '<p>'
+                                 . esc_html__(
+                                     'You have entered an email address that matches an existing user account in our system.  You can only submit registrations for your own account or for a person that does not exist in the system.  Please use a different email address.',
+                                     'event_espresso'
+                                 )
+                                 . '</p>';
+        $wp_user_email_verification = EED_WP_Users_SPCO::getWpUserEmailVerification();
+        return $wp_user_email_verification->getWpUserEmailVerificationNotice(
+            $wp_user_email_verification->verifyWpUserEmailAddress($wp_user_email_address),
+            $login_required_message,
+            $user_mismatch_message,
+            '',
+            ''
+        );
+    }
+
+
+    /**
+     * @param Url $redirect_to_url_after_login
+     * @return string
      * @throws InvalidArgumentException
      * @throws InvalidDataTypeException
      * @throws InvalidInterfaceException
      */
-    public static function verifyWpUserEmailAddress(
-        EmailAddress $registrant_email,
-        Url $redirect_to_url_after_login
-    ) {
-        $user = get_user_by('email', $registrant_email->get());
-        if (! $user instanceof WP_User) {
-            return '';
-        }
-        // we have a user for that email address.
-        // If the person doing the transaction is logged in,
-        // let's verify that this email address matches theirs.
-        if (is_user_logged_in()) {
-            $current_user = get_userdata(get_current_user_id());
-            if ($current_user->user_email === $user->user_email) {
-                return '';
-            }
-            return '<p>'
-                   . esc_html__(
-                       'You have entered an email address that matches an existing user account in our system.  You can only submit registrations for your own account or for a person that does not exist in the system.  Please use a different email address.',
-                       'event_espresso'
-                   )
-                   . '</p>';
-        }
-        //user is NOT logged in, so let's prompt them to log in.
-        $notice = '<p>'
-                  . esc_html__(
-                      'You have entered an email address that matches an existing user account in our system.  If this is your email address, please log in before continuing your registration. Otherwise, register with a different email address.',
-                      'event_espresso'
-                  )
-                  . '</p>';
+    public static function loginAndRegisterButtonsHtml(Url $redirect_to_url_after_login)
+    {
         /**
          * @todo ideally the redirect url would come
          * back to the same page after login.  For
@@ -568,7 +594,7 @@ class EED_WP_Users_SPCO extends EED_Module
          * processing so users with js supported
          * browsers will just stay on the loaded page.
          */
-        $notice .= '<a class="float-right ee-wpuser-login-button" href="'
+        $buttons = '<a class="float-right ee-wpuser-login-button" href="'
                    . wp_login_url($redirect_to_url_after_login->getFullUrl())
                    . '">'
                    . '<button class="button button-primary">' . esc_html__('Login', 'event_espresso') . '</button>'
@@ -584,7 +610,7 @@ class EED_WP_Users_SPCO extends EED_Module
                     wp_registration_url()
                 )
                 : EE_Registry::instance()->CFG->addons->user_integration->registration_page;
-            $notice           .= '<a class="ee-wpuser-register-link float-right" href="'
+            $buttons           .= '<a class="ee-wpuser-register-link float-right" href="'
                                  . $registration_url
                                  . '">'
                                  . '<button class="button button-primary">'
@@ -592,10 +618,9 @@ class EED_WP_Users_SPCO extends EED_Module
                                  . '</button>'
                                  . '</a>';
         }
-        $notice .= '<div style="clear:both"></div>';
-        return $notice;
+        $buttons .= '<div style="clear:both"></div>';
+        return $buttons;
     }
-
 
     /**
      * Callback for AHEE__SPCO__before_registration_steps action hook to display a login required notice if revisiting

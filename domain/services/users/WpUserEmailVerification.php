@@ -107,56 +107,37 @@ class WpUserEmailVerification
 
 
     /**
-     * @param string $user_email_verification            one of the WpUserEmailVerification::EMAIL_ADDRESS_* constants
-     * @param string $login_required_message             use an empty string '' if no message is desired
-     * @param string $user_mismatch_message              use an empty string '' if no message is desired
-     * @param string $not_registered_message             use an empty string '' if no message is desired
-     * @param string $registered_to_current_user_message use an empty string '' if no message is desired
+     * @param string $user_email_verification            [required] one of the four scenarios defined by the
+     *                                                   WpUserEmailVerification::EMAIL_ADDRESS_* constants
+     * @param string $login_required_message             [optional] default: no message
+     * @param string $user_mismatch_message              [optional] default: no message
+     * @param string $not_registered_message             [optional] default: no message
+     * @param string $registered_to_current_user_message [optional] default: no message
      * @return string
      * @throws DomainException
      */
     public function getWpUserEmailVerificationNotice(
         $user_email_verification,
-        $login_required_message = null,
-        $user_mismatch_message = null,
-        $not_registered_message = null,
-        $registered_to_current_user_message = null
+        $login_required_message = '',
+        $user_mismatch_message = '',
+        $not_registered_message = '',
+        $registered_to_current_user_message = ''
     )
     {
         $this->validateUserEmailVerificationOption($user_email_verification);
         switch ($user_email_verification) {
             case WpUserEmailVerification::EMAIL_ADDRESS_NOT_REGISTERED :
-                return $not_registered_message !== null
-                    ? $not_registered_message
-                    : esc_html__(
-                        'The provided email address does not belong to any registered users.',
-                        'event_espresso'
-                    );
+                return $not_registered_message;
                 break;
             case WpUserEmailVerification::EMAIL_ADDRESS_REGISTERED_LOGIN_REQUIRED :
-                return $login_required_message !== null
-                    ? $login_required_message
-                    : esc_html__(
-                        'The provided email address belongs to a registered user - login is required to prove ownership.',
-                        'event_espresso'
-                    );
+                return $login_required_message;
                 break;
             case WpUserEmailVerification::EMAIL_ADDRESS_REGISTERED_USER_MISMATCH :
-                return $user_mismatch_message !== null
-                    ? $user_mismatch_message
-                    : esc_html__(
-                        'The current user is logged in but the provided email address belongs to another registered user.',
-                        'event_espresso'
-                    );
+                return $user_mismatch_message;
                 break;
             case WpUserEmailVerification::EMAIL_ADDRESS_REGISTERED_TO_CURRENT_USER :
             default :
-                return $registered_to_current_user_message !== null
-                    ? $registered_to_current_user_message
-                    : esc_html__(
-                        'The current user is logged in and the provided email address belongs to them.',
-                        'event_espresso'
-                    );
+                return $registered_to_current_user_message;
         }
     }
 }

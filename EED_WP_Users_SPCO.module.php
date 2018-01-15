@@ -597,7 +597,8 @@ class EED_WP_Users_SPCO extends EED_Module
         $buttons = '<a class="float-right ee-wpuser-login-button" href="'
                    . wp_login_url($redirect_to_url_after_login->getFullUrl())
                    . '">'
-                   . '<button class="button button-primary">' . esc_html__('Login', 'event_espresso') . '</button>'
+                   . '<button type="button" class="button button-primary">'
+                   . esc_html__('Login', 'event_espresso') . '</button>'
                    . '</a>';
         if (get_option('users_can_register')) {
             $registration_url = ! EE_Registry::instance()->CFG->addons->user_integration->registration_page
@@ -613,7 +614,7 @@ class EED_WP_Users_SPCO extends EED_Module
             $buttons           .= '<a class="ee-wpuser-register-link float-right" href="'
                                  . $registration_url
                                  . '">'
-                                 . '<button class="button button-primary">'
+                                 . '<button type="button" class="button button-primary">'
                                  . esc_html__('Register', 'event_espresso')
                                  . '</button>'
                                  . '</a>';

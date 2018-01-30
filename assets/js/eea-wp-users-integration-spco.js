@@ -50,7 +50,7 @@ jQuery(document).ready( function($) {
 				if ( this.params.responseSuccess !== '' ) {
 					SPCO.override_messages = false;
 					this.clearNotices();
-					SPCO.scroll_to_top_and_display_messages( '#spco-attendee_information-dv', response, true );
+					SPCO.scroll_to_top_and_display_messages( SPCO.main_container, response, true );
 					return;
 				}
 

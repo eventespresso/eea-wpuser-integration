@@ -44,7 +44,7 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
         // don't display Wait List form if login is required and current user isn't
         add_filter(
             'FHEE__EventEspresso_WaitList_domain_services_forms_WaitListForm__waitListFormOptions__form_options',
-            array('EED_WP_Users_Ticket_Selector', 'loginRequiredWaitListFormNotice'),
+            array('EED_WP_Users_Ticket_Selector', 'waitListFormNoticeSubsections'),
             10, 5
         );
         // maybe display WP User related notices on the wait list form
@@ -241,7 +241,7 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
      * @throws InvalidDataTypeException
      * @throws InvalidInterfaceException
      */
-    public static function loginRequiredWaitListFormNotice(
+    public static function waitListFormNoticeSubsections(
         array $subsections,
         EE_Event $event,
         array $tickets,
@@ -252,16 +252,69 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
         if (! EE_FRONT_AJAX && is_admin()) {
             return $subsections;
         }
-        // or user is already logged in
-        if (is_user_logged_in()) {
+        // auto-fill form if known user is already logged in, or display login notice if they are not
+        return is_user_logged_in()
+            ? EED_WP_Users_Ticket_Selector::autoFillFormWithUserInfo($subsections)
+            : EED_WP_Users_Ticket_Selector::loginRequiredWaitListFormNotice($subsections, $event);
+    }
+
+
+    /**
+     * Retrieves details for  the currently logged in user
+     * and uses them to fill out the Wait List Sign Up form
+     *
+     * @param array    $subsections
+     * @return array
+     * @throws EE_Error
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
+     * @throws InvalidInterfaceException
+     */
+    public static function autoFillFormWithUserInfo(array $subsections)
+    {
+        $user = get_userdata(get_current_user_id());
+        if (! $user instanceof WP_User) {
             return $subsections;
         }
+        if (
+            isset($subsections['subsections']['hidden_inputs'])
+            && $subsections['subsections']['hidden_inputs'] instanceof EE_Form_Section_Proper
+        ) {
+            $sign_up_form = $subsections['subsections']['hidden_inputs'];
+            if (! $sign_up_form instanceof EE_Form_Section_Proper) {
+                return $subsections;
+            }
+            $inputs = $sign_up_form->subsections(false);
+            if(isset($inputs['registrant_name']) && $inputs['registrant_name'] instanceof EE_Text_Input) {
+                $inputs['registrant_name']->set_default($user->display_name);
+            }
+            if(isset($inputs['registrant_email']) && $inputs['registrant_email'] instanceof EE_Email_Input) {
+                $inputs['registrant_email']->set_default($user->user_email);
+            }
+        }
+        return $subsections;
+    }
+
+
+    /**
+     * Replaces visible elements of the Wait List Sign Up form
+     * (as well as some hidden elements) with a "Login Required" notice
+     *
+     * @param array    $subsections
+     * @param EE_Event $event
+     * @return array
+     * @throws EE_Error
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
+     * @throws InvalidInterfaceException
+     */
+    public static function loginRequiredWaitListFormNotice(array $subsections, EE_Event $event){
         // or event does not require login
         $user_integration_settings = $event->get_post_meta('ee_wpuser_integration_settings', true);
-        if( ! isset($user_integration_settings['force_login']) || ! $user_integration_settings['force_login']){
+        if (! isset($user_integration_settings['force_login']) || ! $user_integration_settings['force_login']) {
             return $subsections;
         }
-        if(
+        if (
             isset($subsections['subsections']['hidden_inputs'])
             && $subsections['subsections']['hidden_inputs'] instanceof EE_Form_Section_Proper
         ) {

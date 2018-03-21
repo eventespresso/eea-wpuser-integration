@@ -23,7 +23,7 @@ defined('EVENT_ESPRESSO_VERSION') || exit;
  *
  * @package EventEspresso\WpUser\domain\services\users
  * @author  Brent Christensen
- * @since   $VID:$
+ * @since   2.0.15.p
  */
 class WpUserEmailVerification
 {

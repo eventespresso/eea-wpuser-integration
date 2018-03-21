@@ -15,7 +15,7 @@ defined('EVENT_ESPRESSO_VERSION') || exit;
  *
  * @package EventEspresso\WpUser\domain\entities\exceptions
  * @author  Brent Christensen
- * @since   $VID:$
+ * @since   2.0.15.p
  */
 class WpUserLogInRequiredException extends RuntimeException
 {

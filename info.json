@@ -1,1 +1,22 @@
-{"versionFile":"eea-wpuser-integration.php","slug":"eea-wp-user-integration","name":"EE4 WPuser Integration","releaseFilesRemove":["src\/tests\/**","src\/info.json","src\/circle.yml","src\/readme.txt","src\/build.xml","src\/build\/**","src\/.travis.yml"],"github":true,"awsbucket":"","awsregion":"","srcBuildFolderName":"eea-wpuser-integration","textDomain":"event_espresso","remoteNamesToPushTo":["demoee"],"wpOrgRelease":"2.0.15.p"}
+{
+  "versionFile": "eea-wpuser-integration.php",
+  "slug": "eea-wp-user-integration",
+  "name": "EE4 WPuser Integration",
+  "releaseFilesRemove": [
+    "src\/tests\/**",
+    "src\/info.json",
+    "src\/circle.yml",
+    "src\/readme.txt",
+    "src\/build.xml",
+    "src\/build\/**",
+    "src\/.travis.yml"
+  ],
+  "awsbucket": "",
+  "awsregion": "",
+  "srcBuildFolderName": "eea-wpuser-integration",
+  "textDomain": "event_espresso",
+  "remoteNamesToPushTo": [
+    "demoee"
+  ],
+  "wpOrgRelease": "2.0.15.p"
+}

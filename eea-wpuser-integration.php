@@ -1,17 +1,18 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) )
-	exit( 'No direct script access allowed' );
+if (! defined('ABSPATH')) {
+    exit('No direct script access allowed');
+}
 /*
-  Plugin Name: 	Event Espresso - WP Users (EE4.6+)
-  Plugin URI: 	http://www.eventespresso.com
-  Description: 	This adds the WP users integration.
-  Version: 		2.0.16.rc.001
-  Author: 		Event Espresso
-  Author URI: 	http://www.eventespresso.com
-  License: 		GPLv2
-  TextDomain: 	event_espresso
-  Copyright 	(c) 2008-2014 Event Espresso  All Rights Reserved.
+  Plugin Name:  Event Espresso - WP Users (EE4.6+)
+  Plugin URI:  http://www.eventespresso.com
+  Description: This adds the WP users integration.
+  Version: 2.0.16.rc.000
+  Author: Event Espresso
+  Author URI: http://www.eventespresso.com
+  License: GPLv2
+  TextDomain: event_espresso
+  Copyright (c) 2008-2014 Event Espresso  All Rights Reserved.
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -30,25 +31,23 @@ if ( ! defined( 'ABSPATH' ) )
 
 /**
  * EE WPUsers add-on for Event Espresso
- * @since 		1.0.0
- * @package 	EE WPUsers
+ *
+ * @since        1.0.0
+ * @package      EE WPUsers
  *
  */
-define( 'EE_WPUSERS_VERSION', '2.0.16.rc.001' );
-define( 'EE_WPUSERS_MIN_CORE_VERSION_REQUIRED', '4.8.21.rc.005' );
-define( 'EE_WPUSERS_PLUGIN_FILE', __FILE__ );
+define('EE_WPUSERS_VERSION', '2.0.16.rc.000');
+define('EE_WPUSERS_MIN_CORE_VERSION_REQUIRED', '4.8.21.rc.005');
+define('EE_WPUSERS_PLUGIN_FILE', __FILE__);
 
 
-function load_ee_core_wpusers() {
-	if ( class_exists( 'EE_Addon' ) ) {
-		// new_addon version
-		require_once ( plugin_dir_path( __FILE__ ) . 'EE_WPUsers.class.php' );
-		EE_WPUsers::register_addon();
-	}
-
+function load_ee_core_wpusers()
+{
+    if (class_exists('EE_Addon')) {
+        // new_addon version
+        require_once(plugin_dir_path(__FILE__) . 'EE_WPUsers.class.php');
+        EE_WPUsers::register_addon();
+    }
 }
 
-add_action( 'AHEE__EE_System__load_espresso_addons', 'load_ee_core_wpusers' );
-
-// End of file ee-addon-wpusers.php
-// Location: wp-content/plugins/ee4-wpusers/ee-addon-wpusers.php
+add_action('AHEE__EE_System__load_espresso_addons', 'load_ee_core_wpusers');

@@ -10,10 +10,6 @@ use EventEspresso\core\exceptions\InvalidInterfaceException;
 use InvalidArgumentException;
 use WP_User;
 
-defined('EVENT_ESPRESSO_VERSION') || exit;
-
-
-
 /**
  * Class WpUserEmailVerification
  * Service class for determining whether an email address supplied by the current user:
@@ -31,17 +27,17 @@ class WpUserEmailVerification
     /**
      * the provided email address does not belong to any registered users
      */
-    const EMAIL_ADDRESS_NOT_REGISTERED             = 'email-address-not-registered';
+    const EMAIL_ADDRESS_NOT_REGISTERED = 'email-address-not-registered';
 
     /**
      * the provided email address belongs to a registered user - login is required to prove ownership
      */
-    const EMAIL_ADDRESS_REGISTERED_LOGIN_REQUIRED  = 'email-address-registered-login-required';
+    const EMAIL_ADDRESS_REGISTERED_LOGIN_REQUIRED = 'email-address-registered-login-required';
 
     /**
      * current user is logged in, but the provided email address belongs to another registered user
      */
-    const EMAIL_ADDRESS_REGISTERED_USER_MISMATCH   = 'email-address-registered-user-mismatch';
+    const EMAIL_ADDRESS_REGISTERED_USER_MISMATCH = 'email-address-registered-user-mismatch';
 
     /**
      * current user is logged in and the provided email address belongs to them
@@ -56,8 +52,7 @@ class WpUserEmailVerification
      */
     public function validateUserEmailVerificationOption($user_email_verification)
     {
-        if (
-            empty($user_email_verification)
+        if (empty($user_email_verification)
             || ! in_array(
                 $user_email_verification,
                 array(
@@ -122,21 +117,20 @@ class WpUserEmailVerification
         $user_mismatch_message = '',
         $not_registered_message = '',
         $registered_to_current_user_message = ''
-    )
-    {
+    ) {
         $this->validateUserEmailVerificationOption($user_email_verification);
         switch ($user_email_verification) {
-            case WpUserEmailVerification::EMAIL_ADDRESS_NOT_REGISTERED :
+            case WpUserEmailVerification::EMAIL_ADDRESS_NOT_REGISTERED:
                 return $not_registered_message;
                 break;
-            case WpUserEmailVerification::EMAIL_ADDRESS_REGISTERED_LOGIN_REQUIRED :
+            case WpUserEmailVerification::EMAIL_ADDRESS_REGISTERED_LOGIN_REQUIRED:
                 return $login_required_message;
                 break;
-            case WpUserEmailVerification::EMAIL_ADDRESS_REGISTERED_USER_MISMATCH :
+            case WpUserEmailVerification::EMAIL_ADDRESS_REGISTERED_USER_MISMATCH:
                 return $user_mismatch_message;
                 break;
-            case WpUserEmailVerification::EMAIL_ADDRESS_REGISTERED_TO_CURRENT_USER :
-            default :
+            case WpUserEmailVerification::EMAIL_ADDRESS_REGISTERED_TO_CURRENT_USER:
+            default:
                 return $registered_to_current_user_message;
         }
     }

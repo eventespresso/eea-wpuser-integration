@@ -4,10 +4,6 @@ namespace EventEspresso\WpUser\domain\entities\exceptions;
 
 use RuntimeException;
 
-defined('EVENT_ESPRESSO_VERSION') || exit;
-
-
-
 /**
  * Class WpUserLogInRequiredException
  * thrown when an email address for an existing WP User is used in a form

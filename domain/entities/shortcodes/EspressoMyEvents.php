@@ -1,5 +1,4 @@
 <?php
-
 namespace EventEspresso\WpUser\domain\entities\shortcodes;
 
 use EventEspresso\core\services\shortcodes\EspressoShortcode;
@@ -14,8 +13,6 @@ use EEH_URL;
 use EEH_Template;
 use WP_Query;
 use EEH_File;
-
-defined('EVENT_ESPRESSO_VERSION') || exit('No direct access allowed.');
 
 class EspressoMyEvents extends EspressoShortcode
 {
@@ -64,7 +61,7 @@ class EspressoMyEvents extends EspressoShortcode
         $this->event_model = $event_model;
         $this->registration_model = $registration_model;
 
-        //set ajax hooks
+        // set ajax hooks
         $this->setAjaxHooks();
     }
 
@@ -104,13 +101,13 @@ class EspressoMyEvents extends EspressoShortcode
      */
     public function initializeShortcode()
     {
-        //if a resend registration confirmation is in the request then let's call that method which in turn could
-        //end up redirecting.
+        // if a resend registration confirmation is in the request then let's call that method which in turn could
+        // end up redirecting.
         if ($this->request->is_set(self::RESEND_QUERY_ARGUMENT_KEY)) {
             $this->resendRegistrationConfirmationEmail();
         }
 
-        //load assets
+        // load assets
         wp_register_style(
             'ees-my-events',
             EE_WPUSERS_URL . 'assets/css/ees-espresso-my-events.css',
@@ -131,13 +128,12 @@ class EspressoMyEvents extends EspressoShortcode
     }
 
 
-
     /**
      *
      */
     protected function setAjaxHooks()
     {
-        //load ajax listeners
+        // load ajax listeners
         add_action(
             'wp_ajax_ee_my_events_load_paged_template',
             array($this, 'loadPagedTemplateViaAjax')
@@ -158,7 +154,7 @@ class EspressoMyEvents extends EspressoShortcode
     public function enqueueLocalizedJavascriptObject($attributes)
     {
         $attributes = (array) $attributes;
-        $js_object  = array(
+        $js_object = array(
             'template' => isset($attributes['template']) ? $attributes['template'] : 'event_section',
             'per_page' => isset($attributes['per_page']) ? $attributes['per_page'] : 10,
         );
@@ -177,7 +173,7 @@ class EspressoMyEvents extends EspressoShortcode
      */
     public function processShortcode($attributes = array())
     {
-        //If use is not logged in, then we display a link to login.
+        // If use is not logged in, then we display a link to login.
         if (! is_user_logged_in()) {
             $redirect_url = EEH_URL::current_url();
             /**
@@ -190,7 +186,7 @@ class EspressoMyEvents extends EspressoShortcode
             );
         }
 
-        //if made it here then all assets should be loaded and we are good to go!
+        // if made it here then all assets should be loaded and we are good to go!
         return $this->loadTemplate($attributes);
     }
 
@@ -201,19 +197,19 @@ class EspressoMyEvents extends EspressoShortcode
      */
     public function loadPagedTemplateViaAjax()
     {
-        //intialize attributes array
+        // intialize attributes array
         $attributes = array();
-        //template file sent with the request?
-        if ( $this->request->get('template', '') !== '') {
+        // template file sent with the request?
+        if ($this->request->get('template', '') !== '') {
             $attributes['template'] = $this->request->get('template');
         }
-        //template tags file is not loaded apparently so need to load:
+        // template tags file is not loaded apparently so need to load:
         if (EEH_File::is_readable(EE_PUBLIC . 'template_tags.php')) {
             require_once EE_PUBLIC . 'template_tags.php';
         }
 
         $template_content = $this->loadTemplate($attributes, false);
-        $json_response    = wp_json_encode(
+        $json_response = wp_json_encode(
             array(
                 'content' => $template_content,
             )
@@ -239,15 +235,15 @@ class EspressoMyEvents extends EspressoShortcode
      */
     protected function loadTemplate($attributes = array(), $with_wrapper = true)
     {
-        //add filter for locate template to add paths
+        // add filter for locate template to add paths
         add_filter(
             'FHEE__EEH_Template__locate_template__template_folder_paths',
             array($this, 'templatePaths'),
             10
         );
 
-        //set default attributes and filter
-        //note this is keeping the old filter string for backwards compatibility reasons.
+        // set default attributes and filter
+        // note this is keeping the old filter string for backwards compatibility reasons.
         $default_shortcode_attributes = apply_filters(
             'FHEE__EES_Espresso_My_Events__process_shortcode__default_shortcode_atts',
             array(
@@ -259,8 +255,8 @@ class EspressoMyEvents extends EspressoShortcode
             )
         );
 
-        //merge with defaults
-        $attributes    = array_merge($default_shortcode_attributes, (array) $attributes);
+        // merge with defaults
+        $attributes = array_merge($default_shortcode_attributes, (array) $attributes);
         $template_args = $this->getTemplateArguments($attributes);
 
         if (! $this->request->front_ajax) {
@@ -294,12 +290,12 @@ class EspressoMyEvents extends EspressoShortcode
      */
     protected function getTemplateArguments($attributes)
     {
-        //any parameters coming from the request?
+        // any parameters coming from the request?
         $per_page = (int) $this->request->get('per_page', $attributes['per_page']);
-        $page     = (int) $this->request->get(self::MY_EVENTS_PAGE_QUERY_ARGUMENT_KEY, 0);
+        $page = (int) $this->request->get(self::MY_EVENTS_PAGE_QUERY_ARGUMENT_KEY, 0);
 
-        //if $page is empty then it's likely this is being loaded outside of ajax and wp has usurped
-        //the page value for its query.  So let's see if its in the query.
+        // if $page is empty then it's likely this is being loaded outside of ajax and wp has usurped
+        // the page value for its query.  So let's see if its in the query.
         if (! $page) {
             global $wp_query;
             if ($wp_query instanceof WP_Query && isset($wp_query->query, $wp_query->query['paged'])) {
@@ -310,10 +306,10 @@ class EspressoMyEvents extends EspressoShortcode
         }
 
 
-        $template      = $attributes['template'] ? $attributes['template'] : 'event_section';
+        $template = $attributes['template'] ? $attributes['template'] : 'event_section';
         $template_info = $this->getTemplateInfo($template);
 
-        //define template_args
+        // define template_args
         $template_args = array(
             'object_type'        => $template_info['object_type'],
             'objects'            => array(),
@@ -328,16 +324,16 @@ class EspressoMyEvents extends EspressoShortcode
             'with_wrapper'       => $attributes['with_wrapper'],
         );
 
-        //grab any contact that is attached to this user
+        // grab any contact that is attached to this user
         $attendee_id = get_user_option('EE_Attendee_ID', get_current_user_id());
 
-        //if there is an attached attendee we can use that to retrieve all the related events and
-        //registrations.  Otherwise those will be left empty.
+        // if there is an attached attendee we can use that to retrieve all the related events and
+        // registrations.  Otherwise those will be left empty.
         if ($attendee_id) {
-            $object_info                   = $this->getTemplateObjects($attendee_id, $template_args);
-            $template_args['objects']      = $object_info['objects'];
+            $object_info = $this->getTemplateObjects($attendee_id, $template_args);
+            $template_args['objects'] = $object_info['objects'];
             $template_args['object_count'] = $object_info['object_count'];
-            $template_args['att_id']       = $attendee_id;
+            $template_args['att_id'] = $attendee_id;
         }
         return $template_args;
     }
@@ -360,30 +356,29 @@ class EspressoMyEvents extends EspressoShortcode
     {
         $template_object_map = $this->getTemplateObjectMap();
 
-        //first verify that the given slug is in the map.
-        if (is_string($template_slug) && ! empty($template_slug) && isset($template_object_map[$template_slug])) {
-            $template_info             = $template_object_map[$template_slug];
+        // first verify that the given slug is in the map.
+        if (is_string($template_slug) && ! empty($template_slug) && isset($template_object_map[ $template_slug ])) {
+            $template_info = $template_object_map[ $template_slug ];
             $template_info['template'] = $template_slug;
-            //next verify that there is an object type and that it matches one of the EE models used for querying.
+            // next verify that there is an object type and that it matches one of the EE models used for querying.
             $accepted_object_types = array('Event', 'Registration');
-            if (isset($template_object_map[$template_slug]['object_type'], $template_object_map[$template_slug]['path'])
-                && in_array($template_object_map[$template_slug]['object_type'], $accepted_object_types, true)
+            if (isset($template_object_map[ $template_slug ]['object_type'], $template_object_map[ $template_slug ]['path'])
+                && in_array($template_object_map[ $template_slug ]['object_type'], $accepted_object_types, true)
                 && EEH_File::is_readable(
-                    EE_WPUSERS_TEMPLATE_PATH . $template_object_map[$template_slug]['path']
+                    EE_WPUSERS_TEMPLATE_PATH . $template_object_map[ $template_slug ]['path']
                 )
             ) {
-                //yay made it here you awesome template object you.
+                // yay made it here you awesome template object you.
                 return $template_info;
             }
         }
-        //oh noes, not setup properly, so let's just use a safe known default.
+        // oh noes, not setup properly, so let's just use a safe known default.
         return array(
             'template'    => 'event_section',
             'object_type' => 'Registration',
             'path'        => 'loop-espresso_my_events-event_section.template.php',
         );
     }
-
 
 
     protected function getTemplateObjectMap()
@@ -416,10 +411,11 @@ class EspressoMyEvents extends EspressoShortcode
      * @param int   $attendee_id        This should be the ID of the EE_Attendee being queried against
      * @param array $template_arguments The generated template args for the template.
      * @return array Returns an array:
-     *                             array(
-     *                             'objects' => array(), //an array of EE_Base_Class objects
-     *                             'object_count' => 0, //count of all records matching query params without limits.
-     *                             );
+     *                                  array(
+     *                                  'objects' => array(), //an array of EE_Base_Class objects
+     *                                  'object_count' => 0, //count of all records matching query params without
+     *                                  limits.
+     *                                  );
      * @throws EE_Error
      */
     protected function getTemplateObjects($attendee_id, $template_arguments = array())
@@ -429,16 +425,16 @@ class EspressoMyEvents extends EspressoShortcode
             'object_count' => 0,
         );
 
-        //required values available?
+        // required values available?
         if (empty($template_arguments)
             || empty($template_arguments['object_type'])
             || empty($template_arguments['per_page'])
             || empty($template_arguments['page'])) {
-            return $object_info; //need info yo.
+            return $object_info; // need info yo.
         }
 
-        $offset      = ($template_arguments['page'] - 1) * $template_arguments['per_page'];
-        $attendee_id = (int)$attendee_id;
+        $offset = ($template_arguments['page'] - 1) * $template_arguments['per_page'];
+        $attendee_id = (int) $attendee_id;
 
         if ($template_arguments['object_type'] === 'Event') {
             $query_args = array(
@@ -446,30 +442,28 @@ class EspressoMyEvents extends EspressoShortcode
                 'limit'    => array($offset, $template_arguments['per_page']),
                 'group_by' => 'EVT_ID',
             );
-            $model      = $this->event_model;
+            $model = $this->event_model;
         } elseif ($template_arguments['object_type'] === 'Registration') {
             $query_args = array(
                 0       => array('ATT_ID' => $attendee_id),
                 'limit' => array($offset, $template_arguments['per_page']),
             );
-            $model      = $this->registration_model;
+            $model = $this->registration_model;
         } else {
-            //get out no valid object_types here.
+            // get out no valid object_types here.
             return $object_info;
         }
 
-        $object_info['objects']      = $model->get_all($query_args);
+        $object_info['objects'] = $model->get_all($query_args);
         $object_info['object_count'] = $model->count(array($query_args[0]), null, true);
         return $object_info;
     }
 
 
-
-
-
     /**
      * Handles passing off a registration to be processed by the EED_Messages module for resending the registration
      * confirmation email.
+     *
      * @throws EE_Error
      */
     protected function resendRegistrationConfirmationEmail()
@@ -516,7 +510,7 @@ class EspressoMyEvents extends EspressoShortcode
             EEH_URL::current_url_without_query_paramaters(
                 array(
                     self::RESEND_QUERY_ARGUMENT_KEY,
-                    self::REGISTRATION_TOKEN_QUERY_ARGUMENT_KEY
+                    self::REGISTRATION_TOKEN_QUERY_ARGUMENT_KEY,
                 )
             )
         );

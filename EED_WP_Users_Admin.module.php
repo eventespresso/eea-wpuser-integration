@@ -1,5 +1,4 @@
 <?php
-defined('EVENT_ESPRESSO_VERSION') || exit('No direct access allowed.');
 
 /**
  *
@@ -24,10 +23,10 @@ class EED_WP_Users_Admin extends EED_Module
     {
         add_action('admin_enqueue_scripts', array('EED_WP_Users_Admin', 'admin_enqueue_scripts_styles'));
         
-        //hook into EE contact publish metabox.
+        // hook into EE contact publish metabox.
         add_action('post_submitbox_misc_actions', array('EED_WP_Users_Admin', 'add_link_to_wp_user_account'));
         
-        //hook into wp users
+        // hook into wp users
         add_action('edit_user_profile', array('EED_WP_Users_Admin', 'add_link_to_ee_contact_details'));
         add_action('show_user_profile', array('EED_WP_Users_Admin', 'add_link_to_ee_contact_details'));
         add_action('edit_user_profile', array('EED_WP_Users_Admin', 'view_registrations_for_contact'));
@@ -35,14 +34,14 @@ class EED_WP_Users_Admin extends EED_Module
         add_action('profile_update', array('EED_WP_Users_Admin', 'sync_with_contact'), 10, 2);
         add_action('user_register', array('EED_WP_Users_Admin', 'sync_with_contact'));
         
-        //hook into attendee saves
+        // hook into attendee saves
         add_filter(
             'FHEE__Registrations_Admin_Page__insert_update_cpt_item__attendee_update',
             array('EED_WP_Users_Admin', 'add_sync_with_wp_users_callback'),
             10
         );
         
-        //hook into registration_form_admin_page routes and config.
+        // hook into registration_form_admin_page routes and config.
         add_filter(
             'FHEE__Extend_Registration_Form_Admin_Page__page_setup__page_routes',
             array('EED_WP_Users_Admin', 'add_wp_user_default_settings_route'),
@@ -68,7 +67,7 @@ class EED_WP_Users_Admin extends EED_Module
             3
         );
         
-        //hooking into event editor
+        // hooking into event editor
         add_action('add_meta_boxes', array('EED_WP_Users_Admin', 'add_metaboxes'));
         add_filter(
             'FHEE__Events_Admin_Page___insert_update_cpt_item__event_update_callbacks',
@@ -95,7 +94,7 @@ class EED_WP_Users_Admin extends EED_Module
         );
 
         
-        //hook into ticket editor in event editor.
+        // hook into ticket editor in event editor.
         add_action(
             'AHEE__event_tickets_datetime_ticket_row_template__advanced_details_end',
             array('EED_WP_Users_Admin', 'insert_ticket_meta_interface'),
@@ -122,7 +121,7 @@ class EED_WP_Users_Admin extends EED_Module
         );
         
         
-        //hook into model deletes that may affect relations set on WP_User.
+        // hook into model deletes that may affect relations set on WP_User.
         add_action(
             'AHEE__EE_Base_Class__delete_permanently__before',
             array('EED_WP_Users_Admin', 'remove_relations_on_delete')
@@ -198,7 +197,7 @@ class EED_WP_Users_Admin extends EED_Module
             return;
         }
         
-        //is there an attached wp_user for this attendee record?
+        // is there an attached wp_user for this attendee record?
         $user_id = EE_WPUsers::get_attendee_user($post->ID);
         
         if (empty($user_id)) {
@@ -206,15 +205,15 @@ class EED_WP_Users_Admin extends EED_Module
         }
         
         
-        //let's get the WP_user and setup the link
+        // let's get the WP_user and setup the link
         $url = get_edit_user_link($user_id);
         
-        //if $url is empty, that means logged in user does not have access to view user details so we bail.
+        // if $url is empty, that means logged in user does not have access to view user details so we bail.
         if (empty($url)) {
             return;
         }
         
-        //we HAVE url so let's assemble the item to display.
+        // we HAVE url so let's assemble the item to display.
         ?>
         <div class="misc-pub-section">
             <span class="dashicons dashicons-universal-access ee-icon-color-grey ee-icon-size-20"></span>
@@ -239,17 +238,17 @@ class EED_WP_Users_Admin extends EED_Module
             return '';
         }
         
-        //is there an attadched EE_Attendee?
+        // is there an attadched EE_Attendee?
         $att_id = get_user_option('EE_Attendee_ID', $user->ID);
         
         if (empty($att_id)) {
-            return; //bail, no attached attendee_id.
+            return; // bail, no attached attendee_id.
         }
         
-        //grab contact
+        // grab contact
         $contact = EEM_Attendee::instance()->get_one_by_ID($att_id);
         
-        //if no contact then bail
+        // if no contact then bail
         if (! $contact instanceof EE_Attendee) {
             return;
         }
@@ -277,19 +276,19 @@ class EED_WP_Users_Admin extends EED_Module
             return;
         }
         
-        //is there an attached EE_Attendee?
+        // is there an attached EE_Attendee?
         $att_id = get_user_option('EE_Attendee_ID', $user->ID);
         
         if (empty($att_id)) {
-            return; //bail, no attached attendee_id.
+            return; // bail, no attached attendee_id.
         }
         
-        //does logged in user have the capability to edit this attendee?
+        // does logged in user have the capability to edit this attendee?
         if (! EE_Registry::instance()->CAP->current_user_can('ee_edit_contacts', 'edit_attendee', $att_id)) {
-            return; //bail no access.
+            return; // bail no access.
         }
         
-        //url
+        // url
         $url = admin_url(add_query_arg(array(
             'page'   => 'espresso_registrations',
             'action' => 'edit_attendee',
@@ -338,14 +337,14 @@ class EED_WP_Users_Admin extends EED_Module
     {
         $user = get_userdata($user_id);
         
-        //creating?
+        // creating?
         if (empty($old_user_data)) {
             self::_connect_wp_user_with_contact($user);
             
             return;
         }
         
-        //if we make it here then we're updating an existing user
+        // if we make it here then we're updating an existing user
         $att_id = get_user_option('EE_Attendee_ID', $user->ID);
         
         if (empty($att_id)) {
@@ -353,7 +352,7 @@ class EED_WP_Users_Admin extends EED_Module
             
             return;
         } else {
-            //update the existing attendee attached to the wp_user!
+            // update the existing attendee attached to the wp_user!
             $att = EE_Registry::instance()->load_model('Attendee')->get_one_by_ID($att_id);
             if ($att instanceof EE_Attendee) {
                 $att->set_email($user->user_email);
@@ -380,15 +379,15 @@ class EED_WP_Users_Admin extends EED_Module
      */
     public static function sync_with_wp_user(EE_Attendee $attendee, $request_data)
     {
-        //is there a user for this attendee ID?
+        // is there a user for this attendee ID?
         $user_id = EE_WPUsers::get_attendee_user($attendee->ID());
         
         if (empty($user_id)) {
             return;
         }
         
-        //made it here, so let's sync the main attendee details with the user account
-        //remove the existing action for updates so that we don't cause recursion.
+        // made it here, so let's sync the main attendee details with the user account
+        // remove the existing action for updates so that we don't cause recursion.
         remove_action('profile_update', array('EED_WP_Users_Admin', 'sync_with_contact'));
         wp_update_user(
             array(
@@ -415,7 +414,7 @@ class EED_WP_Users_Admin extends EED_Module
      */
     protected static function _connect_wp_user_with_contact(WP_User $user)
     {
-        //no attached EE_Attendee. Is there an existing attendee that matches this user's details?
+        // no attached EE_Attendee. Is there an existing attendee that matches this user's details?
         $att = self::_find_existing_attendee_from_wpuser($user);
         if ($att instanceof EE_Attendee && ! EE_WPUsers::get_attendee_user($att->ID())) {
             update_user_option($user->ID, 'EE_Attendee_ID', $att->ID());
@@ -464,7 +463,7 @@ class EED_WP_Users_Admin extends EED_Module
         ));
         $att->save();
         
-        //attach to user
+        // attach to user
         update_user_option($user->ID, 'EE_Attendee_ID', $att->ID());
         
         return $att;
@@ -671,8 +670,8 @@ class EED_WP_Users_Admin extends EED_Module
                                 'display_html_label_text' => false
                             )
                         )
-                    ) //end form subsections
-                ) //end apply_filters for form subsections
+                    ) // end form subsections
+                ) // end apply_filters for form subsections
             )
         );
     }
@@ -693,10 +692,10 @@ class EED_WP_Users_Admin extends EED_Module
         try {
             $form = self::_wp_user_settings_form();
             if ($form->was_submitted()) {
-                //capture form data
+                // capture form data
                 $form->receive_form_submission();
                 
-                //validate_form_data
+                // validate_form_data
                 if ($form->is_valid()) {
                     $valid_data                     = $form->valid_data();
                     $config->force_login            = $valid_data['main_settings']['force_login'];
@@ -812,7 +811,7 @@ class EED_WP_Users_Admin extends EED_Module
      */
     public static function event_editor_metabox($post, $metabox)
     {
-        //setup form and print out!
+        // setup form and print out!
         echo self::_get_event_editor_wp_users_form($post)->get_html_and_js();
     }
 
@@ -994,7 +993,7 @@ class EED_WP_Users_Admin extends EED_Module
      */
     public static function insert_ticket_meta_interface($tkt_row, $TKT_ID)
     {
-        //build our form and print.
+        // build our form and print.
         echo self::_get_ticket_capability_required_form($tkt_row, $TKT_ID)->get_html_and_js();
     }
 
@@ -1048,8 +1047,8 @@ class EED_WP_Users_Admin extends EED_Module
                         )
                     ) // end EE_Form_Section_Proper subsections
                 ) // end subsections apply_filters
-            ) //end  main EE_Form_Section_Proper options array
-        ); //end EE_Form_Section_Proper
+            ) // end  main EE_Form_Section_Proper options array
+        ); // end EE_Form_Section_Proper
     }
 
 

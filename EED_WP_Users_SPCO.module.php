@@ -10,8 +10,6 @@ use EventEspresso\core\exceptions\InvalidInterfaceException;
 use EventEspresso\core\services\loaders\LoaderFactory;
 use EventEspresso\WpUser\domain\services\users\WpUserEmailVerification;
 
-defined('EVENT_ESPRESSO_VERSION') || exit('No direct script access allowed');
-
 /**
  * EED_WP_Users_SPCO module.  Takes care of WP Users integration with SPCO.
  *
@@ -28,7 +26,7 @@ class EED_WP_Users_SPCO extends EED_Module
      */
     public static function set_hooks()
     {
-        //hooks into spco
+        // hooks into spco
         /**
          * @todo At some point may provide users the option to toggle whether they want
          * changes made in the registration form to be synced with their user profile.  However,
@@ -60,45 +58,51 @@ class EED_WP_Users_SPCO extends EED_Module
         add_filter(
             'FHEE__EEH_Form_Fields__generate_question_groups_html__after_question_group_questions',
             array('EED_WP_Users_SPCO', 'primary_reg_sync_messages'),
-            10, 4
+            10,
+            4
         );
         add_filter(
             'FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value',
             array('EED_WP_Users_SPCO', 'filter_answer_for_wpuser'),
-            10, 4
+            10,
+            4
         );
         add_filter(
             'FHEE_EE_Single_Page_Checkout__save_registration_items__find_existing_attendee',
             array('EED_WP_Users_SPCO', 'maybe_sync_existing_attendee'),
-            10, 3
+            10,
+            3
         );
         add_filter(
             'FHEE__EE_SPCO_Reg_Step_Attendee_Information___process_registrations__pre_registration_process',
             array('EED_WP_Users_SPCO', 'verify_user_access'),
-            10, 6
+            10,
+            6
         );
         add_action(
             'AHEE__EE_Single_Page_Checkout__process_attendee_information__end',
             array('EED_WP_Users_SPCO', 'process_wpuser_for_attendee'),
-            10, 2
+            10,
+            2
         );
-        //notifications
+        // notifications
         add_action(
             'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_created',
             array('EED_WP_Users_SPCO', 'new_user_notifications'),
-            10, 4
+            10,
+            4
         );
-        //hook into spco for styles and scripts.
+        // hook into spco for styles and scripts.
         add_action(
             'AHEE__EED_Single_Page_Checkout__enqueue_styles_and_scripts__attendee_information',
             array('EED_WP_Users_SPCO', 'enqueue_scripts_styles')
         );
-        //hook into spco for adding additional reg step
+        // hook into spco for adding additional reg step
         add_filter(
             'AHEE__SPCO__load_reg_steps__reg_steps_to_load',
             array('EED_WP_Users_SPCO', 'register_login_reg_step')
         );
-        //hook into spco reg form for additional information
+        // hook into spco reg form for additional information
         add_action(
             'AHEE__attendee_information__reg_step_start',
             array('EED_WP_Users_SPCO', 'maybe_login_notice'),
@@ -113,41 +117,47 @@ class EED_WP_Users_SPCO extends EED_Module
      */
     public static function set_hooks_admin()
     {
-        //hook into filters/actions done on ajax but ONLY EE_FRONT_AJAX requests
+        // hook into filters/actions done on ajax but ONLY EE_FRONT_AJAX requests
         if (EE_FRONT_AJAX) {
             add_filter(
                 'FHEE__EEH_Form_Fields__generate_question_groups_html__after_question_group_questions',
                 array('EED_WP_Users_SPCO', 'primary_reg_sync_messages'),
-                10, 4
+                10,
+                4
             );
             add_filter(
                 'FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value',
                 array('EED_WP_Users_SPCO', 'filter_answer_for_wpuser'),
-                10, 4
+                10,
+                4
             );
             add_filter(
                 'FHEE_EE_Single_Page_Checkout__save_registration_items__find_existing_attendee',
                 array('EED_WP_Users_SPCO', 'maybe_sync_existing_attendee'),
-                10, 3
+                10,
+                3
             );
             add_filter(
                 'FHEE__EE_SPCO_Reg_Step_Attendee_Information___process_registrations__pre_registration_process',
                 array('EED_WP_Users_SPCO', 'verify_user_access'),
-                10, 6
+                10,
+                6
             );
             add_action(
                 'AHEE__EE_Single_Page_Checkout__process_attendee_information__end',
                 array('EED_WP_Users_SPCO', 'process_wpuser_for_attendee'),
-                10, 2
+                10,
+                2
             );
-            //notifications
+            // notifications
             add_action(
                 'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_created',
                 array('EED_WP_Users_SPCO', 'new_user_notifications'),
-                10, 4
+                10,
+                4
             );
         }
-        //ajax calls
+        // ajax calls
         add_action(
             'wp_ajax_ee_process_login_form',
             array('EED_WP_Users_SPCO', 'process_login_form'),
@@ -158,7 +168,7 @@ class EED_WP_Users_SPCO extends EED_Module
             array('EED_WP_Users_SPCO', 'process_login_form'),
             10
         );
-        //send admin notification about user having trouble.
+        // send admin notification about user having trouble.
         add_action(
             'wp_ajax_ee_process_user_trouble_notification',
             array('EED_WP_Users_SPCO', 'send_notification_to_admin')
@@ -176,12 +186,11 @@ class EED_WP_Users_SPCO extends EED_Module
      */
     protected static function _add_user_registration_route_hooks()
     {
-        //do auto login after registration of new user
-        if (
-            ! has_action(
-                'register_new_user',
-                array('EED_WP_Users_SPCO', 'auto_login_registered_user')
-            )
+        // do auto login after registration of new user
+        if (! has_action(
+            'register_new_user',
+            array('EED_WP_Users_SPCO', 'auto_login_registered_user')
+        )
         ) {
             add_action('register_new_user', array('EED_WP_Users_SPCO', 'auto_login_registered_user'));
             add_action('register_form', array('EED_WP_Users_SPCO', 'add_auto_login_parameter'));
@@ -221,7 +230,7 @@ class EED_WP_Users_SPCO extends EED_Module
         );
         wp_enqueue_script('eea-wp-users-integration-spco');
         wp_enqueue_style('eea-wp-users-integration-spco-style');
-        //add hidden login form in footer if user is not logged in that will get called if user needs to log in.
+        // add hidden login form in footer if user is not logged in that will get called if user needs to log in.
         if (! is_user_logged_in()) {
             add_action('wp_footer', array('EED_WP_Users_SPCO', 'login_form_skeleton'), 100);
         }
@@ -276,8 +285,7 @@ class EED_WP_Users_SPCO extends EED_Module
         EE_Question_Group $question_group,
         EE_SPCO_Reg_Step_Attendee_Information $spco
     ) {
-        if (
-            (
+        if ((
                 ! is_user_logged_in()
                 || (
                     is_user_logged_in()
@@ -384,7 +392,7 @@ class EED_WP_Users_SPCO extends EED_Module
         $question_id,
         $system_id = null
     ) {
-        //only fill for primary registrant
+        // only fill for primary registrant
         if (! $registration->is_primary_registrant()) {
             return $value;
         }
@@ -400,26 +408,26 @@ class EED_WP_Users_SPCO extends EED_Module
              * $system_id
              */
             if (is_numeric($question_id) && ! defined('EEM_Attendee::system_question_fname')) {
-                //4.8.10-style. Use the old constants
+                // 4.8.10-style. Use the old constants
                 $firstname = EEM_Attendee::fname_question_id;
                 $lastname  = EEM_Attendee::lname_question_id;
                 $email     = EEM_Attendee::email_question_id;
                 $id_to_use = $question_id;
             } elseif (! is_numeric($question_id) && defined('EEM_Attendee::system_question_fname')) {
-                //4.8.11-style. Use the new constants
+                // 4.8.11-style. Use the new constants
                 $firstname = EEM_Attendee::system_question_fname;
                 $lastname  = EEM_Attendee::system_question_lname;
                 $email     = EEM_Attendee::system_question_email;
                 $id_to_use = $question_id;
             } elseif (is_numeric($question_id) && defined('EEM_Attendee::system_question_fname')) {
-                //4.8.12-style. Use the new constants and the $system_id
+                // 4.8.12-style. Use the new constants and the $system_id
                 $firstname = EEM_Attendee::system_question_fname;
                 $lastname  = EEM_Attendee::system_question_lname;
                 $email     = EEM_Attendee::system_question_email;
                 $id_to_use = $system_id;
             } else {
                 // ! is_numeric( $question_id ) && defined( 'EEM_Attendee::system_question_fname' )
-                //weird shouldn't ever happen. Just use the old default
+                // weird shouldn't ever happen. Just use the old default
                 $firstname = EEM_Attendee::fname_question_id;
                 $lastname  = EEM_Attendee::lname_question_id;
                 $email     = EEM_Attendee::email_question_id;
@@ -427,13 +435,13 @@ class EED_WP_Users_SPCO extends EED_Module
             }
             if ($current_user instanceof WP_User) {
                 switch ($id_to_use) {
-                    case $firstname :
+                    case $firstname:
                         $value = $current_user->get('first_name');
                         break;
-                    case $lastname :
+                    case $lastname:
                         $value = $current_user->get('last_name');
                         break;
-                    case $email :
+                    case $email:
                         $value = $current_user->get('user_email');
                         break;
                     default:
@@ -477,7 +485,7 @@ class EED_WP_Users_SPCO extends EED_Module
         EE_SPCO_Reg_Step_Attendee_Information $spco
     ) {
         if ($att_nmbr !== 0 || $stop_processing) {
-            //get out because we've already either verified things or another plugin is halting things.
+            // get out because we've already either verified things or another plugin is halting things.
             return $stop_processing;
         }
         $user_notice     = '';
@@ -486,7 +494,7 @@ class EED_WP_Users_SPCO extends EED_Module
         // to see if there is a user existing for that email address.
         // If there is then halt the presses!
         foreach ($registrations as $registration) {
-            //if not a valid $reg then we'll just ignore and let spco handle it
+            // if not a valid $reg then we'll just ignore and let spco handle it
             if (! $registration instanceof EE_Registration) {
                 return $stop_processing;
             }
@@ -501,8 +509,7 @@ class EED_WP_Users_SPCO extends EED_Module
                      * responses, then they will need to also filter the stop_processing param at the end of this
                      * method to return true;
                      */
-                    if (
-                        ! empty($form_inputs['email'])
+                    if (! empty($form_inputs['email'])
                         && apply_filters(
                             'EED_WP_Users_SPCO__verify_user_access__perform_email_user_match_check',
                             true,
@@ -633,7 +640,7 @@ class EED_WP_Users_SPCO extends EED_Module
      */
     public static function maybe_login_notice(EE_SPCO_Reg_Step_Attendee_Information $reg_step)
     {
-        //first if this isn't a revisit OR $reg_step is invalid then get out nothing to see here.
+        // first if this isn't a revisit OR $reg_step is invalid then get out nothing to see here.
         if (! $reg_step->checkout->revisit) {
             return;
         }
@@ -645,8 +652,7 @@ class EED_WP_Users_SPCO extends EED_Module
         $event_creates_user = false;
         if ($registrations) {
             foreach ($registrations as $registration) {
-                if (
-                    $reg_step->checkout->visit_allows_processing_of_this_registration($registration)
+                if ($reg_step->checkout->visit_allows_processing_of_this_registration($registration)
                     &&  EE_WPUsers::is_auto_user_create_on($registration->event_ID())
                 ) {
                     $event_creates_user = true;
@@ -667,7 +673,7 @@ class EED_WP_Users_SPCO extends EED_Module
                                  '</a>'
                              )
                              . '</p>';
-            //provide link to notify the admin about unreceived emails.
+            // provide link to notify the admin about unreceived emails.
             $inner_content          .= '<p><span class="ee-send-email-info-text">'
                                        . sprintf(
                                            esc_html__(
@@ -678,8 +684,11 @@ class EED_WP_Users_SPCO extends EED_Module
                                            '</a>'
                                        )
                                        . '</span></p>';
-            $inner_content          = apply_filters('FHEE__EED_WP_Users_SPCO__maybe_login_notice__inner_content',
-                $inner_content, $reg_step);
+            $inner_content          = apply_filters(
+                'FHEE__EED_WP_Users_SPCO__maybe_login_notice__inner_content',
+                $inner_content,
+                $reg_step
+            );
             $email_input_and_button = '<div class="ee-attention-notification-form hidden">';
             $email_input_and_button .= '<label for="notification-email-contact">'
                                        . esc_html__('Email to contact you with:', 'event_espresso')
@@ -725,7 +734,7 @@ class EED_WP_Users_SPCO extends EED_Module
         if (! $user instanceof WP_User) {
             return $existing_attendee;
         }
-        //existing attendee on user?
+        // existing attendee on user?
         $att = self::get_attendee_for_user($user);
         /**
          * if there already IS an existing attendee then that means the system found one matching
@@ -740,7 +749,7 @@ class EED_WP_Users_SPCO extends EED_Module
             return $existing_attendee;
         }
         if ($existing_attendee instanceof EE_Attendee && $att->ID() !== $existing_attendee->ID()) {
-            //only change first and last name for att, we'll leave the email address alone regardless of what its at.
+            // only change first and last name for att, we'll leave the email address alone regardless of what its at.
             if (! empty($attendee_data['ATT_fname'])) {
                 $att->set_fname($attendee_data['ATT_fname']);
             }
@@ -748,7 +757,7 @@ class EED_WP_Users_SPCO extends EED_Module
                 $att->set_lname($attendee_data['ATT_lname']);
             }
         } else {
-            //change all
+            // change all
             if (! empty($attendee_data['ATT_fname'])) {
                 $att->set_fname($attendee_data['ATT_fname']);
             }
@@ -789,24 +798,24 @@ class EED_WP_Users_SPCO extends EED_Module
     {
         $user_created = false;
         $att_id       = '';
-        //use spco to get registrations from the
+        // use spco to get registrations from the
         $registrations = self::_get_registrations($spco);
         foreach ($registrations as $registration) {
-            //is this the primary registrant?  If not, continue
+            // is this the primary registrant?  If not, continue
             if (! $registration->is_primary_registrant()) {
                 continue;
             }
             $attendee = $registration->attendee();
             if (! $attendee instanceof EE_Attendee) {
-                //should always be an attendee, but if not we continue just to prevent errors.
+                // should always be an attendee, but if not we continue just to prevent errors.
                 continue;
             }
-            //if user logged in, then let's just use that user.  Otherwise we'll attempt to get a
-            //user via the attendee info.
+            // if user logged in, then let's just use that user.  Otherwise we'll attempt to get a
+            // user via the attendee info.
             if (is_user_logged_in()) {
                 $user = get_userdata(get_current_user_id());
             } else {
-                //is there already a user for the given attendee?
+                // is there already a user for the given attendee?
                 $user = get_user_by('email', $attendee->email());
                 // does this user have the same att_id as the given att?
                 // If NOT, then we do NOT update because it's possible there was a family member
@@ -817,14 +826,14 @@ class EED_WP_Users_SPCO extends EED_Module
                 }
             }
             $event = $registration->event();
-            //no existing user? then we'll create the user from the date in the attendee form.
+            // no existing user? then we'll create the user from the date in the attendee form.
             if (! $user instanceof WP_User) {
-                //if this event does NOT allow automatic user creation then let's bail.
+                // if this event does NOT allow automatic user creation then let's bail.
                 if (! EE_WPUsers::is_auto_user_create_on($event)) {
-                    return; //no we do NOT auto create users please.
+                    return; // no we do NOT auto create users please.
                 }
                 $password = wp_generate_password(12, false);
-                //remove our action for creating contacts on creating user because we don't want to loop!
+                // remove our action for creating contacts on creating user because we don't want to loop!
                 remove_action('user_register', array('EED_WP_Users_Admin', 'sync_with_contact'));
                 $user_id      = wp_create_user(
                     apply_filters(
@@ -838,7 +847,7 @@ class EED_WP_Users_SPCO extends EED_Module
                 );
                 $user_created = true;
                 if ($user_id instanceof WP_Error) {
-                    return; //get out because something went wrong with creating the user.
+                    return; // get out because something went wrong with creating the user.
                 }
                 $user = new WP_User($user_id);
                 update_user_option(
@@ -855,7 +864,7 @@ class EED_WP_Users_SPCO extends EED_Module
             }
             // only do the below if syncing is enabled.
             if ($user_created || EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact) {
-                //remove our existing action for updating users via saves in the admin to prevent recursion
+                // remove our existing action for updating users via saves in the admin to prevent recursion
                 remove_action('profile_update', array('EED_WP_Users_Admin', 'sync_with_contact'));
                 wp_update_user(
                     array(
@@ -867,7 +876,7 @@ class EED_WP_Users_SPCO extends EED_Module
                     )
                 );
             }
-            //if user created then send notification and attach attendee to user
+            // if user created then send notification and attach attendee to user
             if ($user_created) {
                 do_action(
                     'AHEE__EED_WP_Users_SPCO__process_wpuser_for_attendee__user_user_created',
@@ -876,7 +885,7 @@ class EED_WP_Users_SPCO extends EED_Module
                     $registration,
                     $password
                 );
-                //set user role
+                // set user role
                 $user->set_role(EE_WPUsers::default_user_create_role($event));
                 update_user_option($user->ID, 'EE_Attendee_ID', $attendee->ID());
             } else {
@@ -941,7 +950,7 @@ class EED_WP_Users_SPCO extends EED_Module
         EE_Registration $registration,
         $password
     ) {
-        //for now we just use the existing core wp notifications.
+        // for now we just use the existing core wp notifications.
         global $wp_version;
         if (version_compare($wp_version, '4.3.1', '<')) {
             wp_new_user_notification($user->ID, $password);
@@ -1010,13 +1019,13 @@ class EED_WP_Users_SPCO extends EED_Module
      */
     public static function login_form_skeleton()
     {
-        //dialog container for dialog helper
+        // dialog container for dialog helper
         $d_cont = '<div class="ee-admin-dialog-container auto-hide" style="display:none;">' . "\n";
         $d_cont .= '<div class="ee-notices"></div>';
         $d_cont .= '<div class="ee-admin-dialog-container-inner-content"></div>';
         $d_cont .= '</div>';
         echo $d_cont;
-        //overlay
+        // overlay
         $o_cont = '<div id="espresso-admin-page-overlay-dv" class=""></div>';
         echo $o_cont;
         EE_Registry::instance()->load_helper('Template');
@@ -1044,7 +1053,7 @@ class EED_WP_Users_SPCO extends EED_Module
         $field_input   = array();
         $login_args    = (array) $login_args;
         $handle_return = (bool) $handle_return;
-        //first verify we have the necessary data.
+        // first verify we have the necessary data.
         $user_login = isset($login_args['user_login'])
             ? $login_args['user_login']
             : EE_Registry::instance()->REQ->get('login_name');
@@ -1056,16 +1065,20 @@ class EED_WP_Users_SPCO extends EED_Module
             : EE_Registry::instance()->REQ->get('rememberme');
         if (empty($user_login)) {
             EE_Error::add_error(
-                esc_html__('Missing a username.', 'even_espresso'),
-                __FILE__, __FUNCTION__, __LINE__
+                esc_html__('Missing a username.', 'event_espresso'),
+                __FILE__,
+                __FUNCTION__,
+                __LINE__
             );
             $field_input[] = 'user_login';
             $success       = false;
         }
         if (empty($user_pass)) {
             EE_Error::add_error(
-                esc_html__('Missing a password.', 'even_espresso'),
-                __FILE__, __FUNCTION__, __LINE__
+                esc_html__('Missing a password.', 'event_espresso'),
+                __FILE__,
+                __FUNCTION__,
+                __LINE__
             );
             $field_input[] = 'user_pass';
             $success       = false;
@@ -1085,9 +1098,9 @@ class EED_WP_Users_SPCO extends EED_Module
                 return $return_data;
             }
         }
-        //prevent other plugins from doing anything when users are logging in via the registration process
+        // prevent other plugins from doing anything when users are logging in via the registration process
         remove_all_actions('wp_login');
-        //validate user creds and login if successful
+        // validate user creds and login if successful
         $user = wp_signon(array(
             'user_login'    => $user_login,
             'user_password' => $user_pass,
@@ -1106,7 +1119,9 @@ class EED_WP_Users_SPCO extends EED_Module
                     esc_html__('Invalid username or incorrect password. %s', 'event_espresso'),
                     $lost_password_link
                 ),
-                __FILE__, __FUNCTION__, __LINE__
+                __FILE__,
+                __FUNCTION__,
+                __LINE__
             );
             $return_data = array(
                 'wp_user_response' => array(
@@ -1177,7 +1192,7 @@ class EED_WP_Users_SPCO extends EED_Module
      */
     public static function send_notification_to_admin()
     {
-        //first check if there is required params in the request.
+        // first check if there is required params in the request.
         $email        = isset($_POST['contact_email']) ? sanitize_email($_POST['contact_email']) : '';
         $reg_url_link = isset($_POST['reg_url_link']) ? esc_attr($_POST['reg_url_link']) : '';
         $default_return_data = $return_data = array(
@@ -1190,20 +1205,21 @@ class EED_WP_Users_SPCO extends EED_Module
         if (! $email || ! $reg_url_link) {
             EE_Error::add_error(
                 esc_html__('Invalid email or registration.  Unable to process', 'event_espresso'),
-                __FILE__, __FUNCTION__, __LINE__
+                __FILE__,
+                __FUNCTION__,
+                __LINE__
             );
             $return_data = $default_return_data;
             self::_return_json($return_data);
         }
-        //try to get registration matching reg_url_link so we can fill out the dynamic data for the email.
+        // try to get registration matching reg_url_link so we can fill out the dynamic data for the email.
         $registration = EEM_Registration::instance()->get_registration_for_reg_url_link($reg_url_link);
-        //k we have what we need to send the notification
+        // k we have what we need to send the notification
         $event        = $registration instanceof EE_Registration ? $registration->event() : null;
         $event_author = $event instanceof EE_Event ? $event->wp_user() : 0;
         $event_author = $event_author ? new WP_User($event_author) : null;
         $contact      = $registration instanceof EE_Registration ? $registration->attendee() : null;
-        if (
-            ! $registration instanceof EE_Registration
+        if (! $registration instanceof EE_Registration
             || ! $event_author instanceof WP_User
             || ! $contact instanceof EE_Attendee
         ) {
@@ -1212,15 +1228,23 @@ class EED_WP_Users_SPCO extends EED_Module
                     'Unable to process because valid registration could not be retrieved.',
                     'event_espresso'
                 ),
-                __FILE__, __FUNCTION__, __LINE__
+                __FILE__,
+                __FUNCTION__,
+                __LINE__
             );
             $return_data = $default_return_data;
             self::_return_json($return_data);
         }
-        $to      = apply_filters('FHEE__EED_WP_Users_SPCO__send_notification_to_admin__to', $event_author->user_email,
-            $registration);
-        $subject = apply_filters('FHEE__EED_WP_Users_SPCO__send_notification_to_admin__subject',
-            esc_html__('User having trouble receiving emails', 'event_espresso'), $registration);
+        $to      = apply_filters(
+            'FHEE__EED_WP_Users_SPCO__send_notification_to_admin__to',
+            $event_author->user_email,
+            $registration
+        );
+        $subject = apply_filters(
+            'FHEE__EED_WP_Users_SPCO__send_notification_to_admin__subject',
+            esc_html__('User having trouble receiving emails', 'event_espresso'),
+            $registration
+        );
         $content = sprintf(esc_html__('Hi %s,', 'event_espresso'), $event_author->display_name);
         $content .= "\n\n";
         $content .= esc_html__(
@@ -1249,8 +1273,11 @@ class EED_WP_Users_SPCO extends EED_Module
         );
         $content .= "\n";
         $content .= sprintf(esc_html__('Sincerely, Event Espresso', 'event_espresso'));
-        $message = apply_filters('FHEE__EED_WP_Users_SPCO__send_notification_to_admin__message', $content,
-            $registration);
+        $message = apply_filters(
+            'FHEE__EED_WP_Users_SPCO__send_notification_to_admin__message',
+            $content,
+            $registration
+        );
         $headers = array('Reply-To:' . $email);
         $success = wp_mail($to, $subject, $message, $headers);
         if ($success) {

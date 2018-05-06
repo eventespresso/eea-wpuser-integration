@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "f6ef1f406b36309fbe65e6230e92d1ba",
+    "content-hash": "ed2f512d438c7783580c57ea4d80a850",
     "packages": [
         {
             "name": "composer/installers",
@@ -134,12 +134,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/eventespresso/ee-coding-standards.git",
-                "reference": "eed33629102bfdbb360b20c862ba4f10f1bc146b"
+                "reference": "b1f306ccbdbe73250416185a02c99e3623382819"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/eventespresso/ee-coding-standards/zipball/eed33629102bfdbb360b20c862ba4f10f1bc146b",
-                "reference": "eed33629102bfdbb360b20c862ba4f10f1bc146b",
+                "url": "https://api.github.com/repos/eventespresso/ee-coding-standards/zipball/b1f306ccbdbe73250416185a02c99e3623382819",
+                "reference": "b1f306ccbdbe73250416185a02c99e3623382819",
                 "shasum": ""
             },
             "require": {
@@ -188,7 +188,7 @@
                 "issues": "https://github.com/eventespresso/ee-coding-standards/issues",
                 "source": "https://github.com/eventespresso/ee-coding-standards/tree/master"
             },
-            "time": "2018-05-03T22:38:30+00:00"
+            "time": "2018-05-06T16:55:50+00:00"
         },
         {
             "name": "roave/security-advisories",

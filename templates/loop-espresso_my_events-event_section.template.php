@@ -27,15 +27,20 @@ $pagination_html = EEH_Template::get_paging_html(
     array(
         'single' => __('event', 'event_espresso'),
         'plural' => __('events', 'event_espresso'),
-    ));
+    )
+);
 ?>
-<?php if ($with_wrapper) : ?>
+<?php
+if ($with_wrapper) : ?>
     <div class="espresso-my-events <?php echo $template_slug; ?>_container">
     <?php do_action('AHEE__loop-espresso_my_events__before', $object_type, $objects, $template_slug, $att_id); ?>
     <h3><?php echo $your_events_title; ?></h3>
     <div class="espresso-my-events-inner-content">
-<?php endif; //$with_wrapper check ?>
-<?php if ($objects && reset($objects) instanceof EE_Event) : ?>
+<?php
+endif;
+// $with_wrapper check ?>
+<?php
+if ($objects && reset($objects) instanceof EE_Event) : ?>
     <table class="espresso-my-events-table <?php echo $template_slug; ?>_table">
         <thead>
         <tr>
@@ -115,12 +120,17 @@ $pagination_html = EEH_Template::get_paging_html(
             <div style="clear:both"></div>
         </div>
         <div style="clear:both"></div>
-        <?php EEH_Template::locate_template('status-legend-espresso_my_events.template.php',
-            array('template_slug' => $template_slug), true, false); ?>
+        <?php EEH_Template::locate_template(
+            'status-legend-espresso_my_events.template.php',
+            array('template_slug' => $template_slug),
+            true,
+            false
+        ); ?>
     </div>
 <?php else : ?>
     <div class="no-events-container">
-        <p><?php echo apply_filters(
+        <p>
+            <?php echo apply_filters(
                 'FHEE__loop-espresso_my_events__no_events_message',
                 esc_html__('You have no events yet', 'event_espresso'),
                 $object_type,
@@ -131,8 +141,11 @@ $pagination_html = EEH_Template::get_paging_html(
         </p>
     </div>
 <?php endif; ?>
-<?php if ($with_wrapper) : ?>
+<?php
+if ($with_wrapper) : ?>
     </div>
     <?php do_action('AHEE__loop-espresso_my_events__after', $object_type, $objects, $template_slug, $att_id); ?>
     </div>
-<?php endif; //end $wrapper check?>
+<?php
+endif;
+// end $wrapper check

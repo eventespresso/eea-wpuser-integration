@@ -1,8 +1,6 @@
 <?php
 
-defined('EVENT_ESPRESSO_VERSION') || exit('No direct access allowed.');
-
-//define constants
+// define constants
 define('EE_WPUSERS_PATH', plugin_dir_path(__FILE__));
 define('EE_WPUSERS_URL', plugin_dir_url(__FILE__));
 define('EE_WPUSERS_TEMPLATE_PATH', EE_WPUSERS_PATH . 'templates/');
@@ -53,14 +51,14 @@ class EE_WPUsers extends EE_Addon
                 'DIR' => __DIR__,
             ),
         );
-        //the My Events Shortcode registration depends on EE version.
+        // the My Events Shortcode registration depends on EE version.
         if (EE_Register_Addon::_meets_min_core_version_requirement('4.9.46.rc.024')) {
-            //register shortcode for new system.
+            // register shortcode for new system.
             $registration_array['shortcode_fqcns'] = array(
                 'EventEspresso\WpUser\domain\entities\shortcodes\EspressoMyEvents'
             );
         } else {
-            //register shortcode for old system.
+            // register shortcode for old system.
             $registration_array['shortcode_paths'] = array(
                 EE_WPUSERS_PATH . 'EES_Espresso_My_Events.shortcode.php',
             );
@@ -120,7 +118,7 @@ class EE_WPUsers extends EE_Addon
             array_unshift(
                 $links,
                 '<a href="admin.php?page=espresso_registration_form&action=wp_user_settings">'
-                . __('Settings')
+                . __('Settings', 'event_espresso')
                 . '</a>'
             );
         }
@@ -141,8 +139,8 @@ class EE_WPUsers extends EE_Addon
         global $wpdb;
         $key     = $wpdb->get_blog_prefix() . 'EE_Attendee_ID';
         $query   = "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '$key' AND meta_value = '%d'";
-        $user_id = $wpdb->get_var($wpdb->prepare($query, (int)$att_id));
-        return $user_id ? (int)$user_id : null;
+        $user_id = $wpdb->get_var($wpdb->prepare($query, (int) $att_id));
+        return $user_id ? (int) $user_id : null;
     }
 
 
@@ -185,7 +183,7 @@ class EE_WPUsers extends EE_Addon
      */
     protected static function _get_wp_user_event_setting($key, $event)
     {
-        //any global defaults?
+        // any global defaults?
         $config         = isset(EE_Registry::instance()->CFG->addons->user_integration)
             ? EE_Registry::instance()->CFG->addons->user_integration
             : false;
@@ -205,13 +203,13 @@ class EE_WPUsers extends EE_Addon
             ? $event->get_post_meta('ee_wpuser_integration_settings', true)
             : array();
         if (! empty($settings)) {
-            $value = isset($settings[$key]) ? $settings[$key] : $global_default[$key];
+            $value = isset($settings[ $key ]) ? $settings[ $key ] : $global_default[ $key ];
 
-            //since post_meta *might* return an empty string.  If the default global value is boolean, then let's make
+            // since post_meta *might* return an empty string.  If the default global value is boolean, then let's make
             // sure we cast the value returned from the post_meta as boolean in case its an empty string.
-            return is_bool($global_default[$key]) ? (bool) $value : $value;
+            return is_bool($global_default[ $key ]) ? (bool) $value : $value;
         }
-        return $global_default[$key];
+        return $global_default[ $key ];
     }
 
 
@@ -274,7 +272,7 @@ class EE_WPUsers extends EE_Addon
         }
         $settings       = $event->get_post_meta('ee_wpuser_integration_settings', true);
         $settings       = empty($settings) ? array() : $settings;
-        $settings[$key] = $value;
+        $settings[ $key ] = $value;
         return $event->update_post_meta('ee_wpuser_integration_settings', $settings);
     }
 }

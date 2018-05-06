@@ -15,10 +15,6 @@ use EventEspresso\WaitList\domain\services\forms\WaitListFormHandler;
 use EventEspresso\WpUser\domain\entities\exceptions\WpUserLogInRequiredException;
 use EventEspresso\WpUser\domain\services\users\WpUserEmailVerification;
 
-defined('EVENT_ESPRESSO_VERSION') || exit;
-
-
-
 /**
  * EED_WP_Users_Ticket_Selector module.  Takes care of WP Users integration with ticket selector.
  *
@@ -45,25 +41,29 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
         add_filter(
             'FHEE__EventEspresso_WaitList_domain_services_forms_WaitListForm__waitListFormOptions__form_options',
             array('EED_WP_Users_Ticket_Selector', 'waitListFormNoticeSubsections'),
-            10, 5
+            10,
+            5
         );
         // maybe display WP User related notices on the wait list form
         add_filter(
             'FHEE__EventEspresso_WaitList_domain_services_event_WaitListMonitor__getWaitListFormForEvent__redirect_params',
             array('EED_WP_Users_Ticket_Selector', 'displayWaitListFormUserNotices'),
-            10, 2
+            10,
+            2
         );
         // hook into wait list form submission to check for users
         add_filter(
             'FHEE__EventEspresso_core_libraries_form_sections_form_handlers_FormHandler__process__valid_data',
             array('EED_WP_Users_Ticket_Selector', 'verifyWaitListUserAccess'),
-            10, 2
+            10,
+            2
         );
         // convert login required exceptions into user displayable notices
         add_filter(
             'FHEE__EventEspresso_WaitList_domain_services_event_WaitListMonitor__processWaitListFormForEvent__redirect_params',
             array('EED_WP_Users_Ticket_Selector', 'catchWaitListWpUserLogInRequiredException'),
-            10, 3
+            10,
+            3
         );
         add_filter(
             'FHEE__EventEspresso_WaitList_domain_services_forms__WaitListFormHandler__generate__tickets',
@@ -194,9 +194,9 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
         // otherwise return false because they are not logged in or don't have the required cap
         return is_user_logged_in()
                && EE_Registry::instance()->CAP->current_user_can(
-                $cap_required,
-                'wp_user_ticket_selector_check'
-            );
+                   $cap_required,
+                   'wp_user_ticket_selector_check'
+               );
     }
 
 
@@ -276,8 +276,7 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
         if (! $user instanceof WP_User) {
             return $subsections;
         }
-        if (
-            isset($subsections['subsections']['hidden_inputs'])
+        if (isset($subsections['subsections']['hidden_inputs'])
             && $subsections['subsections']['hidden_inputs'] instanceof EE_Form_Section_Proper
         ) {
             $sign_up_form = $subsections['subsections']['hidden_inputs'];
@@ -285,10 +284,10 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
                 return $subsections;
             }
             $inputs = $sign_up_form->subsections(false);
-            if(isset($inputs['registrant_name']) && $inputs['registrant_name'] instanceof EE_Text_Input) {
+            if (isset($inputs['registrant_name']) && $inputs['registrant_name'] instanceof EE_Text_Input) {
                 $inputs['registrant_name']->set_default($user->display_name);
             }
-            if(isset($inputs['registrant_email']) && $inputs['registrant_email'] instanceof EE_Email_Input) {
+            if (isset($inputs['registrant_email']) && $inputs['registrant_email'] instanceof EE_Email_Input) {
                 $inputs['registrant_email']->set_default($user->user_email);
             }
         }
@@ -308,14 +307,14 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
      * @throws InvalidDataTypeException
      * @throws InvalidInterfaceException
      */
-    public static function loginRequiredWaitListFormNotice(array $subsections, EE_Event $event){
+    public static function loginRequiredWaitListFormNotice(array $subsections, EE_Event $event)
+    {
         // or event does not require login
         $user_integration_settings = $event->get_post_meta('ee_wpuser_integration_settings', true);
         if (! isset($user_integration_settings['force_login']) || ! $user_integration_settings['force_login']) {
             return $subsections;
         }
-        if (
-            isset($subsections['subsections']['hidden_inputs'])
+        if (isset($subsections['subsections']['hidden_inputs'])
             && $subsections['subsections']['hidden_inputs'] instanceof EE_Form_Section_Proper
         ) {
             /** @var EE_Form_Section_Proper $sign_up_form */

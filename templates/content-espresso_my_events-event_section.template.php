@@ -20,8 +20,10 @@ $registrations = $event->get_many_related('Registration', array(array('ATT_ID' =
         $venues        = $event->venues();
         $venue_content = array();
         foreach ($venues as $venue) :
-            $venue_content[] = '<a aria-labelledby="' . sprintf(__('Link to %', 'event_espresso'),
-                    $venue->name()) . '" href="' . get_permalink($venue->ID()) . '">' . $venue->name() . '</a>';
+            $venue_content[] = '<a aria-labelledby="' . sprintf(
+                __('Link to %', 'event_espresso'),
+                $venue->name()
+            ) . '" href="' . get_permalink($venue->ID()) . '">' . $venue->name() . '</a>';
         endforeach;
         echo implode('<br>', $venue_content);
         ?>
@@ -72,7 +74,7 @@ $registrations = $event->get_many_related('Registration', array(array('ATT_ID' =
                     <?php echo EEH_Venue_View::venue_address('multiline', $venue->ID()); ?>
                 </section>
                 <div style="clear:both"></div>
-            <?php endif; //end venue check ?>
+            <?php endif; // end venue check ?>
             <section class="ee-my-events-event-section-tickets-list-table-container">
                 <h3><?php echo $your_tickets_title; ?></h3>
                 <?php if ($registrations) : ?>
@@ -105,7 +107,8 @@ $registrations = $event->get_many_related('Registration', array(array('ATT_ID' =
                         </tr>
                         </thead>
                         <tbody>
-                        <?php foreach ($registrations as $registration) {
+                        <?php
+                        foreach ($registrations as $registration) {
                             if (! $registration instanceof EE_Registration) {
                                 continue;
                             }

@@ -2,7 +2,6 @@
 	"versionFile": "eea-wpuser-integration.php",
 	"slug": "eea-wp-user-integration",
 	"name": "EE4 WPuser Integration",
-	"jsBuildDirectory": ".\/",
 	"wpi18nJsPotFilePath": ".\/languages\/ee-js.pot",
 	"releaseFilesRemove": [
 		"src\/tests\/**",

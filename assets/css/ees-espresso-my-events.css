@@ -109,7 +109,7 @@
 
 /*not-approved registration*/
 .espresso-my-events-table tr td.reg-status-RNA {
-    border-left-color : #E76700;
+    color: #E76700;
 }
 
 .ee-status-RNA {
@@ -137,7 +137,7 @@
 
 /*incomplete registration, sold out event*/
 .espresso-my-events-table tr td.reg-status-RIC, .espresso-my-events-table tr td.event-status-DTS {
-    border-left-color : #FCB93C;
+    color: #FCB93C;
 }
 
 .ee-status-RIC, .ee-status-DTS {

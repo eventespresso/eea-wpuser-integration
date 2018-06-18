@@ -35,7 +35,6 @@
     cursor: pointer;
 }
 
-
 .espresso-my-events .ee-my-events-two-thirds {
     width: 63%;
     margin-left: 20px;
@@ -76,13 +75,14 @@
 .espresso-my-events-table tr td.reg-status-RPP, .espresso-my-events-table tr td.event-status-DTU {
     color: #00B1CA;
 }
+
 .ee-status-RPP, .ee-status-DTU {
     background-color: #00B1CA;
 }
 
 /*cancelled registration, expired event*/
 .espresso-my-events-table tr td.reg-status-RCN, .espresso-my-events-table tr td.event-status-DTE {
-    color : #AC9D9C;
+    color: #AC9D9C;
 }
 
 .ee-status-RCN, .ee-status-DTE {
@@ -91,7 +91,7 @@
 
 /*declined registration, cancelled event*/
 .espresso-my-events-table tr td.reg-status-RDC, .espresso-my-events-table tr td.event-status-DTC {
-    color : #E44064;
+    color: #E44064;
 }
 
 .ee-status-RDC, .ee-status-DTC {
@@ -100,7 +100,7 @@
 
 /*approved registration, active event*/
 .espresso-my-events-table tr td.reg-status-RAP, .espresso-my-events-table tr td.event-status-DTA {
-    color : #70CC50;
+    color: #70CC50;
 }
 
 .ee-status-RAP, .ee-status-DTA {
@@ -118,7 +118,7 @@
 
 /*waitlist registration, postponed event*/
 .espresso-my-events-table tr td.reg-status-RWL, .espresso-my-events-table tr td.event-status-DTP {
-    color : #8A549A;
+    color: #8A549A;
 }
 
 .ee-status-RWL, .ee-status-DTP {
@@ -128,7 +128,7 @@
 
 /*inactive event*/
 .espresso-my-events-table tr td.event-status-DTI {
-    color : #403A3A;
+    color: #403A3A;
 }
 
 .ee-status-DTI {
@@ -147,36 +147,37 @@
 /* legend container  - taken from ee-admin-page.css */
 /** LIST-TABLE-LEGEND **/
 .espresso-my-events-legend-list {
-    margin-top   : 0;
-    padding      : 5px;
-    margin-right : 20px;
+    margin-top: 0;
+    padding: 5px;
+    margin-right: 20px;
     float: left;
 }
 
 .espresso-my-events-legend-list dt {
-    line-height : 25px;
+    line-height: 25px;
     font-weight: normal;
 }
 
 .ee-status-legend {
-    display        : inline-block;
-    width          : 18px;
-    height         : 18px;
-    vertical-align : middle;
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
 }
 
 .espresso-my-events-legend-container .dashicons,
 .espresso-my-events-legend-container .ee-icon {
-    font-size : 18px;
+    font-size: 18px;
     vertical-align: middle;
 }
+
 .espresso-my-events-legend-container .ee-icon-size-8 {
     vertical-align: top;
     margin-bottom: .5em;
 }
 
 .ee-legend-description {
-    margin-left : 10px;
+    margin-left: 10px;
 }
 
 .ee-status-legend-box {

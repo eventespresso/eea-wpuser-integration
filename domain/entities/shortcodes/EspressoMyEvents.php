@@ -204,7 +204,7 @@ class EspressoMyEvents extends EspressoShortcode
             $attributes['template'] = $this->request->get('template');
         }
         // template tags file is not loaded apparently so need to load:
-        if (EEH_File::is_readable(EE_PUBLIC . 'template_tags.php')) {
+        if (is_readable(EE_PUBLIC . 'template_tags.php')) {
             require_once EE_PUBLIC . 'template_tags.php';
         }
 
@@ -364,7 +364,7 @@ class EspressoMyEvents extends EspressoShortcode
             $accepted_object_types = array('Event', 'Registration');
             if (isset($template_object_map[ $template_slug ]['object_type'], $template_object_map[ $template_slug ]['path'])
                 && in_array($template_object_map[ $template_slug ]['object_type'], $accepted_object_types, true)
-                && EEH_File::is_readable(
+                && is_readable(
                     EE_WPUSERS_TEMPLATE_PATH . $template_object_map[ $template_slug ]['path']
                 )
             ) {

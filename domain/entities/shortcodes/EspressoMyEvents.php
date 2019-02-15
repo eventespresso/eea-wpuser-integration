@@ -364,9 +364,6 @@ class EspressoMyEvents extends EspressoShortcode
             $accepted_object_types = array('Event', 'Registration');
             if (isset($template_object_map[ $template_slug ]['object_type'], $template_object_map[ $template_slug ]['path'])
                 && in_array($template_object_map[ $template_slug ]['object_type'], $accepted_object_types, true)
-                && is_readable(
-                    EE_WPUSERS_TEMPLATE_PATH . $template_object_map[ $template_slug ]['path']
-                )
             ) {
                 // yay made it here you awesome template object you.
                 return $template_info;

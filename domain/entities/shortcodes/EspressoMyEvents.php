@@ -372,7 +372,7 @@ class EspressoMyEvents extends EspressoShortcode
         // oh noes, not setup properly, so let's just use a safe known default.
         return array(
             'template'    => 'event_section',
-            'object_type' => 'Registration',
+            'object_type' => 'Event',
             'path'        => 'loop-espresso_my_events-event_section.template.php',
         );
     }

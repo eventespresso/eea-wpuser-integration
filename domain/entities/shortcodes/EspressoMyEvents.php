@@ -453,9 +453,9 @@ class EspressoMyEvents extends EspressoShortcode
 
         // allow $query_args to be filtered.
         $query_args = apply_filters(
-            'FHEE__Espresso_My_Events__getTemplateObjects__query_args', 
-            $query_args, 
-            $template_arguments, 
+            'FHEE__Espresso_My_Events__getTemplateObjects__query_args',
+            $query_args,
+            $template_arguments,
             $attendee_id
         );
         $object_info['objects'] = $model->get_all($query_args);

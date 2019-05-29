@@ -452,7 +452,7 @@ class EspressoMyEvents extends EspressoShortcode
         }
 
         // allow $query_args to be filtered.
-        $query_args = apply_filters(
+        $query_args = (array) apply_filters(
             'FHEE__Espresso_My_Events__getTemplateObjects__query_args',
             $query_args,
             $template_arguments,

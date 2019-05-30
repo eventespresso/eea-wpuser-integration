@@ -16,10 +16,11 @@ jQuery(document).ready( function($) {
         },
 
 
-        doPagination: function( page, per_page, template ) {
+        doPagination: function( page, per_page, template, link ) {
             this.data.ee_mye_page = typeof page === 'undefined' ? 1 : page;
             this.data.per_page = typeof per_page === 'undefined' ? null : per_page;
             this.data.template = typeof template === 'undefined' ? 'event_section' : template;
+            this.data.link = typeof link === 'undefined' ? null : link;
             this.data.successCallback = 'replaceTable';
             this.data.action = 'ee_my_events_load_paged_template';
             this.doAjax();
@@ -33,7 +34,6 @@ jQuery(document).ready( function($) {
                 return false;
             }
             $('.espresso-my-events-inner-content').html(response.content);
-            return;
         },
 
 
@@ -74,7 +74,7 @@ jQuery(document).ready( function($) {
         e.stopPropagation();
         //grab the page being navigated to from the clicked link
         var pageBrowsedTo = parseInt( this.search.replace('?ee_mye_page=','') );
-        EEMYEVENTS.doPagination( pageBrowsedTo, EE_MYE_JS.per_page, EE_MYE_JS.template );
+        EEMYEVENTS.doPagination( pageBrowsedTo, EE_MYE_JS.per_page, EE_MYE_JS.template, EE_MYE_JS.link );
     });
 
 

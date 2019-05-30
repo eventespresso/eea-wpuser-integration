@@ -1,6 +1,7 @@
 <?php
 namespace EventEspresso\WpUser\domain\entities\shortcodes;
 
+use EE_Registry;
 use EventEspresso\core\services\shortcodes\EspressoShortcode;
 use EventEspresso\core\services\cache\PostRelatedCacheManager;
 use EE_Request;
@@ -157,8 +158,8 @@ class EspressoMyEvents extends EspressoShortcode
         $js_object = array(
             'template' => isset($attributes['template']) ? $attributes['template'] : 'event_section',
             'per_page' => isset($attributes['per_page']) ? $attributes['per_page'] : 10,
+            'link' => get_permalink(),
         );
-
         wp_localize_script('ees-my-events-js', 'EE_MYE_JS', $js_object);
     }
 
@@ -293,6 +294,7 @@ class EspressoMyEvents extends EspressoShortcode
         // any parameters coming from the request?
         $per_page = (int) $this->request->get('per_page', $attributes['per_page']);
         $page = (int) $this->request->get(self::MY_EVENTS_PAGE_QUERY_ARGUMENT_KEY, 0);
+        $link = $this->request->get('link', get_permalink());
 
         // if $page is empty then it's likely this is being loaded outside of ajax and wp has usurped
         // the page value for its query.  So let's see if its in the query.
@@ -319,6 +321,7 @@ class EspressoMyEvents extends EspressoShortcode
             'per_page'           => $per_page,
             'path_to_template'   => $template_info['path'],
             'page'               => $page,
+            'link'               => $link,
             'object_count'       => 0,
             'att_id'             => 0,
             'with_wrapper'       => $attributes['with_wrapper'],
@@ -450,7 +453,6 @@ class EspressoMyEvents extends EspressoShortcode
             // get out no valid object_types here.
             return $object_info;
         }
-
         $object_info['objects'] = $model->get_all($query_args);
         $object_info['object_count'] = $model->count(array($query_args[0]), null, true);
         return $object_info;

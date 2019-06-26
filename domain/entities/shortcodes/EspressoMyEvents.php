@@ -456,7 +456,7 @@ class EspressoMyEvents extends EspressoShortcode
             $query_args,
             $template_arguments,
             $attendee_id
-        );  
+        );
         $object_info['objects'] = $model->get_all($query_args);
         $object_info['object_count'] = $model->count(array($query_args[0]), null, true);
         return $object_info;

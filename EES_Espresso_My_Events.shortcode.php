@@ -280,7 +280,6 @@ class EES_Espresso_My_Events extends EES_Shortcode
             'template' => isset($attributes['template']) ? $attributes['template'] : 'event_section',
             'per_page' => isset($attributes['per_page']) ? $attributes['per_page'] : 10,
         );
-
         wp_localize_script('ees-my-events-js', 'EE_MYE_JS', $js_object);
     }
 

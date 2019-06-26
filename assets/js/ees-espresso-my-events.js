@@ -33,7 +33,6 @@ jQuery(document).ready( function($) {
                 return false;
             }
             $('.espresso-my-events-inner-content').html(response.content);
-            return;
         },
 
 

@@ -47,7 +47,7 @@
         // resend confirmation email.
         $resend_registration_link = add_query_arg(
             array( 'token' => $registration->reg_url_link(), 'resend' => true ),
-            get_permalink(EE_Registry::instance()->REQ->get_post_id_from_request())
+            null
         );
         if ($registration->is_primary_registrant() ||
              ( ! $registration->is_primary_registrant()

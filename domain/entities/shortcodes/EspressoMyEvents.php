@@ -1,6 +1,7 @@
 <?php
 namespace EventEspresso\WpUser\domain\entities\shortcodes;
 
+use EE_Registry;
 use EventEspresso\core\services\shortcodes\EspressoShortcode;
 use EventEspresso\core\services\cache\PostRelatedCacheManager;
 use EE_Request;
@@ -158,7 +159,6 @@ class EspressoMyEvents extends EspressoShortcode
             'template' => isset($attributes['template']) ? $attributes['template'] : 'event_section',
             'per_page' => isset($attributes['per_page']) ? $attributes['per_page'] : 10,
         );
-
         wp_localize_script('ees-my-events-js', 'EE_MYE_JS', $js_object);
     }
 
@@ -450,7 +450,6 @@ class EspressoMyEvents extends EspressoShortcode
             // get out no valid object_types here.
             return $object_info;
         }
-
         // allow $query_args to be filtered.
         $query_args = (array) apply_filters(
             'FHEE__Espresso_My_Events__getTemplateObjects__query_args',

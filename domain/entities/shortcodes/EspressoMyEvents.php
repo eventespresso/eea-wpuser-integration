@@ -450,6 +450,13 @@ class EspressoMyEvents extends EspressoShortcode
             // get out no valid object_types here.
             return $object_info;
         }
+        // allow $query_args to be filtered.
+        $query_args = (array) apply_filters(
+            'FHEE__Espresso_My_Events__getTemplateObjects__query_args',
+            $query_args,
+            $template_arguments,
+            $attendee_id
+        );  
         $object_info['objects'] = $model->get_all($query_args);
         $object_info['object_count'] = $model->count(array($query_args[0]), null, true);
         return $object_info;

@@ -1248,7 +1248,7 @@ class EED_WP_Users_SPCO extends EED_Module
         $content = sprintf(esc_html__('Hi %s,', 'event_espresso'), $event_author->display_name);
         $content .= "\n\n";
         $content .= esc_html__(
-            'There is a user having trouble with receiving emails for their recent registration.  You can follow up with them using the following information:',
+            'There is a user having trouble with receiving emails for their recent registration. You can follow up with them using the following information:',
             'event_espresso'
         );
         $content .= "\n\n";

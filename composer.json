@@ -1,6 +1,9 @@
 {
 	"name": "eventespresso/eea-wpuser-integration",
 	"type": "wordpress-plugin",
+	"extra": {
+        "installer-name": "eea-wp-user-integration"
+    },
 	"license": "GPL-2.0-or-later",
 	"description": "An add-on for Event Espresso 4!",
 	"authors" : [

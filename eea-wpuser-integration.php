@@ -3,6 +3,7 @@
 if (! defined('ABSPATH')) {
     exit('No direct script access allowed');
 }
+
 /*
   Plugin Name:  Event Espresso - WP Users (EE4.6+)
   Plugin URI:  http://www.eventespresso.com

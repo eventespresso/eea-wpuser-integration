@@ -48,6 +48,9 @@ function load_ee_core_wpusers()
         // new_addon version
         require_once(plugin_dir_path(__FILE__) . 'EE_WPUsers.class.php');
         EE_WPUsers::register_addon();
+        // TODO execute this conditionally on appropriate routes
+        $schema = new \EventEspresso\WpUser\domain\services\graphql\RegisterSchema();
+        $schema->addHooks();
     }
 }
 

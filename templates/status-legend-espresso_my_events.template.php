@@ -96,17 +96,17 @@ $items = apply_filters('FHEE__status-legend-espresso_my_events__legend_items', $
 <div class="espresso-my-events-legend-container">
     <dl class="espresso-my-events-legend-list">
         <?php foreach ($items as $item => $details) : ?>
-        <?php if ($per_col < $count) : ?>
+            <?php if ($per_col < $count) : ?>
     </dl>
     <dl class="espresso-my-events-legend-list">
-        <?php $count = 1;
-        endif; ?>
+                <?php $count = 1;
+            endif; ?>
         <dt class="ee-legend-item-<?php echo $item; ?>">
             <?php $class = ! empty($details['class']) ? $details['class'] : 'ee-legend-no-class'; ?>
             <span class="<?php echo $class; ?>"></span>
             <span class="ee-legend-description"><?php echo $details['desc']; ?></span>
         </dt>
-        <?php $count++;
+            <?php $count++;
         endforeach; ?>
     </dl>
 </div>

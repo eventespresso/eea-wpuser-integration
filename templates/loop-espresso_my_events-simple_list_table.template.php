@@ -38,7 +38,7 @@ if ($with_wrapper) : ?>
     <?php do_action('AHEE__loop-espresso_my_events__before', $object_type, $objects, $template_slug, $att_id); ?>
     <h3><?php echo $your_events_title; ?></h3>
     <div class="espresso-my-events-inner-content">
-<?php
+    <?php
 endif;
 // $with_wrapper check ?>
 <?php if ($objects && reset($objects) instanceof EE_Registration) : ?>
@@ -133,6 +133,6 @@ endif;
     </div>
     <?php do_action('AHEE__loop-espresso_my_events__after', $object_type, $objects, $template_slug, $att_id); ?>
     </div>
-<?php
+    <?php
 endif;
 // end $wrapper check

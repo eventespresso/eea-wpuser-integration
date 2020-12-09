@@ -2,15 +2,12 @@
 
 namespace EventEspresso\WpUser\domain\services\graphql;
 
+use EE_Error;
 use EE_Ticket;
-
-use EventEspresso\core\exceptions\InvalidDataTypeException;
-use EventEspresso\core\exceptions\InvalidInterfaceException;
-use EventEspresso\core\exceptions\UnexpectedEntityException;
 use EventEspresso\core\services\graphql\fields\GraphQLFieldInterface;
 use EventEspresso\core\services\graphql\fields\GraphQLField;
-use GraphQLRelay\Relay;
 use GraphQL\Type\Definition\ResolveInfo;
+use ReflectionException;
 use WPGraphQL\AppContext;
 
 /**
@@ -73,6 +70,7 @@ class RegisterSchema
         return array_merge($fields, $newFields);
     }
 
+
     /**
      * @param mixed       $source  The source that's passed down the GraphQL queries
      * @param array       $args    The inputArgs on the field
@@ -80,26 +78,21 @@ class RegisterSchema
      * @param ResolveInfo $info    The ResolveInfo passed down the GraphQL tree
      * @return string
      * @throws EE_Error
-     * @throws Exception
-     * @throws InvalidArgumentException
-     * @throws InvalidDataTypeException
-     * @throws InvalidInterfaceException
      * @throws ReflectionException
-     * @throws UserError
-     * @throws UnexpectedEntityException
-     * @since $VID:$
      */
     public function getCapabilityRequired($source, array $args, AppContext $context, ResolveInfo $info)
     {
-        return $source instanceof EE_Ticket ? $source->get_extra_meta('ee_ticket_cap_required', true, '') : '';
+        return $source instanceof EE_Ticket
+            ? $source->get_extra_meta('ee_ticket_cap_required', true, '')
+            : '';
     }
 
 
     /**
-     * @param array $ticket The ticket being mutated.
-     * @param array $input  Data coming from the GraphQL mutation query input.
-     * @return array
-     * @since $VID:$
+     * @param EE_Ticket $ticket The ticket being mutated.
+     * @param array     $input  Data coming from the GraphQL mutation query input.
+     * @throws EE_Error
+     * @throws ReflectionException
      */
     public function updateTicketCapMeta(EE_Ticket $ticket, array $input)
     {

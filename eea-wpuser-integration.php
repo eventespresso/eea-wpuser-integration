@@ -8,7 +8,7 @@ if (! defined('ABSPATH')) {
   Plugin Name:  Event Espresso - WP Users (EE4.6+)
   Plugin URI:  http://www.eventespresso.com
   Description: This adds the WP users integration.
-  Version: 2.0.18.rc.004
+  Version: 2.1.0.rc.001
   Author: Event Espresso
   Author URI: http://www.eventespresso.com
   License: GPLv2
@@ -37,21 +37,41 @@ if (! defined('ABSPATH')) {
  * @package      EE WPUsers
  *
  */
-define('EE_WPUSERS_VERSION', '2.0.18.rc.004');
-define('EE_WPUSERS_MIN_CORE_VERSION_REQUIRED', '4.8.21.rc.005');
+define('EE_WPUSERS_VERSION', '2.1.0.rc.001');
+define('EE_WPUSERS_MIN_CORE_VERSION_REQUIRED', '4.11.0.rc.001');
 define('EE_WPUSERS_PLUGIN_FILE', __FILE__);
 
 
 function load_ee_core_wpusers()
 {
-    if (class_exists('EE_Addon')) {
-        // new_addon version
-        require_once(plugin_dir_path(__FILE__) . 'EE_WPUsers.class.php');
+    if (class_exists('EE_Addon')
+        && class_exists('EventEspresso\core\domain\DomainBase')
+    ) {
+        define('EE_WPUSERS_PATH', plugin_dir_path(__FILE__));
+        define('EE_WPUSERS_URL', plugin_dir_url(__FILE__));
+        define('EE_WPUSERS_TEMPLATE_PATH', EE_WPUSERS_PATH . 'templates/');
+        define('EE_WPUSERS_BASENAME', plugin_basename(EE_WPUSERS_PLUGIN_FILE));
+        require_once EE_WPUSERS_PATH . 'EE_WPUsers.class.php';
         EE_WPUsers::register_addon();
-        // TODO execute this conditionally on appropriate routes
-        $schema = new \EventEspresso\WpUser\domain\services\graphql\RegisterSchema();
-        $schema->addHooks();
     }
 }
 
 add_action('AHEE__EE_System__load_espresso_addons', 'load_ee_core_wpusers');
+
+
+/**
+ * @returns EventEspresso\core\domain\DomainInterface
+ */
+function getWpUserDomain()
+{
+    static $domain;
+    if (! $domain instanceof EventEspresso\WpUser\domain\Domain) {
+        $domain = EventEspresso\core\domain\DomainFactory::getShared(
+            new EventEspresso\core\domain\values\FullyQualifiedName(
+                'EventEspresso\WpUser\domain\Domain'
+            ),
+            [EE_WPUSERS_PLUGIN_FILE, EE_WPUSERS_VERSION]
+        );
+    }
+    return $domain;
+}

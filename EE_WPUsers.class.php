@@ -74,7 +74,7 @@ class EE_WPUsers extends EE_Addon
     {
         $this->register_dependencies();
         add_action(
-            'AHEE__EventEspresso_core_services_routing_Router__brewEspresso',
+            'AHEE__EventEspresso_core_services_routing_Router__coreLoadedAndReady',
             [$this, 'handleWpUserRoutes'],
             10,
             3

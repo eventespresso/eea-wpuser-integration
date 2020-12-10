@@ -16,6 +16,23 @@ use EventEspresso\WpUser\domain\services\assets\EventEditorAssetManager;
  */
 class EspressoEventEditor extends CoreEventEditor
 {
+    /**
+     * @var WpUserData $data_node
+     */
+    protected $data_node;
+
+
+    /**
+     * called just before matchesCurrentRequest()
+     * and allows Route to perform any setup required such as calling setSpecification()
+     *
+     * @return void
+     */
+    public function initialize()
+    {
+        $this->initializeBaristaForDomain(Domain::class);
+    }
+
 
     protected function registerDependencies()
     {
@@ -27,6 +44,22 @@ class EspressoEventEditor extends CoreEventEditor
                 'EventEspresso\core\services\assets\Registry'        => EE_Dependency_Map::load_from_cache,
             ]
         );
+        $this->dependency_map->registerDependencies(
+            WpUserData::class,
+            [
+                'EventEspresso\core\services\json\JsonDataNodeValidator' => EE_Dependency_Map::load_from_cache,
+                'EventEspresso\core\domain\services\graphql\Utilities'   => EE_Dependency_Map::load_from_cache,
+            ]
+        );
+    }
+
+
+    /**
+     * @return string
+     */
+    protected function dataNodeClass(): string
+    {
+        return WpUserData::class;
     }
 
 
@@ -35,15 +68,14 @@ class EspressoEventEditor extends CoreEventEditor
      *
      * @return bool
      */
-    protected function requestHandler()
+    protected function requestHandler(): bool
     {
-        $this->initializeBaristaForDomain(Domain::class);
         /** @var EventEditorAssetManager $asset_manager */
         $asset_manager = $this->loader->getShared(
             EventEditorAssetManager::class,
             [getWpUserDomain()]
         );
-        add_action('admin_enqueue_scripts', [$asset_manager, 'enqueueEventEditor'], 3);
+        add_action('admin_enqueue_scripts', [$asset_manager, 'enqueueEventEditor']);
         return true;
     }
 }

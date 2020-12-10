@@ -25,7 +25,7 @@ class GQLRequests extends CoreGQLRequests
      *
      * @return bool
      */
-    protected function requestHandler()
+    protected function requestHandler(): bool
     {
         /** @var RegisterSchema $schema */
         $schema = $this->loader->getShared(RegisterSchema::class);

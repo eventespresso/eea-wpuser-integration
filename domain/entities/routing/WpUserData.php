@@ -140,10 +140,7 @@ class WpUserData extends JsonDataNode
                     )
                     : null;
                 if ($extra_meta instanceof EE_Extra_Meta) {
-                    $capabilityRequired                                                      = $extra_meta->value();
-                    $event_editor_gql_data['tickets']['nodes'][ $key ]['capabilityRequired'] = $capabilityRequired;
-                    $ticket_meta_data[ $ticket_node['id'] ]                                  =
-                        ['capabilityRequired' => $capabilityRequired];
+                    $ticket_meta_data[ $ticket_node['id'] ] = ['capabilityRequired' => $extra_meta->value()];
                 }
             }
             $this->setTicketMetaData($ticket_meta_data);

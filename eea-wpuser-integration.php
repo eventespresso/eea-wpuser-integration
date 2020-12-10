@@ -44,9 +44,12 @@ define('EE_WPUSERS_PLUGIN_FILE', __FILE__);
 
 function load_ee_core_wpusers()
 {
-    if (class_exists('EE_Addon')
+    static $loaded = false;
+    if (! $loaded
+        && class_exists('EE_Addon')
         && class_exists('EventEspresso\core\domain\DomainBase')
     ) {
+        $loaded = true;
         define('EE_WPUSERS_PATH', plugin_dir_path(__FILE__));
         define('EE_WPUSERS_URL', plugin_dir_url(__FILE__));
         define('EE_WPUSERS_TEMPLATE_PATH', EE_WPUSERS_PATH . 'templates/');

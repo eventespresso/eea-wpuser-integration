@@ -76,7 +76,7 @@ class WpUserData extends JsonDataNode
     private function addCapabilityOptions()
     {
         $capability_options = [
-            'Standard' => [
+            esc_html__('Standard', 'event_espresso') => [
                 'none' => esc_html__('none', 'event_espresso'),
                 'read' => esc_html__('Read Capabilities', 'event_espresso'),
             ],

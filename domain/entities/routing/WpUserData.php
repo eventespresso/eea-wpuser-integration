@@ -76,19 +76,19 @@ class WpUserData extends JsonDataNode
     private function addCapabilityOptions()
     {
         $capability_options = [
-            esc_html__('Standard', 'event_espresso') => [
-                'none' => esc_html__('none', 'event_espresso'),
-                'read' => esc_html__('Read Capabilities', 'event_espresso'),
+            __('Standard', 'event_espresso') => [
+                'none' => __('none', 'event_espresso'),
+                'read' => __('Read Capabilities', 'event_espresso'),
             ],
         ];
 
         if (defined('WS_PLUGIN__S2MEMBER_MIN_WP_VERSION')) {
             $capability_options['s2Member'] = [
-                'access_s2member_level0' => esc_html__('Level 0 Member', 'event_espresso'),
-                'access_s2member_level1' => esc_html__('Level 1 Member', 'event_espresso'),
-                'access_s2member_level2' => esc_html__('Level 2 Member', 'event_espresso'),
-                'access_s2member_level3' => esc_html__('Level 3 Member', 'event_espresso'),
-                'access_s2member_level4' => esc_html__('Level 4 Member', 'event_espresso'),
+                'access_s2member_level0' => __('Level 0 Member', 'event_espresso'),
+                'access_s2member_level1' => __('Level 1 Member', 'event_espresso'),
+                'access_s2member_level2' => __('Level 2 Member', 'event_espresso'),
+                'access_s2member_level3' => __('Level 3 Member', 'event_espresso'),
+                'access_s2member_level4' => __('Level 4 Member', 'event_espresso'),
             ];
         }
 

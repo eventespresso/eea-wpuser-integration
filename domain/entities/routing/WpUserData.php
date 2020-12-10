@@ -48,7 +48,6 @@ class WpUserData extends JsonDataNode
             'FHEE__EventEspresso_core_domain_entities_routing_data_nodes_domains_EventEditor__initialize__related_data',
             [$this, 'getTicketCapabilitiesRequired']
         );
-
     }
 
 
@@ -78,18 +77,18 @@ class WpUserData extends JsonDataNode
     {
         $capability_options = [
             'Standard' => [
-                'none' => 'none',
-                'read' => 'Read Capabilities',
+                'none' => esc_html__('none', 'event_espresso'),
+                'read' => esc_html__('Read Capabilities', 'event_espresso'),
             ],
         ];
 
         if (defined('WS_PLUGIN__S2MEMBER_MIN_WP_VERSION')) {
             $capability_options['s2Member'] = [
-                'access_s2member_level0' => 'Level 0 Member',
-                'access_s2member_level1' => 'Level 1 Member',
-                'access_s2member_level2' => 'Level 2 Member',
-                'access_s2member_level3' => 'Level 3 Member',
-                'access_s2member_level4' => 'Level 4 Member',
+                'access_s2member_level0' => esc_html__('Level 0 Member', 'event_espresso'),
+                'access_s2member_level1' => esc_html__('Level 1 Member', 'event_espresso'),
+                'access_s2member_level2' => esc_html__('Level 2 Member', 'event_espresso'),
+                'access_s2member_level3' => esc_html__('Level 3 Member', 'event_espresso'),
+                'access_s2member_level4' => esc_html__('Level 4 Member', 'event_espresso'),
             ];
         }
 

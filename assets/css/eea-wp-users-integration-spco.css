@@ -1,0 +1,114 @@
+/**
+ * Styles for the wp users integration with EE spco
+ */
+.ee-login-form {
+    font-family: "Open Sans", sans-serif;
+    font-size: 13px;
+    color: #444;
+    line-height: 1.4em;
+}
+
+.ee-login-form a {
+    outline: 0;
+}
+
+.ee-login-form p {
+    line-height: 1.5em;
+}
+
+.ee-login-form input[type="text"], .ee-login-form input[type="password"] {
+    font-size: 24px;
+    width: 100%;
+    padding: 3px;
+    margin: 2px 6px 16px 0;
+}
+
+.ee-login-form .input,
+.ee-login-form input[type="text"],
+.ee-login-form input[type="checkbox"],
+.ee-login-form input[type="password"]{
+    -webkit-appearance: none;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    -webkit-box-shadow: inset 0 1px 2px rgba( 0, 0, 0, 0.07 );
+    box-shadow: inset 0 1px 2px rgba( 0, 0, 0, 0.07 );
+    background-color: #fff;
+    color: #333;
+    outline: none;
+    -webkit-transition: 0.05s border-color ease-in-out;
+    transition: 0.05s border-color ease-in-out;
+    background: #fbfbfb;
+}
+
+.ee-login-form input[type="text"]:focus,
+.ee-login-form input[type="checkbox"]:focus,
+.ee-login-form input[type="password"]:focus {
+    border-color: #5b9dd9;
+    -webkit-box-shadow: 0 0 2px rgba( 30, 140, 190, 0.8 );
+    box-shadow: 0 0 2px rgba( 30, 140, 190, 0.8 );
+}
+
+.ee-login-form input[type="checkbox"] {
+    border: 1px solid #bbb;
+    background: #fff;
+    color: #555;
+    clear: none;
+    cursor: pointer;
+    display: inline-block;
+    line-height: 0;
+    height: 16px;
+    margin: -4px 4px 0 0;
+    outline: 0;
+    padding: 0 !important;
+    text-align: center;
+    vertical-align: middle;
+    width: 16px;
+    min-width: 16px;
+    -webkit-appearance: none;
+    -webkit-box-shadow: inset 0 1px 2px rgba( 0, 0, 0, 0.1 );
+    box-shadow: inset 0 1px 2px rgba( 0, 0, 0, 0.1 );
+    -webkit-transition: .05s border-color ease-in-out;
+    transition: .05s border-color ease-in-out;
+}
+
+.ee-login-form nput[type="checkbox"]:checked:before {
+    float: left;
+    display: inline-block;
+    vertical-align: middle;
+    width: 16px;
+    font: normal 21px/1 'dashicons';
+    speak: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.ee-login-form label {
+    color:#777;
+    font-size: 14px;
+}
+
+.ee-login-form p.submit,
+.ee-login-form .login-action-lostpassword p.submit {
+    border: none;
+    margin: -10px 0 20px; /* May want to revisit this */
+}
+
+.ee-login-form .button-primary {
+    float: right;
+}
+
+.ee-login-form .forgetmenot label {
+    font-size: 12px;
+    line-height: 19px;
+}
+
+
+.ee-wpuser-register-link {
+    margin-right: 10px;
+    margin-top: -3px;
+}
+
+#ee-single-page-checkout-dv .ee-attention-notification-form input#notification-email-contact {
+    width: 70%;
+    margin-right: 10px;
+}

@@ -75,7 +75,7 @@ class EspressoEventEditor extends CoreEventEditor
             EventEditorAssetManager::class,
             [getWpUserDomain()]
         );
-        add_action('admin_enqueue_scripts', [$asset_manager, 'enqueueEventEditor']);
+        add_action('admin_enqueue_scripts', [$asset_manager, 'enqueueEventEditor'], 3);
         return true;
     }
 }

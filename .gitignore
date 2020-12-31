@@ -2,7 +2,7 @@
 core/third_party_libs/dompdf/lib/fonts/log.htm
 coverage
 translation-map.json
-# *-translations.php
+*-translations.php
 *.pot
 
 # local project files that should not be committed

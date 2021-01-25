@@ -1,15 +1,15 @@
 {
   "files": {
-    "wpUser.css": "/static/css/wpUser.e23cf20d.css",
+    "wpUser.css": "/static/css/wpUser.95445c65.css",
     "wpUser.js": "/static/js/wpUser.7f97f76f.js",
     "wpUser.js.map": "/static/js/wpUser.7f97f76f.js.map",
-    "wpUser.php": "/static/js/wpUser.2fb6dafd.asset.php",
-    "static/css/wpUser.e23cf20d.css.map": "/static/css/wpUser.e23cf20d.css.map",
+    "wpUser.php": "/static/js/wpUser.a28df271.asset.php",
+    "static/css/wpUser.95445c65.css.map": "/static/css/wpUser.95445c65.css.map",
     "static/js/wpUser.7f97f76f.js.LICENSE.txt": "/static/js/wpUser.7f97f76f.js.LICENSE.txt"
   },
   "entrypoints": {
     "wpUser": [
-      "static/css/wpUser.e23cf20d.css",
+      "static/css/wpUser.95445c65.css",
       "static/js/wpUser.7f97f76f.js"
     ]
   }

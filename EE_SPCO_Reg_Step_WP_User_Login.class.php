@@ -40,18 +40,19 @@ class EE_SPCO_Reg_Step_WP_User_Login extends EE_SPCO_Reg_Step
      */
     public function this_step_initialized(EE_SPCO_Reg_Step_WP_User_Login $spco_step)
     {
-        $registration_url = ! EE_Registry::instance()->CFG->addons->user_integration->registration_page
-            ? esc_url(
-                add_query_arg(
-                    array(
-                        'ee_do_auto_login' => 1,
-                        'ee_load_on_login' => 1,
-                        'redirect_to' => $this->checkout->next_step->reg_step_url(),
-                    ),
-                    wp_registration_url()
-                )
+        $registration_base_url = EE_Registry::instance()->CFG->addons->user_integration->registration_page
+            ? EE_Registry::instance()->CFG->addons->user_integration->registration_page
+            : wp_registration_url();
+        $registration_url = esc_url(
+            add_query_arg(
+                array(
+                    'ee_do_auto_login' => 1,
+                    'ee_load_on_login' => 1,
+                    'redirect_to' => $this->checkout->next_step->reg_step_url(),
+                ),
+                $registration_base_url
             )
-            : EE_Registry::instance()->CFG->addons->user_integration->registration_page;
+        );
         $instructions = get_option('users_can_register')
             ? sprintf(__('The event you have selected requires logging in before you can register. You can %sregister for an account here%s if you don\'t have a login.', 'event_espresso'), '<a href="' . $registration_url . '">', '</a>')
             : __('The event you have selected requires logging in before you can register.', 'event_espresso');

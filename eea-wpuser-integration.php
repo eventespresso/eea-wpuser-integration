@@ -7,7 +7,7 @@ if (! defined('ABSPATH')) {
 /*
   Plugin Name:  Event Espresso - WP Users (EE4.6+)
   Plugin URI:  http://www.eventespresso.com
-  Description: This adds the WP users integration.
+  Description: This adds the WP Users integration.
   Version: 2.1.0.rc.003
   Author: Event Espresso
   Author URI: http://www.eventespresso.com
@@ -38,10 +38,14 @@ if (! defined('ABSPATH')) {
  *
  */
 define('EE_WPUSERS_VERSION', '2.1.0.rc.003');
-define('EE_WPUSERS_MIN_CORE_VERSION_REQUIRED', '4.11.0.rc.001');
+define('EE_WPUSERS_MIN_CORE_VERSION_REQUIRED', '4.10.0.p');
 define('EE_WPUSERS_PLUGIN_FILE', __FILE__);
 
 
+/**
+ * @throws EE_Error
+ * @throws ReflectionException
+ */
 function load_ee_core_wpusers()
 {
     static $loaded = false;

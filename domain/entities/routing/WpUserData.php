@@ -8,6 +8,7 @@ use EEM_Extra_Meta;
 use EventEspresso\core\domain\services\graphql\Utilities;
 use EventEspresso\core\services\json\JsonDataNode;
 use EventEspresso\core\services\json\JsonDataNodeValidator;
+use ReflectionException;
 
 /**
  * Class WpUserData
@@ -27,22 +28,15 @@ class WpUserData extends JsonDataNode
      */
     private $ticket_meta_data = [];
 
-    /**
-     * @var Utilities
-     */
-    private $utilities;
-
 
     /**
      * WpUserData JsonDataNode constructor.
      *
      * @param JsonDataNodeValidator $validator
-     * @param Utilities             $utilities
      */
-    public function __construct(JsonDataNodeValidator $validator, Utilities $utilities)
+    public function __construct(JsonDataNodeValidator $validator)
     {
         parent::__construct($validator);
-        $this->utilities = $utilities;
         $this->setNodeName(WpUserData::NODE_NAME);
         add_filter(
             'FHEE__EventEspresso_core_domain_entities_routing_data_nodes_domains_EventEditor__initialize__related_data',
@@ -91,7 +85,6 @@ class WpUserData extends JsonDataNode
                 'access_s2member_level4' => __('Level 4 Member', 'event_espresso'),
             ];
         }
-
         $this->addData(
             'capabilityOptions',
             apply_filters(
@@ -108,9 +101,9 @@ class WpUserData extends JsonDataNode
     private function addTicketMetaData()
     {
         $this->addData(
-            'ticketsMeta',
+            'ticketMeta',
             apply_filters(
-                'FHEE__EventEspresso_WpUser_domain_entities_routing_WpUserData__initialize__capabilityOptions',
+                'FHEE__EventEspresso_WpUser_domain_entities_routing_WpUserData__initialize__ticketMetaData',
                 $this->ticket_meta_data
             )
         );
@@ -121,12 +114,14 @@ class WpUserData extends JsonDataNode
      * @param array $event_editor_gql_data
      * @return array
      * @throws EE_Error
+     * @throws ReflectionException
      */
     public function getTicketCapabilitiesRequired(array $event_editor_gql_data): array
     {
-        if (isset($event_editor_gql_data['tickets']['nodes'])) {
+        $ticket_data = $event_editor_gql_data['tickets']['nodes'] ?? null;
+        if (is_array($ticket_data)) {
             $ticket_meta_data = [];
-            foreach ($event_editor_gql_data['tickets']['nodes'] as $key => $ticket_node) {
+            foreach ($ticket_data as $ticket_node) {
                 $extra_meta = isset($ticket_node['dbId'])
                     ? EEM_Extra_Meta::instance()->get_one(
                         [

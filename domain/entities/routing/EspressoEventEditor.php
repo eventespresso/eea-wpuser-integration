@@ -48,7 +48,6 @@ class EspressoEventEditor extends CoreEventEditor
             WpUserData::class,
             [
                 'EventEspresso\core\services\json\JsonDataNodeValidator' => EE_Dependency_Map::load_from_cache,
-                'EventEspresso\core\domain\services\graphql\Utilities'   => EE_Dependency_Map::load_from_cache,
             ]
         );
     }

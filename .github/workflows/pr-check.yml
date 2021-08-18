@@ -112,6 +112,9 @@ jobs:
         with:
           ee-version: master
 
+      - name: Fix MySQL authentication for PHP < 7.4
+        run: mysql --user="root" --password="root" --database="wordpress_test" --execute="ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';"
+
       - name: Run PHP Unit Tests
         run: phpunit --configuration tests/phpunit.xml
         # Allow failure for nightly builds - PHP 8.0/8.1

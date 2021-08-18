@@ -123,7 +123,7 @@ class EED_WP_Users_SPCO extends EED_Module
                 'FHEE__EEH_Form_Fields__generate_question_groups_html__after_question_group_questions',
                 array('EED_WP_Users_SPCO', 'primary_reg_sync_messages'),
                 10,
-                4
+                3
             );
             add_filter(
                 'FHEE__EEM_Answer__get_attendee_question_answer_value__answer_value',
@@ -282,8 +282,7 @@ class EED_WP_Users_SPCO extends EED_Module
     public static function primary_reg_sync_messages(
         $content,
         EE_Registration $registration,
-        EE_Question_Group $question_group,
-        EE_SPCO_Reg_Step_Attendee_Information $spco
+        EE_Question_Group $question_group
     ) {
         if ((
                 ! is_user_logged_in()

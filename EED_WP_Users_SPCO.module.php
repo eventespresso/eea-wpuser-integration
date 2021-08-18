@@ -184,8 +184,7 @@ class EED_WP_Users_SPCO extends EED_Module
     protected static function _add_user_registration_route_hooks()
     {
         // do auto login after registration of new user
-        if (
-            ! has_action(
+        if (! has_action(
                 'register_new_user',
                 ['EED_WP_Users_SPCO', 'auto_login_registered_user']
             )
@@ -280,8 +279,7 @@ class EED_WP_Users_SPCO extends EED_Module
         EE_Registration $registration,
         EE_Question_Group $question_group
     ) {
-        if (
-            (
+        if ((
                 ! is_user_logged_in()
                 || (
                     is_user_logged_in()
@@ -494,7 +492,7 @@ class EED_WP_Users_SPCO extends EED_Module
                 ? $reg_step->checkout
                 : null;
         if (! $checkout instanceof EE_Checkout) {
-            throw new UnexpectedValueException (
+            throw new UnexpectedValueException(
                 esc_html__('An instance of EE_Checkout was expected.', 'event_espresso')
             );
         }
@@ -517,8 +515,7 @@ class EED_WP_Users_SPCO extends EED_Module
                      * responses, then they will need to also filter the stop_processing param at the end of this
                      * method to return true;
                      */
-                    if (
-                        ! empty($form_inputs['email'])
+                    if (! empty($form_inputs['email'])
                         && apply_filters(
                             'EED_WP_Users_SPCO__verify_user_access__perform_email_user_match_check',
                             true,
@@ -662,8 +659,7 @@ class EED_WP_Users_SPCO extends EED_Module
         $event_creates_user = false;
         if ($registrations) {
             foreach ($registrations as $registration) {
-                if (
-                    $reg_step->checkout->visit_allows_processing_of_this_registration($registration)
+                if ($reg_step->checkout->visit_allows_processing_of_this_registration($registration)
                     && EE_WPUsers::is_auto_user_create_on($registration->event_ID())
                 ) {
                     $event_creates_user = true;
@@ -756,8 +752,7 @@ class EED_WP_Users_SPCO extends EED_Module
          * same email address.
          * Here we also skip the user sync if the EE_WPUsers_Config->sync_user_with_contact option is false
          */
-        if (
-            ! $att instanceof EE_Attendee
+        if (! $att instanceof EE_Attendee
             || ! EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact
         ) {
             return $existing_attendee;
@@ -963,7 +958,7 @@ class EED_WP_Users_SPCO extends EED_Module
         WP_User         $user,
         EE_Attendee     $attendee,
         EE_Registration $registration,
-                        $password
+        $password
     ) {
         // for now we just use the existing core wp notifications.
         global $wp_version;

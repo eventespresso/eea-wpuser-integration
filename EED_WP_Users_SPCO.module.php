@@ -9,6 +9,7 @@ use EventEspresso\core\exceptions\InvalidDataTypeException;
 use EventEspresso\core\exceptions\InvalidInterfaceException;
 use EventEspresso\core\services\loaders\LoaderFactory;
 use EventEspresso\WpUser\domain\services\users\WpUserEmailVerification;
+use EventEspresso\core\domain\services\registration\form\v1\RegFormHandler;
 
 /**
  * EED_WP_Users_SPCO module.  Takes care of WP Users integration with SPCO.
@@ -481,7 +482,7 @@ class EED_WP_Users_SPCO extends EED_Module
         EE_Registration $spco_registration,
         $registrations,
         $valid_data,
-        EE_SPCO_Reg_Step_Attendee_Information $spco
+        RegFormHandler $reg_form_handler
     ) {
         if ($att_nmbr !== 0 || $stop_processing) {
             // get out because we've already either verified things or another plugin is halting things.
@@ -512,7 +513,7 @@ class EED_WP_Users_SPCO extends EED_Module
                         && apply_filters(
                             'EED_WP_Users_SPCO__verify_user_access__perform_email_user_match_check',
                             true,
-                            $spco,
+                            $reg_form_handler,
                             $registration
                         )
                     ) {
@@ -521,7 +522,7 @@ class EED_WP_Users_SPCO extends EED_Module
                         );
                         if ($user_notice !== '') {
                             $user_notice .= EED_WP_Users_SPCO::loginAndRegisterButtonsHtml(
-                                new Url($spco->reg_step_url())
+                                new Url($reg_form_handler->checkout->current_step->reg_step_url())
                             );
                             $stop_processing     = true;
                             $field_input_error[] = 'ee_reg_qstn-' . $registration->ID() . '-email';
@@ -532,7 +533,7 @@ class EED_WP_Users_SPCO extends EED_Module
         }
         if ($stop_processing) {
             EE_Error::add_error($user_notice, __FILE__, __FUNCTION__, __LINE__);
-            $spco->checkout->json_response->set_return_data(
+            $reg_form_handler->checkout->json_response->set_return_data(
                 array(
                     'wp_user_response' => array(
                         'require_login'          => true,
@@ -544,7 +545,7 @@ class EED_WP_Users_SPCO extends EED_Module
             );
             return $stop_processing;
         }
-        return apply_filters('EED_WP_Users_SPCO__verify_user_access__stop_processing', $stop_processing, $spco);
+        return apply_filters('EED_WP_Users_SPCO__verify_user_access__stop_processing', $stop_processing, $reg_form_handler);
     }
 
 

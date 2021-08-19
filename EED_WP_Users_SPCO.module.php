@@ -185,10 +185,9 @@ class EED_WP_Users_SPCO extends EED_Module
     {
         // do auto login after registration of new user
         if (! has_action(
-                'register_new_user',
-                ['EED_WP_Users_SPCO', 'auto_login_registered_user']
-            )
-        ) {
+            'register_new_user',
+            ['EED_WP_Users_SPCO', 'auto_login_registered_user']
+        )) {
             add_action('register_new_user', ['EED_WP_Users_SPCO', 'auto_login_registered_user']);
             add_action('register_form', ['EED_WP_Users_SPCO', 'add_auto_login_parameter']);
         }
@@ -1230,8 +1229,7 @@ class EED_WP_Users_SPCO extends EED_Module
         $event_author = $event instanceof EE_Event ? $event->wp_user() : 0;
         $event_author = $event_author ? new WP_User($event_author) : null;
         $contact      = $registration instanceof EE_Registration ? $registration->attendee() : null;
-        if (
-            ! $registration instanceof EE_Registration
+        if (! $registration instanceof EE_Registration
             || ! $event_author instanceof WP_User
             || ! $contact instanceof EE_Attendee
         ) {

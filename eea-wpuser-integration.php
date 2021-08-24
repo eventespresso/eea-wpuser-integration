@@ -7,7 +7,7 @@ if (! defined('ABSPATH')) {
 /*
   Plugin Name:  Event Espresso - WP Users (EE4.6+)
   Plugin URI:  http://www.eventespresso.com
-  Description: This adds the WP users integration.
+  Description: This adds the WP Users integration.
   Version: 2.1.1.rc.001
   Author: Event Espresso
   Author URI: http://www.eventespresso.com

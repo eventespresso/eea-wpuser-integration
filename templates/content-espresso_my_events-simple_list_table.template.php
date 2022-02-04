@@ -42,7 +42,7 @@
             ? '<a aria-label="' . $link_to_edit_registration_text
               . '" title="' . $link_to_edit_registration_text
               . '" href="' . $registration->edit_attendee_information_url() . '">'
-            . '<span class="ee-icon ee-icon-user-edit ee-icon-size-16"></span></a>'
+            . '<span class="dashicons dashicons-groups ee-icon-size-16"></span></a>'
             : '';
         // resend confirmation email.
         $resend_registration_link = add_query_arg(

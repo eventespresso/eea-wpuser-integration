@@ -505,10 +505,7 @@ class EES_Espresso_My_Events extends EES_Shortcode
             );
         }
         // request sent via AJAX ?
-        if (
-            defined('EE_FRONT_AJAX')
-            && EE_FRONT_AJAX
-        ) {
+        if (defined('EE_FRONT_AJAX') && EE_FRONT_AJAX) {
             echo json_encode(EE_Error::get_notices(false));
             die();
             // or was JS disabled ?

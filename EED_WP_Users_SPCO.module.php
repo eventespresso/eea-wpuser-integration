@@ -118,7 +118,7 @@ class EED_WP_Users_SPCO extends EED_Module
     public static function set_hooks_admin()
     {
         // hook into filters/actions done on ajax but ONLY EE_FRONT_AJAX requests
-        if (EE_FRONT_AJAX) {
+        if (defined('EE_FRONT_AJAX') && EE_FRONT_AJAX) {
             add_filter(
                 'FHEE__EEH_Form_Fields__generate_question_groups_html__after_question_group_questions',
                 array('EED_WP_Users_SPCO', 'primary_reg_sync_messages'),

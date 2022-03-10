@@ -12,7 +12,7 @@ use EventEspresso\WpUser\domain\Domain as WpUserDomain;
  *
  * @author  Brent Christensen
  * @package EventEspresso\WpUser\domain\services\assets
- * @since   $VID:$
+ * @since   2.1.0.p
  */
 class EventEditorAssetManager extends ReactAssetManager
 {

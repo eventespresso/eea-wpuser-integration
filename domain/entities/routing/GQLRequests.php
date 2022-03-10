@@ -10,7 +10,7 @@ use EventEspresso\WpUser\domain\services\graphql\RegisterSchema;
  *
  * @author  Brent Christensen
  * @package EventEspresso\WpUser\domain\entities\routing
- * @since   $VID:$
+ * @since   2.1.0.p
  */
 class GQLRequests extends CoreGQLRequests
 {

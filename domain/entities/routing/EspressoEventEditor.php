@@ -12,7 +12,7 @@ use EventEspresso\WpUser\domain\services\assets\EventEditorAssetManager;
  *
  * @author  Brent Christensen
  * @package EventEspresso\WpUser\domain\entities\routing
- * @since   $VID:$
+ * @since   2.1.0.p
  */
 class EspressoEventEditor extends CoreEventEditor
 {

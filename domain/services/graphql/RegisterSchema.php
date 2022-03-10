@@ -16,14 +16,14 @@ use WPGraphQL\AppContext;
  *
  * @package EventEspresso\WpUser\domain\services\graphql
  * @author  Manzoor Wani
- * @since   $VID:$
+ * @since   2.1.0.p
  */
 class RegisterSchema
 {
 
     /**
      * @return void
-     * @since $VID:$
+     * @since 2.1.0.p
      */
     public function addHooks()
     {
@@ -51,7 +51,7 @@ class RegisterSchema
     /**
      * @param GraphQLFieldInterface[] $fields
      * @return GraphQLFieldInterface[]
-     * @since $VID:$
+     * @since 2.1.0.p
      */
     public function registerCoreTicketFields(array $fields)
     {

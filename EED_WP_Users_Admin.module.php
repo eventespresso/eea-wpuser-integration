@@ -216,7 +216,7 @@ class EED_WP_Users_Admin extends EED_Module
         // we HAVE url so let's assemble the item to display.
         ?>
         <div class="misc-pub-section">
-            <span class="dashicons dashicons-universal-access ee-icon-color-grey ee-icon-size-20"></span>
+            <span class="dashicons dashicons-wordpress"></span>
             <a href="<?php echo $url; ?>" title="<?php  esc_html_e('Click to view WordPress user profile', 'event_espresso'); ?>"><?php  esc_html_e('WordPress User Profile', 'event_espresso'); ?></a>
         </div>
         <?php
@@ -242,7 +242,7 @@ class EED_WP_Users_Admin extends EED_Module
         $att_id = get_user_option('EE_Attendee_ID', $user->ID);
         
         if (empty($att_id)) {
-            return; // bail, no attached attendee_id.
+            return ''; // bail, no attached attendee_id.
         }
         
         // grab contact
@@ -250,7 +250,7 @@ class EED_WP_Users_Admin extends EED_Module
         
         // if no contact then bail
         if (! $contact instanceof EE_Attendee) {
-            return;
+            return '';
         }
         
         $template_args = array(

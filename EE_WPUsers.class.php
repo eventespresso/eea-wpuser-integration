@@ -15,7 +15,7 @@ class EE_WPUsers extends EE_Addon
     /**
      * Set up
      *
-     * @throws EE_Error|ReflectionException
+     * @throws EE_Error
      */
     public static function register_addon()
     {
@@ -94,7 +94,7 @@ class EE_WPUsers extends EE_Addon
             'EventEspresso\WpUser\domain\entities\shortcodes\EspressoMyEvents',
             [
                 'EventEspresso\core\services\cache\PostRelatedCacheManager' => EE_Dependency_Map::load_from_cache,
-                'EE_Request'                                                => EE_Dependency_Map::load_from_cache,
+                'EventEspresso\core\services\request\Request'               => EE_Dependency_Map::load_from_cache,
                 'EEM_Event'                                                 => EE_Dependency_Map::load_from_cache,
                 'EEM_Registration'                                          => EE_Dependency_Map::load_from_cache,
             ]

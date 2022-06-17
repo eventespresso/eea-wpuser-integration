@@ -611,17 +611,20 @@ class EED_WP_Users_SPCO extends EED_Module
                    . esc_html__('Login', 'event_espresso') . '</button>'
                    . '</a>';
         if (get_option('users_can_register')) {
-            $registration_url = ! EE_Registry::instance()->CFG->addons->user_integration->registration_page
-                ? add_query_arg(
+            $registration_base_url = EE_Registry::instance()->CFG->addons->user_integration->registration_page
+                ? EE_Registry::instance()->CFG->addons->user_integration->registration_page
+                : wp_registration_url();
+            $registration_url = esc_url(
+                add_query_arg(
                     [
                         'ee_do_auto_login' => 1,
                         'ee_load_on_login' => 1,
-                        'redirect_to'      => $redirect_to_url_after_login->getFullUrl(),
+                        'redirect_to' => $redirect_to_url_after_login->getFullUrl(),
                     ],
-                    wp_registration_url()
+                    $registration_base_url
                 )
-                : EE_Registry::instance()->CFG->addons->user_integration->registration_page;
-            $buttons          .= '<a class="ee-wpuser-register-link float-right" href="'
+            );
+            $buttons .= '<a class="ee-wpuser-register-link float-right" href="'
                                  . $registration_url
                                  . '">'
                                  . '<button type="button" class="button button-primary">'

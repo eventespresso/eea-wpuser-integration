@@ -69,7 +69,7 @@ if ($template_slug == 'event_section') {
 
 // add action icons
 $items['edit_registration']   = array(
-    'class' => 'ee-icon ee-icon-user-edit',
+    'class' => 'dashicons dashicons-groups',
     'desc'  => esc_html__('Edit the registration details.', 'event_espresso'),
 );
 $items['resend_notification'] = array(

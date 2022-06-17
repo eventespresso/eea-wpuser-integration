@@ -1,10 +1,9 @@
 <?php
 namespace EventEspresso\WpUser\domain\entities\shortcodes;
 
-use EE_Registry;
 use EventEspresso\core\services\shortcodes\EspressoShortcode;
 use EventEspresso\core\services\cache\PostRelatedCacheManager;
-use EE_Request;
+use EventEspresso\core\services\request\RequestInterface;
 use EEM_Event;
 use EEM_Registration;
 use EE_Registration;
@@ -12,8 +11,8 @@ use EED_Messages;
 use EE_Error;
 use EEH_URL;
 use EEH_Template;
+use ReflectionException;
 use WP_Query;
-use EEH_File;
 
 class EspressoMyEvents extends EspressoShortcode
 {
@@ -47,13 +46,13 @@ class EspressoMyEvents extends EspressoShortcode
 
 
     /**
-     * @var EE_Request
+     * @var RequestInterface
      */
     private $request;
 
     public function __construct(
         PostRelatedCacheManager $cache_manager,
-        EE_Request $request,
+        RequestInterface $request,
         EEM_Event $event_model,
         EEM_Registration $registration_model
     ) {
@@ -88,6 +87,7 @@ class EspressoMyEvents extends EspressoShortcode
         return 0;
     }
 
+
     /**
      * a place for adding any initialization code that needs to run prior to wp_header().
      * this may be required for shortcodes that utilize a corresponding module,
@@ -99,12 +99,13 @@ class EspressoMyEvents extends EspressoShortcode
      *
      * @return void
      * @throws EE_Error
+     * @throws ReflectionException
      */
     public function initializeShortcode()
     {
         // if a resend registration confirmation is in the request then let's call that method which in turn could
         // end up redirecting.
-        if ($this->request->is_set(self::RESEND_QUERY_ARGUMENT_KEY)) {
+        if ($this->request->requestParamIsSet(self::RESEND_QUERY_ARGUMENT_KEY)) {
             $this->resendRegistrationConfirmationEmail();
         }
 
@@ -194,14 +195,17 @@ class EspressoMyEvents extends EspressoShortcode
     /**
      * Callback for ajax hooks.
      * Takes care of returning the content requested by the ajax request.
+     *
+     * @throws EE_Error
      */
     public function loadPagedTemplateViaAjax()
     {
-        // intialize attributes array
+        // initialize attributes array
         $attributes = array();
         // template file sent with the request?
-        if ($this->request->get('template', '') !== '') {
-            $attributes['template'] = $this->request->get('template');
+        $template = $this->request->getRequestParam('template', '');
+        if ($template !== '') {
+            $attributes['template'] = $template;
         }
         // template tags file is not loaded apparently so need to load:
         if (is_readable(EE_PUBLIC . 'template_tags.php')) {
@@ -259,7 +263,7 @@ class EspressoMyEvents extends EspressoShortcode
         $attributes = array_merge($default_shortcode_attributes, (array) $attributes);
         $template_args = $this->getTemplateArguments($attributes);
 
-        if (! $this->request->front_ajax) {
+        if (! $this->request->isFrontAjax()) {
             $this->enqueueLocalizedJavascriptObject($attributes);
         }
 
@@ -291,8 +295,8 @@ class EspressoMyEvents extends EspressoShortcode
     protected function getTemplateArguments($attributes)
     {
         // any parameters coming from the request?
-        $per_page = (int) $this->request->get('per_page', $attributes['per_page']);
-        $page = (int) $this->request->get(self::MY_EVENTS_PAGE_QUERY_ARGUMENT_KEY, 0);
+        $per_page = $this->request->getRequestParam('per_page', $attributes['per_page'], 'int');
+        $page = $this->request->getRequestParam(self::MY_EVENTS_PAGE_QUERY_ARGUMENT_KEY, 0, 'int');
 
         // if $page is empty then it's likely this is being loaded outside of ajax and wp has usurped
         // the page value for its query.  So let's see if its in the query.
@@ -306,7 +310,7 @@ class EspressoMyEvents extends EspressoShortcode
         }
 
 
-        $template = $attributes['template'] ? $attributes['template'] : 'event_section';
+        $template = $attributes['template'] ?: 'event_section';
         $template_info = $this->getTemplateInfo($template);
 
         // define template_args
@@ -350,7 +354,6 @@ class EspressoMyEvents extends EspressoShortcode
      *                              'object_type' => 'Registration', //validated object type for template
      *                              'path' => 'full_path_to/template', //validate full path to template on the server
      *                              )
-     * @throws EE_Error
      */
     protected function getTemplateInfo($template_slug = '')
     {
@@ -468,10 +471,11 @@ class EspressoMyEvents extends EspressoShortcode
      * confirmation email.
      *
      * @throws EE_Error
+     * @throws ReflectionException
      */
     protected function resendRegistrationConfirmationEmail()
     {
-        $registration_link = $this->request->get(self::REGISTRATION_TOKEN_QUERY_ARGUMENT_KEY);
+        $registration_link = $this->request->getRequestParam(self::REGISTRATION_TOKEN_QUERY_ARGUMENT_KEY);
 
         // was a REG_ID passed ?
         if ($registration_link) {
@@ -502,7 +506,7 @@ class EspressoMyEvents extends EspressoShortcode
             );
         }
         // request sent via AJAX ?
-        if ($this->request->front_ajax) {
+        if ($this->request->isFrontAjax()) {
             echo wp_json_encode(EE_Error::get_notices(false));
             die();
             // or was JS disabled ?

@@ -503,10 +503,6 @@ class EED_WP_Users_SPCO extends EED_Module
             if (! $registration instanceof EE_Registration) {
                 return $stop_processing;
             }
-            // if stop processing has been set to true, break out of the foreach
-            if ($stop_processing) {
-                break;
-            }
             $reg_url_link = $registration->reg_url_link();
             if (isset($valid_data[ $reg_url_link ]) && is_array($valid_data[ $reg_url_link ])) {
                 foreach ($valid_data[ $reg_url_link ] as $form_inputs) {
@@ -535,6 +531,7 @@ class EED_WP_Users_SPCO extends EED_Module
                             );
                             $stop_processing     = true;
                             $field_input_error[] = 'ee_reg_qstn-' . $registration->ID() . '-email';
+                            break 2;
                         }
                     }
                 }

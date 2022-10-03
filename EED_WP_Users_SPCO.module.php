@@ -531,6 +531,7 @@ class EED_WP_Users_SPCO extends EED_Module
                             );
                             $stop_processing     = true;
                             $field_input_error[] = 'ee_reg_qstn-' . $registration->ID() . '-email';
+                            break 2;
                         }
                     }
                 }

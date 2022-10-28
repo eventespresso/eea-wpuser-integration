@@ -17,7 +17,7 @@ $registrations = $event->get_many_related('Registration', array(array('ATT_ID' =
     </td>
     <td>
         <?php
-        $venues        = $event->venues();
+        $venues        = array_filter($event->venues());
         $venue_content = array();
         foreach ($venues as $venue) :
             $venue_content[] = '<a aria-labelledby="' . sprintf(

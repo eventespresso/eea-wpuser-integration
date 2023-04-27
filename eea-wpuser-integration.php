@@ -4,7 +4,7 @@
   Plugin Name:  Event Espresso - WordPress Users Integration (EE4.6+)
   Plugin URI:  http://www.eventespresso.com
   Description: Integrates Event Espresso with WordPress Users.
-  Version: 2.1.1.p
+  Version: 2.1.2.rc.000
   Author: Event Espresso
   Author URI: http://www.eventespresso.com
   License: GPLv2
@@ -34,7 +34,7 @@
  *
  */
 
-define('EE_WPUSERS_VERSION', '2.1.1.p');
+define('EE_WPUSERS_VERSION', '2.1.2.rc.000');
 define('EE_WPUSERS_MIN_CORE_VERSION_REQUIRED', '4.11.0.rc.001');
 define('EE_WPUSERS_PLUGIN_FILE', __FILE__);
 

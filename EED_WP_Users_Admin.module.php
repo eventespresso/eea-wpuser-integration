@@ -1,5 +1,7 @@
 <?php
 
+use EventEspresso\core\domain\services\assets\EspressoLegacyAdminAssetManager;
+
 /**
  *
  * EED_WP_Users_Adminmodule.  Takes care of WP Users integration with EE admin.
@@ -14,146 +16,145 @@
  */
 class EED_WP_Users_Admin extends EED_Module
 {
-
     public static function set_hooks()
     {
     }
-    
+
+
     public static function set_hooks_admin()
     {
-        add_action('admin_enqueue_scripts', array('EED_WP_Users_Admin', 'admin_enqueue_scripts_styles'));
-        
+        add_action('admin_enqueue_scripts', ['EED_WP_Users_Admin', 'admin_enqueue_scripts_styles']);
+
         // hook into EE contact publish metabox.
-        add_action('post_submitbox_misc_actions', array('EED_WP_Users_Admin', 'add_link_to_wp_user_account'));
-        
+        add_action('post_submitbox_misc_actions', ['EED_WP_Users_Admin', 'add_link_to_wp_user_account']);
+
         // hook into wp users
-        add_action('edit_user_profile', array('EED_WP_Users_Admin', 'add_link_to_ee_contact_details'));
-        add_action('show_user_profile', array('EED_WP_Users_Admin', 'add_link_to_ee_contact_details'));
-        add_action('edit_user_profile', array('EED_WP_Users_Admin', 'view_registrations_for_contact'));
-        add_action('show_user_profile', array('EED_WP_Users_Admin', 'view_registrations_for_contact'));
-        add_action('profile_update', array('EED_WP_Users_Admin', 'sync_with_contact'), 10, 2);
-        add_action('user_register', array('EED_WP_Users_Admin', 'sync_with_contact'));
-        
+        add_action('edit_user_profile', ['EED_WP_Users_Admin', 'add_link_to_ee_contact_details']);
+        add_action('show_user_profile', ['EED_WP_Users_Admin', 'add_link_to_ee_contact_details']);
+        add_action('edit_user_profile', ['EED_WP_Users_Admin', 'view_registrations_for_contact']);
+        add_action('show_user_profile', ['EED_WP_Users_Admin', 'view_registrations_for_contact']);
+        add_action('profile_update', ['EED_WP_Users_Admin', 'sync_with_contact'], 10, 2);
+        add_action('user_register', ['EED_WP_Users_Admin', 'sync_with_contact']);
+
         // hook into attendee saves
         add_filter(
             'FHEE__Registrations_Admin_Page__insert_update_cpt_item__attendee_update',
-            array('EED_WP_Users_Admin', 'add_sync_with_wp_users_callback'),
+            ['EED_WP_Users_Admin', 'add_sync_with_wp_users_callback'],
             10
         );
-        
+
         // hook into registration_form_admin_page routes and config.
         add_filter(
             'FHEE__Extend_Registration_Form_Admin_Page__page_setup__page_routes',
-            array('EED_WP_Users_Admin', 'add_wp_user_default_settings_route'),
+            ['EED_WP_Users_Admin', 'add_wp_user_default_settings_route'],
             10,
             2
         );
         add_filter(
             'FHEE__Extend_Registration_Form_Admin_Page__page_setup__page_config',
-            array('EED_WP_Users_Admin', 'add_wp_user_default_settings_config'),
+            ['EED_WP_Users_Admin', 'add_wp_user_default_settings_config'],
             10,
             2
         );
         add_filter(
             'FHEE__Extend_Events_Admin_Page__page_setup__page_config',
-            array('EED_WP_Users_Admin', 'add_ticket_capability_help_tab'),
+            ['EED_WP_Users_Admin', 'add_ticket_capability_help_tab'],
             10,
             2
         );
         add_filter(
             'FHEE__EE_Admin_Page___publish_post_box__box_label',
-            array('EED_WP_Users_Admin', 'modify_settings_publish_box_label'),
+            ['EED_WP_Users_Admin', 'modify_settings_publish_box_label'],
             10,
             3
         );
-        
+
         // hooking into event editor
-        add_action('add_meta_boxes', array('EED_WP_Users_Admin', 'add_metaboxes'));
+        add_action('add_meta_boxes', ['EED_WP_Users_Admin', 'add_metaboxes']);
         add_filter(
             'FHEE__Events_Admin_Page___insert_update_cpt_item__event_update_callbacks',
-            array('EED_WP_Users_Admin', 'set_callback_save_wp_user_event_setting'),
+            ['EED_WP_Users_Admin', 'set_callback_save_wp_user_event_setting'],
             10,
             2
         );
         add_filter(
             'FHEE__EED_WP_Users_Admin__event_editor_metabox__wp_user_form_content',
-            array('EED_WP_Users_Admin', 'set_capability_default_user_create_role_event_editor'),
+            ['EED_WP_Users_Admin', 'set_capability_default_user_create_role_event_editor'],
             10
         );
         add_action(
             'AHEE__Extend_Events_Admin_Page___duplicate_event__after',
-            array('EED_WP_Users_Admin', 'duplicate_user_settings_for_event'),
+            ['EED_WP_Users_Admin', 'duplicate_user_settings_for_event'],
             10,
             2
         );
         add_action(
             'AHEE__Extend_Events_Admin_Page___duplicate_event__duplicate_ticket__after',
-            array('EED_WP_Users_Admin', 'set_capability_on_new_duplicated_ticket'),
+            ['EED_WP_Users_Admin', 'set_capability_on_new_duplicated_ticket'],
             10,
             2
         );
 
-        
+
         // hook into ticket editor in event editor.
         add_action(
             'AHEE__event_tickets_datetime_ticket_row_template__advanced_details_end',
-            array('EED_WP_Users_Admin', 'insert_ticket_meta_interface'),
+            ['EED_WP_Users_Admin', 'insert_ticket_meta_interface'],
             10,
             2
         );
         add_action(
             'AHEE__espresso_events_Pricing_Hooks___update_tkts_new_ticket',
-            array('EED_WP_Users_Admin', 'update_capability_on_ticket'),
+            ['EED_WP_Users_Admin', 'update_capability_on_ticket'],
             10,
             4
         );
         add_action(
             'AHEE__espresso_events_Pricing_Hooks___update_tkts_update_ticket',
-            array('EED_WP_Users_Admin', 'update_capability_on_ticket'),
+            ['EED_WP_Users_Admin', 'update_capability_on_ticket'],
             10,
             4
         );
         add_action(
             'AHEE__espresso_events_Pricing_Hooks___update_tkts_new_default_ticket',
-            array('EED_WP_Users_Admin', 'update_capability_on_ticket'),
+            ['EED_WP_Users_Admin', 'update_capability_on_ticket'],
             10,
             4
         );
-        
-        
+
         // hook into model deletes that may affect relations set on WP_User.
         add_action(
             'AHEE__EE_Base_Class__delete_permanently__before',
-            array('EED_WP_Users_Admin', 'remove_relations_on_delete')
+            ['EED_WP_Users_Admin', 'remove_relations_on_delete']
         );
     }
-    
-    
+
+
     public static function admin_enqueue_scripts_styles()
     {
         if (get_current_screen()->base == 'profile' || get_current_screen()->base == 'user-edit') {
             wp_register_style(
-                'ee-admin-css',
+                EspressoLegacyAdminAssetManager::CSS_HANDLE_EE_ADMIN,
                 EE_ADMIN_URL . 'assets/ee-admin-page.css',
-                array(),
+                ['espresso_admin_base'],
                 EVENT_ESPRESSO_VERSION
             );
             wp_register_style(
                 'espresso_att',
                 REG_ASSETS_URL . 'espresso_attendees_admin.css',
-                array('ee-admin-css'),
+                ['ee-admin-css'],
                 EVENT_ESPRESSO_VERSION
             );
             wp_enqueue_style('espresso_att');
         }
     }
-    
-    
+
+
     public function run($WP)
     {
     }
-    
-    
+
+
     /**
      * Register metaboxes for event editor.
      */
@@ -161,29 +162,29 @@ class EED_WP_Users_Admin extends EED_Module
     {
         $page  = EE_Registry::instance()->REQ->get('page');
         $route = EE_Registry::instance()->REQ->get('action');
-        
+
         // on event editor page?
         if ($page == 'espresso_events' && ($route == 'edit' || $route == 'create_new')) {
             add_meta_box(
                 'eea_wp_user_integration',
                 esc_html__('User Integration Settings', 'event_espresso'),
-                array('EED_WP_Users_Admin', 'event_editor_metabox'),
+                ['EED_WP_Users_Admin', 'event_editor_metabox'],
                 null,
                 'side',
                 'default'
             );
         }
     }
-    
-    
+
+
     public static function add_sync_with_wp_users_callback($callbacks)
     {
-        $callbacks[] = array('EED_WP_Users_Admin', 'sync_with_wp_user');
-        
+        $callbacks[] = ['EED_WP_Users_Admin', 'sync_with_wp_user'];
+
         return $callbacks;
     }
-    
-    
+
+
     /**
      * Callback for post_submitbox_misc_actions that adds a link to the wp user
      * edit page for the user attached to the EE_Attendee (if present).
@@ -196,28 +197,30 @@ class EED_WP_Users_Admin extends EED_Module
         if (! $post instanceof WP_Post || $post->post_type != 'espresso_attendees') {
             return;
         }
-        
+
         // is there an attached wp_user for this attendee record?
         $user_id = EE_WPUsers::get_attendee_user($post->ID);
-        
+
         if (empty($user_id)) {
             return;
         }
-        
-        
+
+
         // let's get the WP_user and setup the link
         $url = get_edit_user_link($user_id);
-        
+
         // if $url is empty, that means logged in user does not have access to view user details so we bail.
         if (empty($url)) {
             return;
         }
-        
+
         // we HAVE url so let's assemble the item to display.
         ?>
         <div class="misc-pub-section">
             <span class="dashicons dashicons-wordpress"></span>
-            <a href="<?php echo $url; ?>" title="<?php  esc_html_e('Click to view WordPress user profile', 'event_espresso'); ?>"><?php  esc_html_e('WordPress User Profile', 'event_espresso'); ?></a>
+            <a href="<?php echo $url; ?>"
+               title="<?php esc_html_e('Click to view WordPress user profile', 'event_espresso'); ?>"
+            ><?php esc_html_e('WordPress User Profile', 'event_espresso'); ?></a>
         </div>
         <?php
     }
@@ -231,39 +234,40 @@ class EED_WP_Users_Admin extends EED_Module
      * @return string
      * @throws DomainException
      * @throws EE_Error
+     * @throws ReflectionException
      */
     public static function view_registrations_for_contact($user)
     {
         if (! $user instanceof WP_User) {
             return '';
         }
-        
+
         // is there an attadched EE_Attendee?
         $att_id = get_user_option('EE_Attendee_ID', $user->ID);
-        
+
         if (empty($att_id)) {
             return ''; // bail, no attached attendee_id.
         }
-        
+
         // grab contact
         $contact = EEM_Attendee::instance()->get_one_by_ID($att_id);
-        
+
         // if no contact then bail
         if (! $contact instanceof EE_Attendee) {
             return '';
         }
-        
-        $template_args = array(
+
+        $template_args = [
             'attendee'      => $contact,
-            'registrations' => $contact->get_many_related('Registration')
-        );
+            'registrations' => $contact->get_many_related('Registration'),
+        ];
         EEH_Template::display_template(
             EE_WPUSERS_TEMPLATE_PATH . 'eea-wp-users-registrations-table.template.php',
             $template_args
         );
     }
-    
-    
+
+
     /**
      * callback for edit_user_profile that is used to add link to the EE_Attendee
      * details if there is one attached to the user.
@@ -275,35 +279,46 @@ class EED_WP_Users_Admin extends EED_Module
         if (! $user instanceof WP_User) {
             return;
         }
-        
+
         // is there an attached EE_Attendee?
         $att_id = get_user_option('EE_Attendee_ID', $user->ID);
-        
+
         if (empty($att_id)) {
             return; // bail, no attached attendee_id.
         }
-        
+
         // does logged in user have the capability to edit this attendee?
         if (! EE_Registry::instance()->CAP->current_user_can('ee_edit_contacts', 'edit_attendee', $att_id)) {
             return; // bail no access.
         }
-        
+
         // url
-        $url = admin_url(add_query_arg(array(
-            'page'   => 'espresso_registrations',
-            'action' => 'edit_attendee',
-            'post'   => $att_id
-        ), 'admin.php'));
+        $url = admin_url(
+            add_query_arg(
+                [
+                    'page'   => 'espresso_registrations',
+                    'action' => 'edit_attendee',
+                    'post'   => $att_id,
+                ],
+                'admin.php'
+            )
+        );
         ?>
-        <table class="form-table">
+        <table class="ee-admin-two-column-layout form-table">
             <tr class="ee-wpuser-integration-row">
                 <th></th>
                 <td>
                     <p>
-                        <?php  esc_html_e('When you save this user profile, the details will be synced with the attached Event Espresso Contact', 'event_espresso'); ?>
+                        <?php esc_html_e(
+                            'When you save this user profile, the details will be synced with the attached Event Espresso Contact',
+                            'event_espresso'
+                        ); ?>
                     </p>
                     <p>
-                        <a class="button button-secondary" href="<?php echo $url; ?>" title="<?php  esc_html_e('Click to go to Attendee Details', 'event_espresso'); ?>"><?php  esc_html_e('View Linked Contact', 'event_espresso'); ?></a>
+                        <a class="button button-secondary"
+                           href="<?php echo $url; ?>"
+                           title="<?php esc_html_e('Click to go to Attendee Details', 'event_espresso'); ?>"
+                        ><?php esc_html_e('View Linked Contact', 'event_espresso'); ?></a>
                     </p>
                 </td>
             </tr>
@@ -326,30 +341,31 @@ class EED_WP_Users_Admin extends EED_Module
      *    - Yes -> update it.
      *    - No -> do the same as when we create user.
      *
-     * @since 1.0.0
-     * @param int      $user_id                        The id of the user that was just created/updated.
-     * @param WP_User|null $old_user_data                  Object container user's data prior to update.  If empty, then
+     * @param int          $user_id                    The id of the user that was just created/updated.
+     * @param WP_User|null $old_user_data              Object container user's data prior to update.  If empty, then
      *                                                 the user_register hook was fired.
      * @return void
      * @throws EE_Error
+     * @throws ReflectionException
+     * @since 1.0.0
      */
     public static function sync_with_contact($user_id, $old_user_data = null)
     {
         $user = get_userdata($user_id);
-        
+
         // creating?
         if (empty($old_user_data)) {
             self::_connect_wp_user_with_contact($user);
-            
+
             return;
         }
-        
+
         // if we make it here then we're updating an existing user
         $att_id = get_user_option('EE_Attendee_ID', $user->ID);
-        
+
         if (empty($att_id)) {
             self::_connect_wp_user_with_contact($user);
-            
+
             return;
         } else {
             // update the existing attendee attached to the wp_user!
@@ -362,7 +378,7 @@ class EED_WP_Users_Admin extends EED_Module
                 $att->save();
             }
         }
-        
+
         return;
     }
 
@@ -376,29 +392,30 @@ class EED_WP_Users_Admin extends EED_Module
      * @param array       $request_data The request data from the save.
      * @return void
      * @throws EE_Error
+     * @throws ReflectionException
      */
     public static function sync_with_wp_user(EE_Attendee $attendee, $request_data)
     {
         // is there a user for this attendee ID?
         $user_id = EE_WPUsers::get_attendee_user($attendee->ID());
-        
+
         if (empty($user_id)) {
             return;
         }
-        
+
         // made it here, so let's sync the main attendee details with the user account
         // remove the existing action for updates so that we don't cause recursion.
-        remove_action('profile_update', array('EED_WP_Users_Admin', 'sync_with_contact'));
+        remove_action('profile_update', ['EED_WP_Users_Admin', 'sync_with_contact']);
         wp_update_user(
-            array(
+            [
                 'ID'          => $user_id,
                 'first_name'  => $attendee->fname(),
                 'last_name'   => $attendee->lname(),
                 'user_email'  => $attendee->email(),
                 'description' => $attendee->get('ATT_bio'),
-            )
+            ]
         );
-        
+
         return;
     }
 
@@ -407,10 +424,11 @@ class EED_WP_Users_Admin extends EED_Module
      * This takes an incoming wp_user object and either connects it with an existing contact that
      * matches its details, or creates a new attendee and attaches.
      *
-     * @since 1.0.0
      * @param WP_User $user
      * @return EE_Attendee
      * @throws EE_Error
+     * @throws ReflectionException
+     * @since 1.0.0
      */
     protected static function _connect_wp_user_with_contact(WP_User $user)
     {
@@ -419,11 +437,11 @@ class EED_WP_Users_Admin extends EED_Module
         if ($att instanceof EE_Attendee && ! EE_WPUsers::get_attendee_user($att->ID())) {
             update_user_option($user->ID, 'EE_Attendee_ID', $att->ID());
         }
-        
+
         return $att;
     }
-    
-    
+
+
     /**
      * Using the given WP_User object, this method finds an EE_Attendee that matches email
      * address, first name, last name and returns if it exists.
@@ -431,15 +449,19 @@ class EED_WP_Users_Admin extends EED_Module
      * @param WP_User $user
      *
      * @return EE_Attendee|bool false if EE_Attendee does not exist.
+     * @throws EE_Error
+     * @throws ReflectionException
      */
     protected static function _find_existing_attendee_from_wpuser(WP_User $user)
     {
-        $existing_attendee = EE_Registry::instance()->load_model('Attendee')->find_existing_attendee(array(
-            'ATT_fname' => $user->first_name,
-            'ATT_lname' => $user->last_name,
-            'ATT_email' => $user->user_email
-        ));
-        
+        $existing_attendee = EE_Registry::instance()->load_model('Attendee')->find_existing_attendee(
+            [
+                'ATT_fname' => $user->first_name,
+                'ATT_lname' => $user->last_name,
+                'ATT_email' => $user->user_email,
+            ]
+        );
+
         return $existing_attendee instanceof EE_Attendee ? $existing_attendee : false;
     }
 
@@ -448,28 +470,31 @@ class EED_WP_Users_Admin extends EED_Module
      * This creates an EE_Attendee record using data from the given user and attaches that
      * EE_Attendee to the user.
      *
-     * @since 1.0.0
      * @param WP_User $user
      * @return EE_Attendee
      * @throws EE_Error
+     * @throws ReflectionException
+     * @since 1.0.0
      */
     protected static function _create_attendee_and_attach_wpuser(WP_User $user)
     {
-        $att = EE_Attendee::new_instance(array(
-            'ATT_fname' => $user->first_name,
-            'ATT_lname' => $user->last_name,
-            'ATT_email' => $user->user_email,
-            'ATT_bio'   => $user->user_description,
-        ));
+        $att = EE_Attendee::new_instance(
+            [
+                'ATT_fname' => $user->first_name,
+                'ATT_lname' => $user->last_name,
+                'ATT_email' => $user->user_email,
+                'ATT_bio'   => $user->user_description,
+            ]
+        );
         $att->save();
-        
+
         // attach to user
         update_user_option($user->ID, 'EE_Attendee_ID', $att->ID());
-        
+
         return $att;
     }
-    
-    
+
+
     /**
      * callback for FHEE__Extend_Registration_Form_Admin_Page__page_setup__page_routes.
      * Add additional routes for saving WP_User settings to the Registration Form admin page system
@@ -477,82 +502,86 @@ class EED_WP_Users_Admin extends EED_Module
      * @param array         $page_routes current array of page routes.
      * @param EE_Admin_Page $admin_page
      *
+     * @return array
      * @since 1.0.0
      *
-     * @return array
      */
     public static function add_wp_user_default_settings_route($page_routes, EE_Admin_Page $admin_page)
     {
-        $page_routes['wp_user_settings']        = array(
-            'func'       => array('EED_WP_Users_Admin', 'wp_user_settings'),
-            'args'       => array($admin_page),
-            'capability' => 'manage_options'
-        );
-        $page_routes['update_wp_user_settings'] = array(
-            'func'       => array('EED_WP_Users_Admin', 'update_wp_user_settings'),
-            'args'       => array($admin_page),
+        $page_routes['wp_user_settings']        = [
+            'func'       => ['EED_WP_Users_Admin', 'wp_user_settings'],
+            'args'       => [$admin_page],
             'capability' => 'manage_options',
-            'noheader'   => true
-        );
-        
+        ];
+        $page_routes['update_wp_user_settings'] = [
+            'func'       => ['EED_WP_Users_Admin', 'update_wp_user_settings'],
+            'args'       => [$admin_page],
+            'capability' => 'manage_options',
+            'noheader'   => true,
+        ];
+
         return $page_routes;
     }
-    
-    
+
+
     /**
      * callback for the wp_user_settings route.
      *
      * @param EE_Admin_Page $admin_page
      *
      * @return string html for displaying wp_user_settings.
+     * @throws EE_Error
+     * @throws ReflectionException
      */
     public static function wp_user_settings(EE_Admin_Page $admin_page)
     {
         $template_args['admin_page_content'] = self::_wp_user_settings_form()->get_html_and_js();
         $admin_page->set_add_edit_form_tags('update_wp_user_settings');
-        $admin_page->set_publish_post_box_vars(null, false, false, null, false);
+        $admin_page->set_publish_post_box_vars('', 0, '', '', false);
         $admin_page->set_template_args($template_args);
         $admin_page->display_admin_page_with_sidebar();
     }
-    
-    
+
+
     /**
      * This outputs the settings form for WP_User_integration.
      *
-     * @since 1.0.0
-     *
      * @return string html form.
+     * @throws EE_Error
+     * @throws ReflectionException
+     * @since 1.0.0
      */
     protected static function _wp_user_settings_form()
     {
         EE_Registry::instance()->load_helper('HTML');
         EE_Registry::instance()->load_helper('Template');
-        
+
         return new EE_Form_Section_Proper(
-            array(
+            [
                 'name'            => 'wp_user_settings_form',
                 'html_id'         => 'wp_user_settings_form',
                 'layout_strategy' => new EE_Div_Per_Section_Layout(),
                 'subsections'     => apply_filters(
                     'FHEE__EED_WP_Users_Admin___wp_user_settings_form__form_subsections',
-                    array(
+                    [
                         'main_settings_hdr' => new EE_Form_Section_HTML(
                             EEH_HTML::h3(
                                 esc_html__('WP User Integration Defaults', 'event_espresso')
                             )
                         ),
-                        'main_settings'     => EED_WP_Users_Admin::_main_settings()
-                    )
-                )
-            )
+                        'main_settings'     => EED_WP_Users_Admin::_main_settings(),
+                    ]
+                ),
+            ]
         );
     }
-    
-    
+
+
     /**
      * Output the main settings section for wp_user_integration settings page.
      *
      * @return string html form.
+     * @throws EE_Error
      */
     protected static function _main_settings()
     {
@@ -569,18 +598,18 @@ class EED_WP_Users_Admin extends EED_Module
                   '</a>'
               )
               . '</p></div>';
-        
+
         return new EE_Form_Section_Proper(
-            array(
+            [
                 'name'            => 'wp_user_settings_tbl',
                 'html_id'         => 'wp_user_settings_tbl',
                 'html_class'      => 'form-table',
                 'layout_strategy' => new EE_Admin_Two_Column_Layout(),
                 'subsections'     => apply_filters(
                     'FHEE__EED_WP_Users_Admin___main_settigns__form_subsections',
-                    array(
+                    [
                         'force_login'            => new EE_Yes_No_Input(
-                            array(
+                            [
                                 'html_label_text'         => esc_html__(
                                     'Default setting for Login Required on Registration',
                                     'event_espresso'
@@ -594,11 +623,11 @@ class EED_WP_Users_Admin extends EED_Module
                                 )
                                     ? EE_Registry::instance()->CFG->addons->user_integration->force_login
                                     : false,
-                                'display_html_label_text' => false
-                            )
+                                'display_html_label_text' => false,
+                            ]
                         ),
                         'registration_page'      => new EE_Text_Input(
-                            array(
+                            [
                                 'html_label_text'         => esc_html__(
                                     'Registration Page URL (if different from default WordPress Registration)',
                                     'event_espresso'
@@ -612,11 +641,11 @@ class EED_WP_Users_Admin extends EED_Module
                                 )
                                     ? EE_Registry::instance()->CFG->addons->user_integration->registration_page
                                     : '',
-                                'display_html_label_text' => true
-                            )
+                                'display_html_label_text' => true,
+                            ]
                         ),
                         'auto_create_user'       => new EE_Yes_No_Input(
-                            array(
+                            [
                                 'html_label_text'         => esc_html__(
                                     'Default setting for User Creation on Registration.',
                                     'event_espresso'
@@ -630,12 +659,12 @@ class EED_WP_Users_Admin extends EED_Module
                                 )
                                     ? EE_Registry::instance()->CFG->addons->user_integration->auto_create_user
                                     : false,
-                                'display_html_label_text' => false
-                            )
+                                'display_html_label_text' => false,
+                            ]
                         ),
                         'default_wp_user_role'   => new EE_Select_Input(
                             $wp_roles->get_names(),
-                            array(
+                            [
                                 'html_label_text'         => esc_html__(
                                     'Default role for User Creation on Registration.',
                                     'event_espresso'
@@ -649,11 +678,11 @@ class EED_WP_Users_Admin extends EED_Module
                                 )
                                     ? EE_Registry::instance()->CFG->addons->user_integration->default_wp_user_role
                                     : 'subscriber',
-                                'display_html_label_text' => false
-                            )
+                                'display_html_label_text' => false,
+                            ]
                         ),
                         'sync_user_with_contact' => new EE_Yes_No_Input(
-                            array(
+                            [
                                 'html_label_text'         => esc_html__(
                                     'Always sync contact information with WP user profile?',
                                     'event_espresso'
@@ -667,12 +696,12 @@ class EED_WP_Users_Admin extends EED_Module
                                 )
                                     ? EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact
                                     : true,
-                                'display_html_label_text' => false
-                            )
-                        )
-                    ) // end form subsections
+                                'display_html_label_text' => false,
+                            ]
+                        ),
+                    ] // end form subsections
                 ) // end apply_filters for form subsections
-            )
+            ]
         );
     }
 
@@ -694,7 +723,7 @@ class EED_WP_Users_Admin extends EED_Module
             if ($form->was_submitted()) {
                 // capture form data
                 $form->receive_form_submission();
-                
+
                 // validate_form_data
                 if ($form->is_valid()) {
                     $valid_data                     = $form->valid_data();
@@ -712,14 +741,14 @@ class EED_WP_Users_Admin extends EED_Module
         } catch (EE_Error $e) {
             $e->get_error();
         }
-        
+
         EE_Error::add_success(__('User Integration Settings updated.', 'event_espresso'));
         EE_Registry::instance()->CFG->update_config('addons', 'user_integration', $config);
         $admin_page->redirect_after_action(
             false,
             '',
             '',
-            array('action' => 'wp_user_settings'),
+            ['action' => 'wp_user_settings'],
             true
         );
     }
@@ -732,26 +761,27 @@ class EED_WP_Users_Admin extends EED_Module
      * @param array         $page_config current page config.
      * @param EE_Admin_Page $admin_page
      * @return array
-     * @throws DomainException
+     * @throws EE_Error
+     * @throws ReflectionException
      * @since  1.0.0
      */
     public static function add_wp_user_default_settings_config($page_config, EE_Admin_Page $admin_page)
     {
-        $page_config['wp_user_settings'] = array(
-            'nav'           => array(
+        $page_config['wp_user_settings'] = [
+            'nav'           => [
                 'label' => esc_html__('User Integration Settings', 'event_espresso'),
-                'order' => 50
-            ),
+                'order' => 50,
+            ],
             'require_nonce' => false,
-            'help_tabs'     => array(
-                'wp_user_settings_help_tab' => array(
+            'help_tabs'     => [
+                'wp_user_settings_help_tab' => [
                     'title'   => esc_html__('WP User Settings', 'event_espresso'),
-                    'content' => self::_settings_help_tab_content()
-                )
-            ),
-            'metaboxes'     => array('_publish_post_box', '_espresso_news_post_box', '_espresso_links_post_box')
-        );
-        
+                    'content' => self::_settings_help_tab_content(),
+                ],
+            ],
+            'metaboxes'     => ['_publish_post_box', '_espresso_news_post_box', '_espresso_links_post_box'],
+        ];
+
         return $page_config;
     }
 
@@ -760,15 +790,16 @@ class EED_WP_Users_Admin extends EED_Module
      * Callback for the WP Users Settings help tab content as set in the page_config array
      *
      * @return string
-     * @throws DomainException
+     * @throws EE_Error
+     * @throws ReflectionException
      */
     protected static function _settings_help_tab_content()
     {
         EE_Registry::instance()->load_helper('Template');
-        
+
         return EEH_Template::display_template(
             EE_WPUSERS_TEMPLATE_PATH . 'settings_help_tab.help_tab.php',
-            array(),
+            [],
             true
         );
     }
@@ -781,22 +812,24 @@ class EED_WP_Users_Admin extends EED_Module
      * @param array         $page_config current page config
      * @param EE_Admin_Page $admin_page
      * @return array
-     * @throws DomainException
+     * @throws EE_Error
+     * @throws ReflectionException
      * @since 1.0.0
      */
     public static function add_ticket_capability_help_tab($page_config, EE_Admin_Page $admin_page)
     {
         EE_Registry::instance()->load_helper('Template');
-        $file = EE_WPUSERS_TEMPLATE_PATH . 'ticket_capability_help_content.template.php';
-        $page_config['create_new']['help_tabs']['ticket_capability_info'] = array(
+        $file                                                             =
+            EE_WPUSERS_TEMPLATE_PATH . 'ticket_capability_help_content.template.php';
+        $page_config['create_new']['help_tabs']['ticket_capability_info'] = [
             'title'   => esc_html__('Ticket Capability Restrictions', 'event_espresso'),
-            'content' => EEH_Template::display_template($file, array(), true)
-        );
-        $page_config['edit']['help_tabs']['ticket_capability_info']       = array(
+            'content' => EEH_Template::display_template($file, [], true),
+        ];
+        $page_config['edit']['help_tabs']['ticket_capability_info']       = [
             'title'   => esc_html__('Ticket Capability Restrictions', 'event_espresso'),
-            'content' => EEH_Template::display_template($file, array(), true)
-        );
-        
+            'content' => EEH_Template::display_template($file, [], true),
+        ];
+
         return $page_config;
     }
 
@@ -808,6 +841,7 @@ class EED_WP_Users_Admin extends EED_Module
      * @param array   $metabox metabox arguments
      * @return string html for metabox content.
      * @throws EE_Error
+     * @throws ReflectionException
      */
     public static function event_editor_metabox($post, $metabox)
     {
@@ -822,6 +856,7 @@ class EED_WP_Users_Admin extends EED_Module
      * @param $post
      * @return EE_Form_Section_Proper
      * @throws EE_Error
+     * @throws ReflectionException
      */
     protected static function _get_event_editor_wp_users_form($post)
     {
@@ -829,29 +864,32 @@ class EED_WP_Users_Admin extends EED_Module
         $evt_id = $post instanceof EE_Event ? $post->ID() : null;
         $evt_id = empty($evt_id) && isset($post->ID) ? $post->ID : 0;
         EE_Registry::instance()->load_helper('HTML');
-        
+
         return new EE_Form_Section_Proper(
-            array(
+            [
                 'name'            => 'wp_user_event_settings_form',
                 'html_id'         => 'wp_user_event_settings_form',
                 'layout_strategy' => new EE_Div_Per_Section_Layout(),
                 'subsections'     => apply_filters(
                     'FHEE__EED_WP_Users_Admin__event_editor_metabox__wp_user_form_content',
-                    array(
+                    [
                         'force_login'              => new EE_Yes_No_Input(
-                            array(
-                                'html_label_text'         => esc_html__('Force Login for registrations?', 'event_espresso'),
+                            [
+                                'html_label_text'         => esc_html__(
+                                    'Force Login for registrations?',
+                                    'event_espresso'
+                                ),
                                 'html_help_text'          => esc_html__(
                                     'If yes, then all people registering for this event must login before they can register',
                                     'event_espresso'
                                 ),
                                 'default'                 => EE_WPUsers::is_event_force_login($evt_id),
-                                'display_html_label_text' => true
-                            )
+                                'display_html_label_text' => true,
+                            ]
                         ),
                         'spacing1'                 => new EE_Form_Section_HTML('<br>'),
                         'auto_user_create'         => new EE_Yes_No_Input(
-                            array(
+                            [
                                 'html_label_text'         => esc_html__(
                                     'Auto Create users with registrations?',
                                     'event_espresso'
@@ -861,13 +899,13 @@ class EED_WP_Users_Admin extends EED_Module
                                     'event_espresso'
                                 ),
                                 'default'                 => EE_WPUsers::is_auto_user_create_on($evt_id),
-                                'display_html_label_text' => true
-                            )
+                                'display_html_label_text' => true,
+                            ]
                         ),
                         'spacing2'                 => new EE_Form_Section_HTML('<br>'),
                         'default_user_create_role' => new EE_Select_Input(
                             $wp_roles->get_names(),
-                            array(
+                            [
                                 'html_label_text'         => esc_html__(
                                     'Default role for auto-created users:',
                                     'event_espresso'
@@ -877,15 +915,16 @@ class EED_WP_Users_Admin extends EED_Module
                                     'event_espresso'
                                 ),
                                 'default'                 => EE_WPUsers::default_user_create_role($evt_id),
-                                'display_html_label_text' => true
-                            )
+                                'display_html_label_text' => true,
+                            ]
                         ),
-                    )
-                )
-            )
+                    ]
+                ),
+            ]
         );
     }
-    
+
+
     /**
      * Callback for FHEE__EED_WP_Users_Admin__event_editor_metabox__wp_user_form_content.
      * Limit the Default role for auto-created users option to roles with manage_options cap.
@@ -899,21 +938,22 @@ class EED_WP_Users_Admin extends EED_Module
         if (! current_user_can('manage_options')) {
             unset($array['default_user_create_role']);
         }
-        
+
         return $array;
     }
+
 
     /**
      * callback for FHEE__Events_Admin_Page___insert_update_cpt_item__event_update_callbacks
      * Set the callback for updating wp_user_settings on event update.
      *
-     * @param  array $callbacks existing array of callbacks.
+     * @param array $callbacks existing array of callbacks.
      * @return array
      */
     public static function set_callback_save_wp_user_event_setting($callbacks)
     {
-        $callbacks[] = array('EED_WP_Users_Admin', 'save_wp_user_event_setting');
-        
+        $callbacks[] = ['EED_WP_Users_Admin', 'save_wp_user_event_setting'];
+
         return $callbacks;
     }
 
@@ -934,7 +974,7 @@ class EED_WP_Users_Admin extends EED_Module
             $form = self::_get_event_editor_wp_users_form($event);
             if ($form->was_submitted()) {
                 $form->receive_form_submission();
-                
+
                 if ($form->is_valid()) {
                     $valid_data = $form->valid_data();
                     EE_WPUsers::update_event_force_login($event, $valid_data['force_login']);
@@ -946,20 +986,20 @@ class EED_WP_Users_Admin extends EED_Module
             } else {
                 if ($form->submission_error_message() != '') {
                     EE_Error::add_error($form->submission_error_message(), __FILE__, __FUNCTION__, __LINE__);
-                    
+
                     return false;
                 }
             }
         } catch (EE_Error $e) {
             $e->get_error();
         }
-        
+
         EE_Error::add_success(__('User Integration Event Settings updated.', 'event_espresso'));
-        
+
         return true;
     }
-    
-    
+
+
     /**
      * Callback for FHEE__EE_Admin_Page___publish_post_box__box_label.
      * Used to change the label to something more descriptive for the WP_Users settings page.
@@ -975,7 +1015,7 @@ class EED_WP_Users_Admin extends EED_Module
         if ($route == 'wp_user_settings') {
             $box_label = esc_html__('Update Settings', 'event_espresso');
         }
-        
+
         return $box_label;
     }
 
@@ -984,12 +1024,13 @@ class EED_WP_Users_Admin extends EED_Module
      * Callback for AHEE__event_tickets_datetime_ticket_row_template__advanced_details_end.
      * This is used to add the form to the tickets for the capabilities.
      *
-     * @since 1.0.0
      * @param string|int $tkt_row                  This will either be the ticket row number for an existing ticket or
      *                                             'TICKETNUM' for ticket skeleton.
      * @param int        $TKT_ID                   The id for a Ticket or 0 (which is not for any ticket)
      * @return string form for capabilities required.
      * @throws EE_Error
+     * @throws ReflectionException
+     * @since 1.0.0
      */
     public static function insert_ticket_meta_interface($tkt_row, $TKT_ID)
     {
@@ -1001,28 +1042,29 @@ class EED_WP_Users_Admin extends EED_Module
     /**
      * Form generator for capability field on tickets.
      *
-     * @since 1.0.0
-     * @see   EED_WP_Users_Admin::insert_ticket_meta_interface for params documentation
      * @param $tkt_row
      * @param $TKT_ID
      * @return string
      * @throws EE_Error
+     * @throws ReflectionException
+     * @since 1.0.0
+     * @see   EED_WP_Users_Admin::insert_ticket_meta_interface for params documentation
      */
     protected static function _get_ticket_capability_required_form($tkt_row, $TKT_ID)
     {
         $ticket      = EE_Registry::instance()->load_model('Ticket')->get_one_by_ID($TKT_ID);
         $current_cap = $ticket instanceof EE_Ticket ? $ticket->get_extra_meta('ee_ticket_cap_required', true, '') : '';
-        
+
         EE_Registry::instance()->load_helper('HTML');
-        
+
         return new EE_Form_Section_Proper(
-            array(
+            [
                 'name'            => 'wp-user-ticket-capability-container-' . $tkt_row,
                 'html_class'      => 'wp-user-ticket-capability-container',
                 'layout_strategy' => new EE_Div_Per_Section_Layout(),
                 'subsections'     => apply_filters(
                     'FHEE__EED_WP_Users_Admin___get_ticket_capability_required_form__form_subsections',
-                    array(
+                    [
                         'ticket_capability_hdr-' . $tkt_row => new EE_Form_Section_HTML(
                             EEH_HTML::h5(
                                 esc_html__('Ticket Capability Requirement', 'event_espresso')
@@ -1032,7 +1074,7 @@ class EED_WP_Users_Admin extends EED_Module
                             )
                         ),
                         'TKT_capability'                    => new EE_Text_Input(
-                            array(
+                            [
                                 'html_class'              => 'TKT-capability',
                                 'html_name'               => 'wp_user_ticket_capability_input['
                                                              . $tkt_row
@@ -1042,12 +1084,12 @@ class EED_WP_Users_Admin extends EED_Module
                                     'event_espresso'
                                 ),
                                 'default'                 => $current_cap,
-                                'display_html_label_text' => true
-                            )
-                        )
-                    ) // end EE_Form_Section_Proper subsections
+                                'display_html_label_text' => true,
+                            ]
+                        ),
+                    ] // end EE_Form_Section_Proper subsections
                 ) // end subsections apply_filters
-            ) // end  main EE_Form_Section_Proper options array
+            ] // end  main EE_Form_Section_Proper options array
         ); // end EE_Form_Section_Proper
     }
 
@@ -1061,7 +1103,8 @@ class EED_WP_Users_Admin extends EED_Module
      * @param int               $tkt_row         The ticket row this ticket corresponds with (used for knowing
      *                                           what form element to retrieve from).
      * @param array | EE_Ticket $tkt_form_data   The original incoming ticket form data OR the original created
-     *                                           EE_Ticket from that form data depending on which hook this callback is called on.
+     *                                           EE_Ticket from that form data depending on which hook this callback is
+     *                                           called on.
      * @param array             $all_form_data   All incoming form data for ticket editor (includes datetime data)
      * @return void This is an action callback so returns are ignored.
      * @throws EE_Error
@@ -1091,13 +1134,14 @@ class EED_WP_Users_Admin extends EED_Module
      *
      * @param EE_Base_Class $model_object
      * @throws EE_Error
+     * @throws ReflectionException
      */
     public static function remove_relations_on_delete(EE_Base_Class $model_object)
     {
         if ($model_object instanceof EE_Event) {
             delete_post_meta($model_object->ID(), 'ee_wpuser_integration_settings');
         }
-        
+
         if ($model_object instanceof EE_Ticket) {
             $model_object->delete_extra_meta('ee_ticket_cap_required');
         }
@@ -1111,6 +1155,7 @@ class EED_WP_Users_Admin extends EED_Module
      * @param EE_Event $new_event
      * @param EE_Event $old_event
      * @throws EE_Error
+     * @throws ReflectionException
      */
     public static function duplicate_user_settings_for_event(EE_Event $new_event, EE_Event $old_event)
     {
@@ -1127,14 +1172,17 @@ class EED_WP_Users_Admin extends EED_Module
      * @param EE_Ticket $original_ticket
      * @param EE_Ticket $new_ticket
      * @throws EE_Error
+     * @throws ReflectionException
      */
     public static function set_capability_on_new_duplicated_ticket(EE_Ticket $original_ticket, EE_Ticket $new_ticket)
     {
-        if ($custom_capability = $original_ticket->get_extra_meta(
-            'ee_ticket_cap_required',
-            true,
-            ''
-        )) {
+        if (
+            $custom_capability = $original_ticket->get_extra_meta(
+                'ee_ticket_cap_required',
+                true,
+                ''
+            )
+        ) {
             $new_ticket->update_extra_meta('ee_ticket_cap_required', $custom_capability);
         }
     }

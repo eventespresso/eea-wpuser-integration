@@ -14,7 +14,6 @@ use EventEspresso\core\domain\DomainBase;
  */
 class Domain extends DomainBase
 {
-
     const NAME = 'wpUser';
 
     /**

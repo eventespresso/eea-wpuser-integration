@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file contains the Dat Migration Script for WP Users addon version 2.0.0
  *
@@ -6,9 +7,6 @@
  * @package  EE WP Users Addon
  * @subpackage dms
  */
-if (! defined('EVENT_ESPRESSO_VERSION')) {
-    exit('No direct script access allowed');
-}
 /**
  *
  * WP Users Integration Addon Data Migration Script
@@ -23,7 +21,6 @@ if (! defined('EVENT_ESPRESSO_VERSION')) {
  */
 class EE_DMS_EE_WPUsers_2_0_0 extends EE_Data_Migration_Script_Base
 {
-
     public function __construct()
     {
         $this->_pretty_name = __("Data Migration to WP Users Integration 2.0.0.", "event_espresso");
@@ -54,7 +51,8 @@ class EE_DMS_EE_WPUsers_2_0_0 extends EE_Data_Migration_Script_Base
 
         if (! $version_string || ! $has_records) {
             return false;
-        } elseif (version_compare($version_string, '2.0.0', '<=')
+        } elseif (
+            version_compare($version_string, '2.0.0', '<=')
             && version_compare($version_string, '1.0.0', '>=')
         ) {
                 return true;

@@ -15,7 +15,6 @@ use RuntimeException;
  */
 class WpUserLogInRequiredException extends RuntimeException
 {
-
     /**
      * InvalidFormSubmissionException constructor
      *

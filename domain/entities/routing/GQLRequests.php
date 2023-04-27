@@ -14,7 +14,6 @@ use EventEspresso\WpUser\domain\services\graphql\RegisterSchema;
  */
 class GQLRequests extends CoreGQLRequests
 {
-
     protected function registerDependencies()
     {
     }

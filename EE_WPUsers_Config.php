@@ -19,7 +19,6 @@
  */
 class EE_WPUsers_Config extends EE_Config_Base
 {
-
     /**
      * Global default setting for whether login is required to register for an event.
      *

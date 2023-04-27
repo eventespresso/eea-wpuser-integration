@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This is the template for EE WPUsers addon login form.
  */

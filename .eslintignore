@@ -1,9 +1,0 @@
-assets/dist
-node_modules
-acceptance_tests
-application
-domain
-views
-languages
-wp-assets
-coverage

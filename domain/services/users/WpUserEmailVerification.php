@@ -23,7 +23,6 @@ use WP_User;
  */
 class WpUserEmailVerification
 {
-
     /**
      * the provided email address does not belong to any registered users
      */
@@ -52,7 +51,8 @@ class WpUserEmailVerification
      */
     public function validateUserEmailVerificationOption($user_email_verification)
     {
-        if (empty($user_email_verification)
+        if (
+            empty($user_email_verification)
             || ! in_array(
                 $user_email_verification,
                 array(

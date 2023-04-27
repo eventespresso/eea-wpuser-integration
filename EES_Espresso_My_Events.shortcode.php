@@ -1,4 +1,5 @@
 <?php
+
 /**
  * [ESPRESSO_MY_EVENTS] shortcode class
  *
@@ -10,8 +11,6 @@
  */
 class EES_Espresso_My_Events extends EES_Shortcode
 {
-
-
     public function run(WP $WP)
     {
         // if fallback processor is running then this shortcode is running in an unsupported area
@@ -140,10 +139,10 @@ class EES_Espresso_My_Events extends EES_Shortcode
      * [ESPRESSO_MY_EVENTS per_page=10] - use this to indicate the number of records per page shown ("records" is
      *                                    dependent on template being generated.
      *
-     * @param array $attributes see description above for current available attributes.
+     * @param array|string $attributes
      * @return string
      */
-    public function process_shortcode($attributes = array())
+    public function process_shortcode($attributes = []): string
     {
         // if fallback processor is running, then let's exit because this is currently unsupported
         if (apply_filters('FHEE__fallback_shortcode_processor__EES_Espresso_Events', false)) {
@@ -339,7 +338,8 @@ class EES_Espresso_My_Events extends EES_Shortcode
             $template_info['template'] = $template_slug;
             // next verify that there is an object type and that it matches one of the EE models used for querying.
             $accepted_object_types = array('Event', 'Registration');
-            if (isset($template_object_map[ $template_slug ]['object_type']) &&
+            if (
+                isset($template_object_map[ $template_slug ]['object_type']) &&
                 in_array($template_object_map[ $template_slug ]['object_type'], $accepted_object_types)
             ) {
                 // next verify that the path for the template is valid
@@ -377,10 +377,12 @@ class EES_Espresso_My_Events extends EES_Shortcode
         );
 
         // required values available?
-        if (empty($template_args)
+        if (
+            empty($template_args)
             || empty($template_args['object_type'])
             || empty($template_args['per_page'])
-            || empty($template_args['page'])) {
+            || empty($template_args['page'])
+        ) {
             return $object_info; // need info yo.
         }
 

@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Template for the "simple_list_table" content template for the [ESPRESSO_MY_EVENTS] shortcode
  *
  * Available template args:
  * @type    $registration EE_Registration registration object
  */
+
 ?>
 <tr>
     <td class="ee-status-strip reg-status-<?php echo $registration->status_ID(); ?>"></td>
@@ -49,9 +51,11 @@
             array( 'token' => $registration->reg_url_link(), 'resend' => true ),
             null
         );
-        if ($registration->is_primary_registrant() ||
-             ( ! $registration->is_primary_registrant()
-               && $registration->status_ID() === EEM_Registration::status_id_approved )) {
+        if (
+            $registration->is_primary_registrant() ||
+             ( ! $registration->is_primary_registrant() &&
+               $registration->status_ID() === EEM_Registration::status_id_approved )
+        ) {
             $actions['resend_registration'] = '<a aria-label="' . $link_to_resend_registration_message_text
                                               . '" title="' . $link_to_resend_registration_message_text
                                               . '" href="' . $resend_registration_link . '">'
@@ -59,9 +63,11 @@
         }
 
         // make payment?
-        if ($registration->is_primary_registrant()
+        if (
+            $registration->is_primary_registrant()
              && $registration->transaction() instanceof EE_Transaction
-             && $registration->transaction()->remaining()) {
+             && $registration->transaction()->remaining()
+        ) {
             $actions['make_payment'] = '<a aria-label="' . $link_to_make_payment_text
                                        . '" title="' . $link_to_make_payment_text
                                        . '" href="' . $registration->payment_overview_url() . '">'

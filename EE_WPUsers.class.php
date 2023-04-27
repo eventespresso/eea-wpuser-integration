@@ -11,7 +11,6 @@ use EventEspresso\core\services\routing\RouteHandler;
  */
 class EE_WPUsers extends EE_Addon
 {
-
     /**
      * Set up
      *

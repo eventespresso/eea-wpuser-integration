@@ -1,4 +1,5 @@
 <?php
+
  /**
  *
  * Class EE_SPCO_Reg_Step_WP_User_Login
@@ -13,8 +14,6 @@
  */
 class EE_SPCO_Reg_Step_WP_User_Login extends EE_SPCO_Reg_Step
 {
-
-
     /**
      * constructor
      *

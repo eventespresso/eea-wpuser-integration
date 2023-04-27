@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Template for the "event_section" content template for each ticket/registration row via [ESPRESSO_MY_EVENTS] shortcode
  * Available template args:
  *
  * @type $registration EE_Registration registration object
  */
+
 $ticket = $registration->ticket();
 ?>
 <tr>
@@ -35,9 +37,10 @@ $ticket = $registration->ticket();
             array('token' => $registration->reg_url_link(), 'resend' => true),
             null
         );
-        if ($registration->is_primary_registrant() ||
-            (! $registration->is_primary_registrant()
-             && $registration->status_ID() === EEM_Registration::status_id_approved)
+        if (
+            $registration->is_primary_registrant() ||
+            (! $registration->is_primary_registrant() &&
+             $registration->status_ID() === EEM_Registration::status_id_approved)
         ) {
             $actions['resend_registration'] = '<a aria-label="'
                 . $link_to_resend_registration_message_text
@@ -47,9 +50,11 @@ $ticket = $registration->ticket();
         }
 
         // make payment?
-        if ($registration->is_primary_registrant()
+        if (
+            $registration->is_primary_registrant()
             && $registration->transaction() instanceof EE_Transaction
-            && $registration->transaction()->remaining()) {
+            && $registration->transaction()->remaining()
+        ) {
             $actions['make_payment'] = '<a aria-label="' . $link_to_make_payment_text
                                        . '" title="' . $link_to_make_payment_text
                                        . '" href="' . $registration->payment_overview_url() . '">'

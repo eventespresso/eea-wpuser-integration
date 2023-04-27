@@ -1,14 +1,10 @@
 <?php
 
-if (! defined('ABSPATH')) {
-    exit('No direct script access allowed');
-}
-
 /*
-  Plugin Name:  Event Espresso - WP Users (EE4.6+)
+  Plugin Name:  Event Espresso - WordPress Users Integration (EE4.6+)
   Plugin URI:  http://www.eventespresso.com
-  Description: This adds the WP Users integration.
-  Version: 2.1.1.rc.005
+  Description: Integrates Event Espresso with WordPress Users.
+  Version: 2.1.1.rc.004
   Author: Event Espresso
   Author URI: http://www.eventespresso.com
   License: GPLv2
@@ -37,7 +33,8 @@ if (! defined('ABSPATH')) {
  * @package      EE WPUsers
  *
  */
-define('EE_WPUSERS_VERSION', '2.1.1.rc.005');
+
+define('EE_WPUSERS_VERSION', '2.1.1.rc.004');
 define('EE_WPUSERS_MIN_CORE_VERSION_REQUIRED', '4.11.0.rc.001');
 define('EE_WPUSERS_PLUGIN_FILE', __FILE__);
 
@@ -45,7 +42,8 @@ define('EE_WPUSERS_PLUGIN_FILE', __FILE__);
 function load_ee_core_wpusers()
 {
     static $loaded = false;
-    if (! $loaded
+    if (
+        ! $loaded
         && class_exists('EE_Addon')
         && class_exists('EventEspresso\core\domain\DomainBase')
     ) {

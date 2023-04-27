@@ -21,7 +21,6 @@ use EventEspresso\core\domain\services\registration\form\v1\RegFormHandler;
  */
 class EED_WP_Users_SPCO extends EED_Module
 {
-
     /**
      * All frontend hooks.
      */
@@ -69,7 +68,7 @@ class EED_WP_Users_SPCO extends EED_Module
             4
         );
         add_filter(
-            'FHEE_EE_Single_Page_Checkout__save_registration_items__find_existing_attendee',
+            'FHEE_EventEspresso_core_domain_services_commands_attendee_CreateAttendeeCommandHandler__findExistingAttendee__existing_attendee',
             ['EED_WP_Users_SPCO', 'maybe_sync_existing_attendee'],
             10,
             3
@@ -131,7 +130,7 @@ class EED_WP_Users_SPCO extends EED_Module
                 4
             );
             add_filter(
-                'FHEE_EE_Single_Page_Checkout__save_registration_items__find_existing_attendee',
+                'FHEE_EventEspresso_core_domain_services_commands_attendee_CreateAttendeeCommandHandler__findExistingAttendee__existing_attendee',
                 ['EED_WP_Users_SPCO', 'maybe_sync_existing_attendee'],
                 10,
                 3
@@ -184,10 +183,12 @@ class EED_WP_Users_SPCO extends EED_Module
     protected static function _add_user_registration_route_hooks()
     {
         // do auto login after registration of new user
-        if (! has_action(
-            'register_new_user',
-            ['EED_WP_Users_SPCO', 'auto_login_registered_user']
-        )) {
+        if (
+            ! has_action(
+                'register_new_user',
+                ['EED_WP_Users_SPCO', 'auto_login_registered_user']
+            )
+        ) {
             add_action('register_new_user', ['EED_WP_Users_SPCO', 'auto_login_registered_user']);
             add_action('register_form', ['EED_WP_Users_SPCO', 'add_auto_login_parameter']);
         }
@@ -278,7 +279,8 @@ class EED_WP_Users_SPCO extends EED_Module
         EE_Registration $registration,
         EE_Question_Group $question_group
     ) {
-        if ((
+        if (
+            (
                 ! is_user_logged_in()
                 || (
                     is_user_logged_in()
@@ -514,7 +516,8 @@ class EED_WP_Users_SPCO extends EED_Module
                      * responses, then they will need to also filter the stop_processing param at the end of this
                      * method to return true;
                      */
-                    if (! empty($form_inputs['email'])
+                    if (
+                        ! empty($form_inputs['email'])
                         && apply_filters(
                             'EED_WP_Users_SPCO__verify_user_access__perform_email_user_match_check',
                             true,
@@ -662,7 +665,8 @@ class EED_WP_Users_SPCO extends EED_Module
         $event_creates_user = false;
         if ($registrations) {
             foreach ($registrations as $registration) {
-                if ($reg_step->checkout->visit_allows_processing_of_this_registration($registration)
+                if (
+                    $reg_step->checkout->visit_allows_processing_of_this_registration($registration)
                     && EE_WPUsers::is_auto_user_create_on($registration->event_ID())
                 ) {
                     $event_creates_user = true;
@@ -714,7 +718,7 @@ class EED_WP_Users_SPCO extends EED_Module
 
 
     /**
-     * This is the callback for FHEE_EE_Single_Page_Checkout__save_registration_items__find_existing_attendee
+     * This is the callback for FHEE_EventEspresso_core_domain_services_commands_attendee_CreateAttendeeCommandHandler__findExistingAttendee__existing_attendee
      * In this callback if the user is logged in and the registration being processed is the primary
      * registration, then we will make sure we're always updating the existing attendee record
      * attached to the wp_user regardless of what might have been detected by spco.
@@ -755,7 +759,8 @@ class EED_WP_Users_SPCO extends EED_Module
          * same email address.
          * Here we also skip the user sync if the EE_WPUsers_Config->sync_user_with_contact option is false
          */
-        if (! $att instanceof EE_Attendee
+        if (
+            ! $att instanceof EE_Attendee
             || ! EE_Registry::instance()->CFG->addons->user_integration->sync_user_with_contact
         ) {
             return $existing_attendee;
@@ -958,8 +963,8 @@ class EED_WP_Users_SPCO extends EED_Module
      * @since  1.0.0
      */
     public static function new_user_notifications(
-        WP_User         $user,
-        EE_Attendee     $attendee,
+        WP_User $user,
+        EE_Attendee $attendee,
         EE_Registration $registration,
         $password
     ) {
@@ -1233,7 +1238,8 @@ class EED_WP_Users_SPCO extends EED_Module
         $event_author = $event instanceof EE_Event ? $event->wp_user() : 0;
         $event_author = $event_author ? new WP_User($event_author) : null;
         $contact      = $registration instanceof EE_Registration ? $registration->attendee() : null;
-        if (! $registration instanceof EE_Registration
+        if (
+            ! $registration instanceof EE_Registration
             || ! $event_author instanceof WP_User
             || ! $contact instanceof EE_Attendee
         ) {

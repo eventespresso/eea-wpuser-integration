@@ -25,55 +25,54 @@ use EventEspresso\WpUser\domain\services\users\WpUserEmailVerification;
  */
 class EED_WP_Users_Ticket_Selector extends EED_Module
 {
-
-    const META_KEY_LOGIN_REQUIRED_NOTICE = 'login_required_notice';
+    public const META_KEY_LOGIN_REQUIRED_NOTICE = 'login_required_notice';
 
 
     public static function set_hooks()
     {
         add_filter(
             'FHEE__ticket_selector_chart_template__do_ticket_inside_row',
-            array('EED_WP_Users_Ticket_Selector', 'maybe_restrict_ticket_option_by_cap'),
+            ['EED_WP_Users_Ticket_Selector', 'maybe_restrict_ticket_option_by_cap'],
             10,
             9
         );
         // don't display Wait List form if login is required and current user isn't
         add_filter(
             'FHEE__EventEspresso_WaitList_domain_services_forms_WaitListForm__waitListFormOptions__form_options',
-            array('EED_WP_Users_Ticket_Selector', 'waitListFormNoticeSubsections'),
+            ['EED_WP_Users_Ticket_Selector', 'waitListFormNoticeSubsections'],
             10,
             5
         );
         // maybe display WP User related notices on the wait list form
         add_filter(
             'FHEE__EventEspresso_WaitList_domain_services_event_WaitListMonitor__getWaitListFormForEvent__redirect_params',
-            array('EED_WP_Users_Ticket_Selector', 'displayWaitListFormUserNotices'),
+            ['EED_WP_Users_Ticket_Selector', 'displayWaitListFormUserNotices'],
             10,
             2
         );
         // hook into wait list form submission to check for users
         add_filter(
             'FHEE__EventEspresso_core_libraries_form_sections_form_handlers_FormHandler__process__valid_data',
-            array('EED_WP_Users_Ticket_Selector', 'verifyWaitListUserAccess'),
+            ['EED_WP_Users_Ticket_Selector', 'verifyWaitListUserAccess'],
             10,
             2
         );
         // convert login required exceptions into user displayable notices
         add_filter(
             'FHEE__EventEspresso_WaitList_domain_services_event_WaitListMonitor__processWaitListFormForEvent__redirect_params',
-            array('EED_WP_Users_Ticket_Selector', 'catchWaitListWpUserLogInRequiredException'),
+            ['EED_WP_Users_Ticket_Selector', 'catchWaitListWpUserLogInRequiredException'],
             10,
             3
         );
         add_filter(
             'FHEE__EventEspresso_WaitList_domain_services_forms__WaitListFormHandler__generate__tickets',
-            array('EED_WP_Users_Ticket_Selector', 'checkWaitListTicketCaps'),
+            ['EED_WP_Users_Ticket_Selector', 'checkWaitListTicketCaps'],
             10,
             3
         );
         add_filter(
             'FHEE__EventEspresso_core_libraries_form_sections_form_handlers_FormHandler__process__valid_data',
-            array('EED_WP_Users_Ticket_Selector', 'checkSubmittedWaitListTicketCaps'),
+            ['EED_WP_Users_Ticket_Selector', 'checkSubmittedWaitListTicketCaps'],
             11,
             2
         );
@@ -97,17 +96,17 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
 
     /**
      * @return WpUserEmailVerification
-     * @throws EE_Error
      * @throws InvalidArgumentException
      * @throws InvalidInterfaceException
      * @throws InvalidDataTypeException
      */
-    protected static function getWpUserEmailVerification()
+    protected static function getWpUserEmailVerification(): WpUserEmailVerification
     {
         return LoaderFactory::getLoader()->getShared(
             'EventEspresso\WpUser\domain\services\users\WpUserEmailVerification'
         );
     }
+
 
     /**
      * Callback for FHEE__ticket_selector_chart_template__do_ticket_inside_row filter.
@@ -115,33 +114,34 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
      * ticket selector if the ticket has a required cap and the viewer does not have access to that ticket
      * option.
      *
-     * @param bool|string $return_value                        Either false, which means we're not doing anything
+     * @param bool|string  $return_value                       Either false, which means we're not doing anything
      *                                                         and let the ticket selector continue on its merry way,
-     *                                                         or a string if we're replacing what get's generated.
-     * @param EE_Ticket   $tkt
-     * @param int         $max                                 Max tickets purchasable
-     * @param int         $min                                 Min tickets purchasable
-     * @param bool|string $required_ticket_sold_out            Either false for tickets not sold out, or date.
-     * @param float       $ticket_price                        Ticket price
-     * @param bool        $ticket_bundle                       Is this a ticket bundle?
-     * @param string      $tkt_status                          The status for the ticket.
-     * @param string      $status_class                        The status class for the ticket.
+     *                                                         or a string if we're replacing what gets generated.
+     * @param EE_Ticket    $tkt
+     * @param int          $max                                Max tickets purchasable
+     * @param int          $min                                Min tickets purchasable
+     * @param bool|string  $required_ticket_sold_out           Either false for tickets not sold out, or date.
+     * @param float|string $ticket_price                       Ticket price
+     * @param bool         $ticket_bundle                      Is this a ticket bundle?
+     * @param string       $tkt_status                         The status for the ticket.
+     * @param string       $status_class                       The status class for the ticket.
      * @return bool|string    @see $return value.
      * @throws EE_Error
      * @throws InvalidArgumentException
      * @throws InvalidDataTypeException
      * @throws InvalidInterfaceException
+     * @throws ReflectionException
      */
     public static function maybe_restrict_ticket_option_by_cap(
         $return_value,
         EE_Ticket $tkt,
-        $max,
-        $min,
+        int $max,
+        int $min,
         $required_ticket_sold_out,
         $ticket_price,
-        $ticket_bundle,
-        $tkt_status,
-        $status_class
+        bool $ticket_bundle,
+        string $tkt_status,
+        string $status_class
     ) {
         if (EED_WP_Users_Ticket_Selector::ticketAvailableToUser($tkt)) {
             return false;
@@ -158,7 +158,7 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
             $tkt_status
         );
         $full_html_content .= $inner_message . '</td>';
-        $full_html_content = apply_filters(
+        return apply_filters(
             'FHEE__EED_WP_Users_Ticket_Selector__maybe_restrict_ticket_option_by_cap__no_access_msg_html',
             $full_html_content,
             $inner_message,
@@ -166,7 +166,6 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
             $ticket_price,
             $tkt_status
         );
-        return $full_html_content;
     }
 
 
@@ -177,8 +176,9 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
      * @throws InvalidArgumentException
      * @throws InvalidDataTypeException
      * @throws InvalidInterfaceException
+     * @throws ReflectionException
      */
-    public static function ticketAvailableToUser(EE_Ticket $ticket)
+    public static function ticketAvailableToUser(EE_Ticket $ticket): bool
     {
         // don't check caps if adding registrants via the admin
         if (! EE_FRONT_AJAX && is_admin()) {
@@ -201,13 +201,14 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
 
 
     /**
-     * @param EE_Ticket $ticket
-     * @param string    $ticket_price
-     * @param string    $ticket_status
+     * @param EE_Ticket    $ticket
+     * @param float|string $ticket_price
+     * @param string       $ticket_status
      * @return string
      * @throws EE_Error
+     * @throws ReflectionException
      */
-    private static function getMembersOnlyTicketMessage(EE_Ticket $ticket, $ticket_price, $ticket_status)
+    private static function getMembersOnlyTicketMessage(EE_Ticket $ticket, $ticket_price, string $ticket_status): string
     {
         return (string) apply_filters(
             'FHEE__EED_WP_Users_Ticket_Selector__maybe_restrict_ticket_option_by_cap__no_access_msg',
@@ -230,24 +231,22 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
 
 
     /**
-     * @param array        $subsections
-     * @param EE_Event     $event
-     * @param array        $tickets
-     * @param int          $wait_list_spaces_left
-     * @param WaitListForm $form
+     * @param array             $subsections
+     * @param EE_Event          $event
+     * @param array             $tickets
+     * @param int               $wait_list_spaces_left
+     * @param WaitListForm|null $form
      * @return array
      * @throws EE_Error
-     * @throws InvalidArgumentException
-     * @throws InvalidDataTypeException
-     * @throws InvalidInterfaceException
+     * @throws ReflectionException
      */
     public static function waitListFormNoticeSubsections(
         array $subsections,
         EE_Event $event,
         array $tickets,
-        $wait_list_spaces_left = 10,
-        WaitListForm $form
-    ) {
+        int $wait_list_spaces_left = 10,
+        ?WaitListForm $form = null
+    ): array {
         // login not required if adding registrants via the admin
         if (! EE_FRONT_AJAX && is_admin()) {
             return $subsections;
@@ -263,27 +262,25 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
      * Retrieves details for  the currently logged in user
      * and uses them to fill out the Wait List Sign Up form
      *
-     * @param array    $subsections
+     * @param array $subsections
      * @return array
      * @throws EE_Error
      * @throws InvalidArgumentException
      * @throws InvalidDataTypeException
      * @throws InvalidInterfaceException
      */
-    public static function autoFillFormWithUserInfo(array $subsections)
+    public static function autoFillFormWithUserInfo(array $subsections): array
     {
         $user = get_userdata(get_current_user_id());
         if (! $user instanceof WP_User) {
             return $subsections;
         }
-        if (isset($subsections['subsections']['hidden_inputs'])
+        if (
+            isset($subsections['subsections']['hidden_inputs'])
             && $subsections['subsections']['hidden_inputs'] instanceof EE_Form_Section_Proper
         ) {
             $sign_up_form = $subsections['subsections']['hidden_inputs'];
-            if (! $sign_up_form instanceof EE_Form_Section_Proper) {
-                return $subsections;
-            }
-            $inputs = $sign_up_form->subsections(false);
+            $inputs       = $sign_up_form->subsections(false);
             if (isset($inputs['registrant_name']) && $inputs['registrant_name'] instanceof EE_Text_Input) {
                 $inputs['registrant_name']->set_default($user->display_name);
             }
@@ -306,21 +303,23 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
      * @throws InvalidArgumentException
      * @throws InvalidDataTypeException
      * @throws InvalidInterfaceException
+     * @throws ReflectionException
      */
-    public static function loginRequiredWaitListFormNotice(array $subsections, EE_Event $event)
+    public static function loginRequiredWaitListFormNotice(array $subsections, EE_Event $event): array
     {
         // or event does not require login
         $user_integration_settings = $event->get_post_meta('ee_wpuser_integration_settings', true);
         if (! isset($user_integration_settings['force_login']) || ! $user_integration_settings['force_login']) {
             return $subsections;
         }
-        if (isset($subsections['subsections']['hidden_inputs'])
+        if (
+            isset($subsections['subsections']['hidden_inputs'])
             && $subsections['subsections']['hidden_inputs'] instanceof EE_Form_Section_Proper
         ) {
             /** @var EE_Form_Section_Proper $sign_up_form */
             $sign_up_form = $subsections['subsections']['hidden_inputs'];
             $sign_up_form->exclude(
-                array(
+                [
                     'wait_list_form_notice',
                     'registrant_name',
                     'registrant_email',
@@ -328,10 +327,10 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
                     'quantity',
                     'lb1',
                     'submit',
-                )
+                ]
             );
             $sign_up_form->add_subsections(
-                array(
+                [
                     'login_required' => new EE_Form_Section_HTML(
                         EED_WP_Users_Ticket_Selector::userLoginNoticeHeading(
                             esc_html__('Login Required', 'event_espresso'),
@@ -354,12 +353,13 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
                             new Url(get_permalink($event->ID()))
                         )
                     ),
-                ),
+                ],
                 'clear_submit'
             );
         }
         return $subsections;
     }
+
 
     /**
      * maybe display WP User related notices on the wait list form
@@ -368,8 +368,9 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
      * @param EE_Event $event
      * @return string
      * @throws EE_Error
+     * @throws ReflectionException
      */
-    public static function displayWaitListFormUserNotices($wait_list_form, EE_Event $event)
+    public static function displayWaitListFormUserNotices(string $wait_list_form, EE_Event $event): string
     {
         if (isset($_REQUEST[ EED_WP_Users_Ticket_Selector::META_KEY_LOGIN_REQUIRED_NOTICE ])) {
             $login_notice_id = sanitize_text_field(
@@ -405,8 +406,9 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
      * @throws InvalidInterfaceException
      * @throws UnexpectedEntityException
      * @throws DomainException
+     * @throws ReflectionException
      */
-    public static function verifyWaitListUserAccess(array $form_data, FormHandler $form_handler)
+    public static function verifyWaitListUserAccess(array $form_data, FormHandler $form_handler): array
     {
         // only process the wait list form
         if (! $form_handler instanceof WaitListFormHandler) {
@@ -429,8 +431,9 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
      * @param EE_Event $event
      * @return string
      * @throws EE_Error
+     * @throws ReflectionException
      */
-    private static function userLoginNoticeHeading($heading, Context $context, EE_Event $event)
+    private static function userLoginNoticeHeading(string $heading, Context $context, EE_Event $event): string
     {
         return EEH_HTML::h2(
             apply_filters(
@@ -449,14 +452,15 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
      * @param EmailAddress $wp_user_email_address
      * @param EE_Event     $event
      * @return string
-     * @throws \EventEspresso\core\domain\services\validation\email\EmailValidationException
+     * @throws EmailValidationException
      * @throws DomainException
      * @throws EE_Error
      * @throws InvalidArgumentException
      * @throws InvalidDataTypeException
      * @throws InvalidInterfaceException
+     * @throws ReflectionException
      */
-    private static function userLoginNotice(EmailAddress $wp_user_email_address, EE_Event $event)
+    private static function userLoginNotice(EmailAddress $wp_user_email_address, EE_Event $event): string
     {
         // LOGIN REQUIRED
         $login_required_message = EED_WP_Users_Ticket_Selector::userLoginNoticeHeading(
@@ -480,7 +484,7 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
             new Url(get_permalink($event->ID()))
         );
         // USER MISMATCH
-        $user_mismatch_message = EED_WP_Users_Ticket_Selector::userLoginNoticeHeading(
+        $user_mismatch_message      = EED_WP_Users_Ticket_Selector::userLoginNoticeHeading(
             esc_html__('Email Address Mismatch', 'event_espresso'),
             new Context(
                 WpUserEmailVerification::EMAIL_ADDRESS_REGISTERED_USER_MISMATCH,
@@ -488,7 +492,7 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
             ),
             $event
         );
-        $user_mismatch_message .= sprintf(
+        $user_mismatch_message      .= sprintf(
             esc_html__(
                 '%1$sYou have entered an email address that matches an existing user account in our system.%2$sYou can only join the Wait List using your own account or one that does not already exist.%2$sPlease use a different email address.%3$s',
                 'event_espresso'
@@ -501,9 +505,7 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
         return $wp_user_email_verification->getWpUserEmailVerificationNotice(
             $wp_user_email_verification->verifyWpUserEmailAddress($wp_user_email_address),
             $login_required_message,
-            $user_mismatch_message,
-            '',
-            ''
+            $user_mismatch_message
         );
     }
 
@@ -516,12 +518,13 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
      * @param EE_Event  $event
      * @return array
      * @throws EE_Error
+     * @throws ReflectionException
      */
     public static function catchWaitListWpUserLogInRequiredException(
         array $redirect_params,
         Exception $exception,
         EE_Event $event
-    ) {
+    ): array {
         if ($exception instanceof WpUserLogInRequiredException) {
             $login_notice_id = md5($event->ID() . $event->name() . time());
             $event->add_extra_meta($login_notice_id, $exception->getMessage(), true);
@@ -540,8 +543,9 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
      * @throws InvalidArgumentException
      * @throws InvalidDataTypeException
      * @throws InvalidInterfaceException
+     * @throws ReflectionException
      */
-    public static function checkWaitListTicketCaps(array $tickets, array $active_tickets, EE_Event $event)
+    public static function checkWaitListTicketCaps(array $tickets, array $active_tickets, EE_Event $event): array
     {
         foreach ($active_tickets as $active_ticket) {
             if (! EED_WP_Users_Ticket_Selector::ticketAvailableToUser($active_ticket)) {
@@ -573,8 +577,9 @@ class EED_WP_Users_Ticket_Selector extends EED_Module
      * @throws WpUserLogInRequiredException
      * @throws EE_Error
      * @throws InvalidArgumentException
+     * @throws ReflectionException
      */
-    public static function checkSubmittedWaitListTicketCaps(array $valid_form_data, FormHandler $form_handler)
+    public static function checkSubmittedWaitListTicketCaps(array $valid_form_data, FormHandler $form_handler): array
     {
         if (! $form_handler instanceof WaitListFormHandler) {
             return $valid_form_data;

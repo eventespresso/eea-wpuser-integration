@@ -1,7 +1,9 @@
 <?php
+
 /**
  * This is the template for the ticket capability help content
  */
+
 ?>
 <p><strong><?php _e('What is this field for?', 'event_espresso'); ?></strong></p>
 <p>

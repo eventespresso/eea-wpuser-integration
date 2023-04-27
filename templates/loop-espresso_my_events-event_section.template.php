@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Template for the "event_section" loop template for the [ESPRESSO_MY_EVENTS] shortcode
  * Available template args:
@@ -16,6 +17,7 @@
  * @type    string     $with_wrapper       Whether to include the wrapper containers or not.
  * @type    int        $att_id             Attendee ID all the displayed data belongs to.
  */
+
 $url             = EEH_URL::current_url();
 $pagination_html = EEH_Template::get_paging_html(
     $object_count,

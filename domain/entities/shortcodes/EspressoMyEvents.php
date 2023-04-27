@@ -1,4 +1,5 @@
 <?php
+
 namespace EventEspresso\WpUser\domain\entities\shortcodes;
 
 use EventEspresso\core\services\shortcodes\EspressoShortcode;
@@ -16,7 +17,6 @@ use WP_Query;
 
 class EspressoMyEvents extends EspressoShortcode
 {
-
     /**
      * Query argument key for indicating resending registration
      */
@@ -168,7 +168,7 @@ class EspressoMyEvents extends EspressoShortcode
      * IMPORTANT !!!
      * remember that shortcode content should be RETURNED and NOT echoed out
      *
-     * @param array $attributes
+     * @param array|string $attributes
      * @return string
      * @throws EE_Error
      */
@@ -365,7 +365,8 @@ class EspressoMyEvents extends EspressoShortcode
             $template_info['template'] = $template_slug;
             // next verify that there is an object type and that it matches one of the EE models used for querying.
             $accepted_object_types = array('Event', 'Registration');
-            if (isset($template_object_map[ $template_slug ]['object_type'], $template_object_map[ $template_slug ]['path'])
+            if (
+                isset($template_object_map[ $template_slug ]['object_type'], $template_object_map[ $template_slug ]['path'])
                 && in_array($template_object_map[ $template_slug ]['object_type'], $accepted_object_types, true)
             ) {
                 // yay made it here you awesome template object you.
@@ -426,10 +427,12 @@ class EspressoMyEvents extends EspressoShortcode
         );
 
         // required values available?
-        if (empty($template_arguments)
+        if (
+            empty($template_arguments)
             || empty($template_arguments['object_type'])
             || empty($template_arguments['per_page'])
-            || empty($template_arguments['page'])) {
+            || empty($template_arguments['page'])
+        ) {
             return $object_info; // need info yo.
         }
 

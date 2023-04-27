@@ -20,7 +20,6 @@ use ReflectionException;
  */
 class WpUserData extends JsonDataNode
 {
-
     const NODE_NAME = 'wpUserData';
 
     /**

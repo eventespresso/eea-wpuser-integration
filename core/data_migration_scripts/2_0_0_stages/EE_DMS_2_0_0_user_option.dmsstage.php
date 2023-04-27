@@ -12,7 +12,6 @@
  */
 class EE_DMS_2_0_0_user_option extends EE_Data_Migration_Script_Stage_Table
 {
-
     protected $_wp_user_meta_table;
 
     public function __construct()

@@ -20,7 +20,6 @@ use WPGraphQL\AppContext;
  */
 class RegisterSchema
 {
-
     /**
      * @return void
      * @since 2.1.0.p

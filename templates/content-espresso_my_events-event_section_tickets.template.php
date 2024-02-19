@@ -35,7 +35,6 @@ $ticket = $registration->ticket();
         // resend confirmation email.
         $resend_registration_link = add_query_arg(
             array('token' => $registration->reg_url_link(), 'resend' => true),
-            null
         );
         if (
             $registration->is_primary_registrant() ||

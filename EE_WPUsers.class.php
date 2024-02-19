@@ -106,7 +106,14 @@ class EE_WPUsers extends EE_Addon
      */
     public function additional_admin_hooks()
     {
-        if (is_admin() && ! EE_Maintenance_Mode::instance()->level()) {
+        // is admin and not in M-Mode ?
+        if (
+            is_admin()
+            && (
+                class_exists('EventEspresso\core\domain\services\database\MaintenanceStatus')
+                && EventEspresso\core\domain\services\database\MaintenanceStatus::isDisabled()
+            ) || ! EE_Maintenance_Mode::instance()->level()
+        ) {
             add_filter('plugin_action_links', [$this, 'plugin_actions'], 10, 2);
         }
     }

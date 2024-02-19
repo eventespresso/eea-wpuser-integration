@@ -1,17 +1,17 @@
 {
   "files": {
-    "wpUser.css": "/static/css/wpUser.7874be93.css",
-    "wpUser.js": "/static/js/wpUser.f1279319.js",
-    "wpUser.js.map": "/static/js/wpUser.f1279319.js.map",
-    "wpUser.php": "/static/js/wpUser.97505b2b.asset.php",
-    "static/css/wpUser.7874be93.css.map": "/static/css/wpUser.7874be93.css.map",
-    "static/js/wpUser.f1279319.js.LICENSE.txt": "/static/js/wpUser.f1279319.js.LICENSE.txt"
+    "wpUser.css": "/static/css/wpUser.4c5cc891.css",
+    "wpUser.js": "/static/js/wpUser.44e3921a.js",
+    "wpUser.js.map": "/static/js/wpUser.44e3921a.js.map",
+    "wpUser.php": "/static/js/wpUser.ad965817.asset.php",
+    "static/css/wpUser.4c5cc891.css.map": "/static/css/wpUser.4c5cc891.css.map",
+    "static/js/wpUser.44e3921a.js.LICENSE.txt": "/static/js/wpUser.44e3921a.js.LICENSE.txt"
   },
   "entrypoints": {
     "wpUser": [
-      "static/css/wpUser.7874be93.css",
-      "static/js/wpUser.f1279319.js",
-      "static/js/wpUser.97505b2b.asset.php"
+      "static/css/wpUser.4c5cc891.css",
+      "static/js/wpUser.44e3921a.js",
+      "static/js/wpUser.ad965817.asset.php"
     ]
   }
 }

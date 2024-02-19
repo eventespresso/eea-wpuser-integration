@@ -22,7 +22,7 @@ $registration_url = ! EE_Registry::instance()->CFG->addons->user_integration->re
             <?php if (get_option('users_can_register')) : ?>
                 <a class="wp_register_link" href="<?php echo $registration_url; ?>"><?php _e('Register', 'event_espresso'); ?></a>
             <?php endif; ?>
-            <input type="submit" name="wp-submit" class="button button-primary button-large wp-submit" value="<?php esc_attr_e('Log In', 'event_espresso'); ?>" />
+            <input type="submit" name="wp-submit" class="button button--primary button--big wp-submit" value="<?php esc_attr_e('Log In', 'event_espresso'); ?>" />
         </p>
     </form>
     <p><a href="<?php echo esc_url(wp_lostpassword_url()); ?>" title="<?php esc_attr_e('Password Lost and Found', 'event_espresso'); ?>"><?php _e('Lost your password?', 'event_espresso'); ?></a></p>

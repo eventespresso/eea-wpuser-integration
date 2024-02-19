@@ -63,7 +63,10 @@ $venue_content = [];
                  */
 
                 ?>
-                <?php echo esc_html(apply_filters('the_content', $event->description())); ?>
+                <?php echo wp_kses(
+                    apply_filters('the_content', $event->description()),
+                    AllowedTags::getAllowedTags()
+                ); ?>
             </section>
             <?php
             /**

@@ -20,4 +20,8 @@ class Domain extends DomainBase
      * EE Core Version Required for Add-on
      */
     const CORE_VERSION_REQUIRED = EE_WPUSERS_MIN_CORE_VERSION_REQUIRED;
+
+    public const LICENSE_PLUGIN_ID = 0;
+    public const LICENSE_PLUGIN_NAME = 'WordPress User Integration';
+    public const LICENSE_PLUGIN_SLUG = 'eea-wp-user-integration';
 }

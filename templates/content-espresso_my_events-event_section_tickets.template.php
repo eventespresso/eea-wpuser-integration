@@ -36,11 +36,12 @@ $ticket = $registration->ticket();
         $resend_registration_link = add_query_arg(
             array('token' => $registration->reg_url_link(), 'resend' => true),
         );
-        if (
-            $registration->is_primary_registrant() ||
-            (! $registration->is_primary_registrant() &&
-             $registration->status_ID() === EEM_Registration::status_id_approved)
-        ) {
+
+        $approved = class_exists('EventEspresso\core\domain\services\registration\RegStatus')
+            ? \EventEspresso\core\domain\services\registration\RegStatus::APPROVED
+            : EEM_Registration::status_id_approved;
+
+        if ($registration->is_primary_registrant() || $registration->status_ID() === $approved) {
             $actions['resend_registration'] = '<a aria-label="'
                 . $link_to_resend_registration_message_text
                 . '" title="' . $link_to_resend_registration_message_text
@@ -51,7 +52,6 @@ $ticket = $registration->ticket();
         // make payment?
         if (
             $registration->is_primary_registrant()
-            && $registration->transaction() instanceof EE_Transaction
             && $registration->transaction()->remaining()
         ) {
             $actions['make_payment'] = '<a aria-label="' . $link_to_make_payment_text

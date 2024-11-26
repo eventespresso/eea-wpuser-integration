@@ -11,28 +11,44 @@ $reg_statuses = EEM_Registration::reg_status_array(array(), true);
 $per_col      = 5;
 $count        = 1;
 
-// let's setup the legend items
+
+$approved_reg_status = EEM_Registration::status_id_approved;
+$awaiting_review_reg_status = EEM_Registration::status_id_not_approved;
+$cancelled_reg_status = EEM_Registration::status_id_cancelled;
+$declined_reg_status = EEM_Registration::status_id_declined;
+$incomplete_reg_status = EEM_Registration::status_id_incomplete;
+$pending_payment_reg_status = EEM_Registration::status_id_pending_payment;
+if (class_exists('EventEspresso\core\domain\services\registration\RegStatus')) {
+    $approved_reg_status = \EventEspresso\core\domain\services\registration\RegStatus::APPROVED;
+    $awaiting_review_reg_status = \EventEspresso\core\domain\services\registration\RegStatus::AWAITING_REVIEW;
+    $cancelled_reg_status = \EventEspresso\core\domain\services\registration\RegStatus::CANCELLED;
+    $declined_reg_status = \EventEspresso\core\domain\services\registration\RegStatus::DECLINED;
+    $incomplete_reg_status = \EventEspresso\core\domain\services\registration\RegStatus::INCOMPLETE;
+    $pending_payment_reg_status = \EventEspresso\core\domain\services\registration\RegStatus::PENDING_PAYMENT;
+}
+
+// let's set up the legend items
 $items = array();
 foreach ($reg_statuses as $status_code => $status_label) {
     if ($template_slug == 'event_section') {
         // include event statuses
         switch ($status_code) {
-            case EEM_Registration::status_id_pending_payment:
+            case $pending_payment_reg_status:
                 $event_status = EEH_Template::pretty_status(EE_Datetime::upcoming, false, 'sentence');
                 break;
-            case EEM_Registration::status_id_cancelled:
+            case $cancelled_reg_status:
                 $event_status = EEH_Template::pretty_status(EE_Datetime::expired, false, 'sentence');
                 break;
-            case EEM_Registration::status_id_declined:
+            case $declined_reg_status:
                 $event_status = EEH_Template::pretty_status(EE_Datetime::cancelled, false, 'sentence');
                 break;
-            case EEM_Registration::status_id_approved:
+            case $approved_reg_status:
                 $event_status = EEH_Template::pretty_status(EE_Datetime::active, false, 'sentence');
                 break;
-            case EEM_Registration::status_id_incomplete:
+            case $incomplete_reg_status:
                 $event_status = EEH_Template::pretty_status(EE_Datetime::sold_out, false, 'sentence');
                 break;
-            case EEM_Registration::status_id_not_approved:
+            case $awaiting_review_reg_status:
                 $event_status = '';
                 break;
         }

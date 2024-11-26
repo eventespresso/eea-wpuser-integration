@@ -10,7 +10,6 @@
  */
 class EE_DMS_2_0_0_user_option extends EE_Data_Migration_Script_Stage_Table
 {
-
     public function __construct()
     {
         /** @type WPDB $wpdb */ global $wpdb;

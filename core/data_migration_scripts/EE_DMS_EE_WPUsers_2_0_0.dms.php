@@ -18,14 +18,13 @@
  */
 class EE_DMS_EE_WPUsers_2_0_0 extends EE_Data_Migration_Script_Base
 {
-
     public function __construct()
     {
         $this->_pretty_name      = __("Data Migration to WP Users Integration 2.0.0.", "event_espresso");
         $this->_pretty_name      .= is_multisite() ? '<strong>' . __(
-                ' WordPress Multisite use is detected. Please contact Event Espresso Support before migrating.',
-                'event_espresso'
-            ) . '</strong>' : '';
+            ' WordPress Multisite use is detected. Please contact Event Espresso Support before migrating.',
+            'event_espresso'
+        ) . '</strong>' : '';
         $this->_migration_stages = [
             new EE_DMS_2_0_0_user_option(),
         ];

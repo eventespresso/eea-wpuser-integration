@@ -2,6 +2,7 @@
 
 use EventEspresso\core\services\routing\PrimaryRoute;
 use EventEspresso\core\services\routing\RouteHandler;
+use EventEspresso\WpUser\domain\Domain;
 
 /**
  * Class definition for the EE_WPUsers object
@@ -19,6 +20,7 @@ class EE_WPUsers extends EE_Addon
     public static function register_addon()
     {
         $registration_array = [
+            'plugin_slug'      => Domain::LICENSE_PLUGIN_SLUG,
             'version'          => EE_WPUSERS_VERSION,
             'min_core_version' => EE_WPUSERS_MIN_CORE_VERSION_REQUIRED,
             'main_file_path'   => EE_WPUSERS_PLUGIN_FILE,
@@ -38,15 +40,24 @@ class EE_WPUsers extends EE_Addon
                     EE_WPUSERS_PATH
                     . 'core/data_migration_scripts/2_0_0_stages/EE_DMS_2_0_0_user_option.dmsstage.php',
             ],
-            // if plugin update engine is being used for auto-updates. not needed if PUE is not being used.
+            'namespace'        => [
+                'FQNS' => 'EventEspresso\WpUser',
+                'DIR'  => __DIR__,
+            ],
+            'license' => [
+                'beta'             => false,
+                'main_file_path'   => EE_WPUSERS_PLUGIN_FILE,
+                'min_core_version' => Domain::CORE_VERSION_REQUIRED,
+                'plugin_id'        => Domain::LICENSE_PLUGIN_ID,
+                'plugin_name'      => Domain::LICENSE_PLUGIN_NAME,
+                'plugin_slug'      => Domain::LICENSE_PLUGIN_SLUG,
+                'version'          => EE_WPUSERS_VERSION,
+                'wp_override'      => false,
+            ],
             'pue_options'      => [
                 'pue_plugin_slug' => 'eea-wp-user-integration',
                 'checkPeriod'     => '24',
                 'use_wp_update'   => false,
-            ],
-            'namespace'        => [
-                'FQNS' => 'EventEspresso\WpUser',
-                'DIR'  => __DIR__,
             ],
         ];
         // the My Events Shortcode registration depends on EE version.
@@ -133,7 +144,7 @@ class EE_WPUsers extends EE_Addon
             array_unshift(
                 $links,
                 '<a href="admin.php?page=espresso_registration_form&action=wp_user_settings">'
-                . __('Settings', 'event_espresso')
+                . esc_html__('Settings', 'event_espresso')
                 . '</a>'
             );
         }

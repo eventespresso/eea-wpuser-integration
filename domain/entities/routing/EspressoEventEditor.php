@@ -17,12 +17,6 @@ use EventEspresso\WpUser\domain\services\assets\EventEditorAssetManager;
 class EspressoEventEditor extends CoreEventEditor
 {
     /**
-     * @var WpUserData $data_node
-     */
-    protected $data_node;
-
-
-    /**
      * called just before matchesCurrentRequest()
      * and allows Route to perform any setup required such as calling setSpecification()
      *

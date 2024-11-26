@@ -1,6 +1,6 @@
 <?php
 
-use EventEspresso\core\domain\entities\Context;
+use EventEspresso\core\domain\entities\contexts\Context;
 use EventEspresso\core\domain\services\factories\EmailAddressFactory;
 use EventEspresso\core\domain\services\validation\email\EmailValidationException;
 use EventEspresso\core\domain\values\EmailAddress;

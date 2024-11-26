@@ -869,7 +869,7 @@ class EED_WP_Users_Admin extends EED_Module
             [
                 'name'            => 'wp_user_event_settings_form',
                 'html_id'         => 'wp_user_event_settings_form',
-                'layout_strategy' => new EE_Div_Per_Section_Layout(),
+                'layout_strategy' => new EE_No_Layout(['use_break_tags' => false]),
                 'subsections'     => apply_filters(
                     'FHEE__EED_WP_Users_Admin__event_editor_metabox__wp_user_form_content',
                     [
@@ -885,6 +885,7 @@ class EED_WP_Users_Admin extends EED_Module
                                 ),
                                 'default'                 => EE_WPUsers::is_event_force_login($evt_id),
                                 'display_html_label_text' => true,
+                                // 'html_class'              => 'ee-input-width--small',
                             ]
                         ),
                         'spacing1'                 => new EE_Form_Section_HTML('<br>'),
@@ -900,6 +901,7 @@ class EED_WP_Users_Admin extends EED_Module
                                 ),
                                 'default'                 => EE_WPUsers::is_auto_user_create_on($evt_id),
                                 'display_html_label_text' => true,
+                                // 'html_class'              => 'ee-input-width--small',
                             ]
                         ),
                         'spacing2'                 => new EE_Form_Section_HTML('<br>'),

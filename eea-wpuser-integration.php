@@ -1,12 +1,12 @@
 <?php
 
 /*
-  Plugin Name:  Event Espresso - WordPress Users Integration (EE4.6+)
-  Plugin URI:  http://www.eventespresso.com
+  Plugin Name:  Event Espresso - WordPress User Integration
+  Plugin URI:  https://www.eventespresso.com
   Description: Integrates Event Espresso with WordPress Users.
-  Version: 2.1.3.rc.000
+  Version: 2.1.3.rc.015
   Author: Event Espresso
-  Author URI: http://www.eventespresso.com
+  Author URI: https://www.eventespresso.com
   License: GPLv2
   TextDomain: event_espresso
   Copyright (c) 2008-2014 Event Espresso  All Rights Reserved.
@@ -34,7 +34,7 @@
  *
  */
 
-define('EE_WPUSERS_VERSION', '2.1.3.rc.000');
+define('EE_WPUSERS_VERSION', '2.1.3.rc.015');
 define('EE_WPUSERS_MIN_CORE_VERSION_REQUIRED', '4.11.0.rc.001');
 define('EE_WPUSERS_PLUGIN_FILE', __FILE__);
 
@@ -52,6 +52,7 @@ function load_ee_core_wpusers()
         define('EE_WPUSERS_URL', plugin_dir_url(__FILE__));
         define('EE_WPUSERS_TEMPLATE_PATH', EE_WPUSERS_PATH . 'templates/');
         define('EE_WPUSERS_BASENAME', plugin_basename(EE_WPUSERS_PLUGIN_FILE));
+        EE_Psr4AutoloaderInit::psr4_loader()->addNamespace('EventEspresso\WpUser', __DIR__);
         require_once EE_WPUSERS_PATH . 'EE_WPUsers.class.php';
         EE_WPUsers::register_addon();
     }
